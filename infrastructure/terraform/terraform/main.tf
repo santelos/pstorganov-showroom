@@ -1,15 +1,15 @@
 terraform {
   backend "s3" {
-    bucket = "pstroganov-terraform-main"
-    key    = "terraform.tfstate"
-    region = "eu-central-1"
-    role_arn = "arn:aws:iam::162173573602:role/terraform/terraform-terraform-backend"
+    bucket       = "pstroganov-terraform-main"
+    key          = "terraform.tfstate"
+    region       = "eu-central-1"
+    role_arn     = "arn:aws:iam::162173573602:role/terraform/terraform-terraform-backend"
     session_name = "TerraformBackend"
   }
 
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "4.4.0"
     }
   }
@@ -23,9 +23,9 @@ provider "aws" {
   }
 
   default_tags {
-   tags = {
-     Managed = "Test"
-     Project = "Terraform"
-   }
- }
+    tags = {
+      Managed = "Terraform"
+      Project = "Terraform"
+    }
+  }
 }

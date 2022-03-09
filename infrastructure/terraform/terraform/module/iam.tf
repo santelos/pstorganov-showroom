@@ -27,8 +27,8 @@ resource "aws_iam_role" "terraform_backend" {
           Resource = "${var.terraform_bucket_arn}",
         },
         {
-          Action = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
-          Effect = "Allow",
+          Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+          Effect   = "Allow",
           Resource = "${var.terraform_bucket_arn}/${var.project_name}.tfstate",
         },
       ]
@@ -54,7 +54,7 @@ resource "aws_iam_role" "terraform_apply" {
   })
 
   inline_policy {
-    name = "extra-policy"
+    name   = "extra-policy"
     policy = var.extra_policy
   }
 }
