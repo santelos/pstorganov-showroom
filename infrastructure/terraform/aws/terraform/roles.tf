@@ -204,6 +204,15 @@ module "terraform_ecr" {
           "arn:aws:iam::162173573602:role/ecr/*",
         ],
       },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:GetOpenIDConnectProvider",
+        ]
+        Resource = [
+          "arn:aws:iam::162173573602:oidc-provider/token.actions.githubusercontent.com",
+        ],
+      },
     ]
   })
 }
