@@ -1,0 +1,47 @@
+name: 'Terraform | AWS | ECR'
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - infrastructure/terraform/aws/ecr/**
+      - .github/workflows/infrastructure_terraform_aws__ecr.yml
+  pull_request:
+    paths:
+      - infrastructure/terraform/aws/ecr/**
+      - .github/workflows/infrastructure_terraform_aws__ecr.yml
+  
+permissions:
+  id-token: write
+  
+defaults:
+  run:
+    working-directory: infrastructure/terraform/aws/ecr
+
+env:
+  AWS_ROLE: arn:aws:iam::162173573602:role/terraform/terraform-ecr
+  AWS_REGION: eu-central-1
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: hashicorp/setup-terraform@v1
+    
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ env.AWS_ROLE }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - run: terraform init
+    - run: terraform fmt -check
+    - run: terraform plan
+
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: terraform apply -auto-approve
