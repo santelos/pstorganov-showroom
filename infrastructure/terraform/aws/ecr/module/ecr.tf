@@ -13,12 +13,12 @@ resource "aws_ecr_repository" "repo" {
 
 resource "aws_ecr_repository_policy" "repo" {
   repository = aws_ecr_repository.repo.name
-  policy = data.aws_iam_policy_document.repo_policy.json
+  policy     = data.aws_iam_policy_document.repo_policy.json
 }
 
 data "aws_iam_policy_document" "repo_policy" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "ecr:GetAuthorizationToken",
       "ecr:BatchCheckLayerAvailability",
