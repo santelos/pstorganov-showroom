@@ -1,19 +1,8 @@
-resource "aws_iam_role" "terraform_backend" {
-  name = "terraform-${var.project_name}-backend"
+resource "aws_iam_role" "terraform" {
+  name = "terraform-${var.project_name}"
   path = "/terraform/"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          AWS = "${var.trusted_user_arn}"
-        }
-      },
-    ]
-  })
+  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 
   inline_policy {
     name = "terraform-main-policy"
@@ -34,27 +23,32 @@ resource "aws_iam_role" "terraform_backend" {
       ]
     })
   }
-}
-
-resource "aws_iam_role" "terraform_apply" {
-  name = "terraform-${var.project_name}-apply"
-  path = "/terraform/"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          AWS = "${var.trusted_user_arn}"
-        }
-      },
-    ]
-  })
 
   inline_policy {
     name   = "extra-policy"
     policy = var.extra_policy
+  }
+}
+
+data "aws_iam_policy_document" "assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+    principals {
+      type        = "Federated"
+      identifiers = [var.oidc_provider_arn]
+    }
+    condition {
+      test     = "ForAllValues:StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+
+      values = ["sts.amazonaws.com"]
+    }
+    condition {
+      test     = "ForAllValues:StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+
+      values = [var.github_ref]
+    }
   }
 }

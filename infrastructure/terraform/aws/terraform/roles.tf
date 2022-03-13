@@ -2,7 +2,8 @@ module "terraform" {
   source               = "./module"
   project_name         = "terraform"
   terraform_bucket_arn = aws_s3_bucket.terraform_main.arn
-  trusted_user_arn     = aws_iam_user.terraform_main.arn
+  oidc_provider_arn    = aws_iam_openid_connect_provider.terraform_main.arn
+  github_ref           = "repo:santelos/pstorganov-showroom*"
   extra_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -21,42 +22,57 @@ module "terraform" {
           "iam:ListUserPolicies",
           "iam:ListAttachedUserPolicies",
           "iam:ListUserTags",
-          "iam:ListRolePolicies",
-          "iam:ListAttachedRolePolicies",
-          "iam:ListRoleTags",
-          "iam:ListPolicyTags",
-          "iam:ListPolicyVersions",
           "iam:GetUser",
           "iam:GetUserPolicy",
-          "iam:GetRole",
-          "iam:GetRolePolicy",
-          "iam:GetPolicy",
-          "iam:GetPolicyVersion",
           "iam:CreateUser",
           "iam:UpdateUser",
           "iam:DeleteUser",
           "iam:TagUser",
           "iam:UntagUser",
+          "iam:AttachUserPolicy",
+          "iam:DetachUserPolicy",
+          "iam:DeleteUserPolicy",
+          "iam:PutUserPolicy",
+        ]
+        Resource = [
+          "arn:aws:iam::162173573602:user/terraform/*",
+        ],
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
+          "iam:ListInstanceProfilesForRole",
+          "iam:ListRoleTags",
+          "iam:GetRole",
+          "iam:GetRolePolicy",
           "iam:CreateRole",
           "iam:UpdateRole",
           "iam:DeleteRole",
           "iam:UpdateRoleDescription",
           "iam:TagRole",
           "iam:UntagRole",
-          "iam:AttachUserPolicy",
-          "iam:DetachUserPolicy",
-          "iam:DeleteUserPolicy",
-          "iam:PutUserPolicy",
-          "iam:TagPolicy",
-          "iam:UntagPolicy",
           "iam:AttachRolePolicy",
           "iam:DetachRolePolicy",
           "iam:DeleteRolePolicy",
           "iam:PutRolePolicy",
         ]
         Resource = [
-          "arn:aws:iam::162173573602:user/terraform/*",
           "arn:aws:iam::162173573602:role/terraform/*",
+        ],
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:ListPolicyTags",
+          "iam:ListPolicyVersions",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:TagPolicy",
+          "iam:UntagPolicy",
+        ]
+        Resource = [
           "arn:aws:iam::162173573602:policy/terraform/*",
         ],
       },
@@ -73,6 +89,13 @@ module "terraform" {
         ]
         Resource = "${aws_s3_bucket.terraform_main.arn}",
       },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:*OpenIDConnectProvider*",
+        ]
+        Resource = "arn:aws:iam::162173573602:oidc-provider/*",
+      },
     ]
   })
 }
@@ -81,7 +104,8 @@ module "terraform-common" {
   source               = "./module"
   project_name         = "common"
   terraform_bucket_arn = aws_s3_bucket.terraform_main.arn
-  trusted_user_arn     = aws_iam_user.terraform_main.arn
+  oidc_provider_arn    = aws_iam_openid_connect_provider.terraform_main.arn
+  github_ref           = "repo:santelos/pstorganov-showroom*"
   extra_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
