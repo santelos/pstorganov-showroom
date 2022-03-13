@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket       = "pstroganov-terraform-main"
-    key          = "common.tfstate"
-    region       = "eu-central-1"
+    bucket = "pstroganov-terraform-main"
+    key    = "common.tfstate"
+    region = "eu-central-1"
   }
 
   required_providers {
