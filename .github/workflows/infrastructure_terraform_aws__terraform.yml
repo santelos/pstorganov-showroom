@@ -1,26 +1,26 @@
-name: 'Terraform | AWS | Common'
+name: 'Terraform | AWS | Terraform'
 
 on:
   push:
     branches:
       - master
     paths:
-      - infrastructure/terraform/aws/common/**
-      - .github/workflows/infrastructure_terraform_aws__common.yml
+      - infrastructure/terraform/aws/terraform/**
+      - .github/workflows/infrastructure_terraform_aws__terraform.yml
   pull_request:
     paths:
-      - infrastructure/terraform/aws/common/**
-      - .github/workflows/infrastructure_terraform_aws__common.yml
+      - infrastructure/terraform/aws/terraform/**
+      - .github/workflows/infrastructure_terraform_aws__terraform.yml
   
 permissions:
   id-token: write
   
 defaults:
   run:
-    working-directory: infrastructure/terraform/aws/common
+    working-directory: infrastructure/terraform/aws/terraform
 
 env:
-  AWS_ROLE: arn:aws:iam::162173573602:role/terraform/terraform-common
+  AWS_ROLE: arn:aws:iam::162173573602:role/terraform/terraform-terraform
   AWS_REGION: eu-central-1
 
 jobs:
