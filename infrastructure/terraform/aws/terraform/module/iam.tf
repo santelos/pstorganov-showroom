@@ -33,9 +33,9 @@ resource "aws_iam_role" "terraform" {
 data "aws_iam_policy_document" "assume_role_policy" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
-    effect = "Allow"
+    effect  = "Allow"
     principals {
-      type = "Federated"
+      type        = "Federated"
       identifiers = [var.oidc_provider_arn]
     }
     condition {
