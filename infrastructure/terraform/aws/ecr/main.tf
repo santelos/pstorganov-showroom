@@ -26,8 +26,8 @@ provider "aws" {
 
 module "repo" {
   source       = "./module"
-  for_each     = local.repos
-  project_name = each
+  for_each     = toset(local.repos)
+  project_name = each.key
 }
 
 locals {
