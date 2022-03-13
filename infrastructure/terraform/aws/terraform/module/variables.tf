@@ -8,9 +8,14 @@ variable "terraform_bucket_arn" {
   description = "ARN of the policy to list bucket with terraform states"
 }
 
-variable "trusted_user_arn" {
+variable "oidc_provider_arn" {
   type        = string
-  description = "ARN of the truested user to assume this role"
+  description = "ARN of the OIDC provider in AWS IAM"
+}
+
+variable "github_ref" {
+  type        = string
+  description = "Ref to a github repo/branch that will assume the role"
 }
 
 variable "extra_policy" {
