@@ -139,3 +139,71 @@ module "terraform-common" {
   })
 }
 
+module "terraform_ecr" {
+  source               = "./module"
+  project_name         = "ecr"
+  terraform_bucket_arn = aws_s3_bucket.terraform_main.arn
+  oidc_provider_arn    = aws_iam_openid_connect_provider.terraform_main.arn
+  github_ref           = "repo:santelos/pstorganov-showroom*"
+  extra_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetRegistryPolicy",
+          "ecr:DescribeRegistry",
+          "ecr:PutRegistryScanningConfiguration",
+          "ecr:DeleteRegistryPolicy",
+          "ecr:PutRegistryPolicy",
+          "ecr:GetRegistryScanningConfiguration",
+          "ecr:PutReplicationConfiguration",
+        ]
+        Resource = ["*"],
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:PutLifecyclePolicy",
+          "ecr:CreateRepository",
+          "ecr:ListTagsForResource",
+          "ecr:BatchGetRepositoryScanningConfiguration",
+          "ecr:DeleteLifecyclePolicy",
+          "ecr:DeleteRepository",
+          "ecr:UntagResource",
+          "ecr:SetRepositoryPolicy",
+          "ecr:TagResource",
+          "ecr:DescribeRepositories",
+          "ecr:StartLifecyclePolicyPreview",
+          "ecr:GetRepositoryPolicy",
+          "ecr:GetLifecyclePolicy",
+        ]
+        Resource = ["arn:aws:ecr:eu-central-1:162173573602:repository/*"],
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
+          "iam:ListInstanceProfilesForRole",
+          "iam:ListRoleTags",
+          "iam:GetRole",
+          "iam:GetRolePolicy",
+          "iam:CreateRole",
+          "iam:UpdateRole",
+          "iam:DeleteRole",
+          "iam:UpdateRoleDescription",
+          "iam:TagRole",
+          "iam:UntagRole",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:DeleteRolePolicy",
+          "iam:PutRolePolicy",
+        ]
+        Resource = [
+          "arn:aws:iam::162173573602:role/ecr/*",
+        ],
+      },
+    ]
+  })
+}
