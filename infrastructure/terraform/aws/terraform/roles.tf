@@ -3,7 +3,7 @@ module "terraform" {
   project_name         = "terraform"
   terraform_bucket_arn = aws_s3_bucket.terraform_main.arn
   oidc_provider_arn    = aws_iam_openid_connect_provider.terraform_main.arn
-  github_ref           = "repo:santelos/pstorganov-showroom:ref:refs/heads/master"
+  github_ref           = "repo:santelos/pstorganov-showroom*"
   extra_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -105,7 +105,7 @@ module "terraform-common" {
   project_name         = "common"
   terraform_bucket_arn = aws_s3_bucket.terraform_main.arn
   oidc_provider_arn    = aws_iam_openid_connect_provider.terraform_main.arn
-  github_ref           = "repo:santelos/pstorganov-showroom:ref:refs/heads/master"
+  github_ref           = "repo:santelos/pstorganov-showroom*"
   extra_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

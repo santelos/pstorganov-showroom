@@ -39,13 +39,13 @@ data "aws_iam_policy_document" "assume_role_policy" {
       identifiers = [var.oidc_provider_arn]
     }
     condition {
-      test     = "StringEquals"
+      test     = "ForAllValues:StringEquals"
       variable = "token.actions.githubusercontent.com:aud"
 
       values = ["sts.amazonaws.com"]
     }
     condition {
-      test     = "StringEquals"
+      test     = "ForAllValues:StringLike"
       variable = "token.actions.githubusercontent.com:sub"
 
       values = [var.github_ref]
