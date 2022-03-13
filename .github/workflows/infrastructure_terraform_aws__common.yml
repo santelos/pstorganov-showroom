@@ -3,11 +3,19 @@ name: 'Terraform'
 on:
   push:
     branches:
-    - master
+      - master
+    paths:
+      - ./infrastructure/terraform/aws/terraform
   pull_request:
+    paths:
+      - ./infrastructure/terraform/aws/terraform
   
 permissions:
   id-token: write
+  
+defaults:
+  run:
+    working-directory: ./infrastructure/terraform/aws/terraform
 
 env:
   AWS_ROLE: arn:aws:iam::162173573602:role/terraform/terraform-terraform
