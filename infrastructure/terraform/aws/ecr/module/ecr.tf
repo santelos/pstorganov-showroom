@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "repo_policy" {
     ]
     principals {
       type        = "AWS"
-      identifiers = [locals.trusted_role_arns]
+      identifiers = local.trusted_role_arns
     }
   }
 }
