@@ -1,8 +1,3 @@
-resource "aws_iam_user" "terraform_main" {
-  name = "terraform-main"
-  path = "/terraform/"
-}
-
 resource "aws_iam_openid_connect_provider" "terraform_main" {
   url = "https://token.actions.githubusercontent.com"
 
