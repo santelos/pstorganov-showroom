@@ -26,7 +26,7 @@ provider "aws" {
 
 module "repo" {
   source       = "./module"
-  for_each     = var.repos
+  for_each     = locals.repos
   project_name = each
 }
 
