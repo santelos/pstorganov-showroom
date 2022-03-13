@@ -1,3 +1,7 @@
+data "aws_iam_openid_connect_provider" "github" {
+  arn = "arn:aws:iam::162173573602:oidc-provider/token.actions.githubusercontent.com"
+}
+
 resource "aws_iam_role" "ecr_pull" {
   name = "ecr-pull"
   path = "/ecr/"
@@ -39,7 +43,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
     effect  = "Allow"
     principals {
       type        = "Federated"
-      identifiers = [var.oidc_provider_arn]
+      identifiers = [data.aws_iam_openid_connect_provider.github.arn]
     }
     condition {
       test     = "ForAllValues:StringEquals"
@@ -51,7 +55,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
       test     = "ForAllValues:StringLike"
       variable = "token.actions.githubusercontent.com:sub"
 
-      values = [var.github_ref]
+      values = ["repo:santelos/pstorganov-showroom*"]
     }
   }
 }
