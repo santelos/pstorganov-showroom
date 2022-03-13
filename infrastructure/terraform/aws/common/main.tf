@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket = "pstroganov-terraform-main"
-    key    = "common.tfstate"
-    region = "eu-central-1"
-    role_arn = "arn:aws:iam::162173573602:role/terraform/terraform-common-backend"
+    bucket       = "pstroganov-terraform-main"
+    key          = "common.tfstate"
+    region       = "eu-central-1"
+    role_arn     = "arn:aws:iam::162173573602:role/terraform/terraform-common-backend"
     session_name = "TerraformBackend"
   }
 
@@ -18,8 +18,8 @@ terraform {
 provider "aws" {
   region = "eu-central-1"
   #   assume_role {
-      role_arn     = "arn:aws:iam::162173573602:role/terraform/terraform-common-apply"
-      session_name = "TerraformExecution"
+  role_arn     = "arn:aws:iam::162173573602:role/terraform/terraform-common-apply"
+  session_name = "TerraformExecution"
   #   }
 
   default_tags {
