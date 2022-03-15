@@ -135,6 +135,30 @@ module "terraform-common" {
         ]
         Resource = ["*"],
       },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
+          "iam:ListInstanceProfilesForRole",
+          "iam:ListRoleTags",
+          "iam:GetRole",
+          "iam:GetRolePolicy",
+          "iam:CreateRole",
+          "iam:UpdateRole",
+          "iam:DeleteRole",
+          "iam:UpdateRoleDescription",
+          "iam:TagRole",
+          "iam:UntagRole",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:DeleteRolePolicy",
+          "iam:PutRolePolicy",
+        ]
+        Resource = [
+          "arn:aws:iam::162173573602:role/common/*",
+        ],
+      },
     ]
   })
 }
