@@ -15,13 +15,13 @@ resource "aws_iam_role" "ec2_connect" {
       Version = "2012-10-17"
       Statement = [
         {
-          Effect = "Allow"
-          Action = "ec2:DescribeInstances"
+          Effect   = "Allow"
+          Action   = "ec2:DescribeInstances"
           Resource = "*"
         },
         {
-          Effect = "Allow"
-          Action = "ec2-instance-connect:SendSSHPublicKey"
+          Effect   = "Allow"
+          Action   = "ec2-instance-connect:SendSSHPublicKey"
           Resource = "${aws_instance.main.arn}"
         },
       ]
