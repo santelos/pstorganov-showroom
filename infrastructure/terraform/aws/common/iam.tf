@@ -1,39 +1,31 @@
-resource "aws_iam_role" "terraform" {
-  name = "terraform-${var.project_name}"
-  path = "/terraform/"
+data "aws_iam_openid_connect_provider" "github" {
+  arn = "arn:aws:iam::162173573602:oidc-provider/token.actions.githubusercontent.com"
+}
+
+resource "aws_iam_role" "ec2_connect" {
+  name = "ec2-connect"
+  path = "/common/"
 
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 
   inline_policy {
-    name = "terraform-main-policy"
+    name = "ecr-pull"
 
     policy = jsonencode({
       Version = "2012-10-17"
       Statement = [
         {
-          Action   = ["s3:ListBucket"]
           Effect   = "Allow"
-          Resource = "${var.terraform_bucket_arn}",
+          Action   = "ec2:DescribeInstances"
+          Resource = "*"
         },
         {
-          Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
-          Effect   = "Allow",
-          Resource = "${var.terraform_bucket_arn}/${var.project_name}.tfstate",
-        },
-        {
-          Effect = "Allow"
-          Action = [
-            "iam:GetOpenIDConnectProvider",
-          ]
-          Resource = "${var.oidc_provider_arn}",
+          Effect   = "Allow"
+          Action   = "ec2-instance-connect:SendSSHPublicKey"
+          Resource = "${aws_instance.main.arn}"
         },
       ]
     })
-  }
-
-  inline_policy {
-    name   = "extra-policy"
-    policy = var.extra_policy
   }
 }
 
@@ -43,7 +35,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
     effect  = "Allow"
     principals {
       type        = "Federated"
-      identifiers = [var.oidc_provider_arn]
+      identifiers = [data.aws_iam_openid_connect_provider.github.arn]
     }
     condition {
       test     = "ForAllValues:StringEquals"
@@ -55,7 +47,7 @@ data "aws_iam_policy_document" "assume_role_policy" {
       test     = "ForAllValues:StringLike"
       variable = "token.actions.githubusercontent.com:sub"
 
-      values = [var.github_ref]
+      values = ["repo:santelos/pstorganov-showroom*"]
     }
   }
 }

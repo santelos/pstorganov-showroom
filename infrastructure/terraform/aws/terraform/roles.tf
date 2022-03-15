@@ -89,13 +89,6 @@ module "terraform" {
         ]
         Resource = "${aws_s3_bucket.terraform_main.arn}",
       },
-      {
-        Effect = "Allow"
-        Action = [
-          "iam:*OpenIDConnectProvider*",
-        ]
-        Resource = "arn:aws:iam::162173573602:oidc-provider/*",
-      },
     ]
   })
 }
@@ -134,6 +127,30 @@ module "terraform-common" {
           "ec2:TerminateInstances",
         ]
         Resource = ["*"],
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
+          "iam:ListInstanceProfilesForRole",
+          "iam:ListRoleTags",
+          "iam:GetRole",
+          "iam:GetRolePolicy",
+          "iam:CreateRole",
+          "iam:UpdateRole",
+          "iam:DeleteRole",
+          "iam:UpdateRoleDescription",
+          "iam:TagRole",
+          "iam:UntagRole",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:DeleteRolePolicy",
+          "iam:PutRolePolicy",
+        ]
+        Resource = [
+          "arn:aws:iam::162173573602:role/common/*",
+        ],
       },
     ]
   })
@@ -202,15 +219,6 @@ module "terraform_ecr" {
         ]
         Resource = [
           "arn:aws:iam::162173573602:role/ecr/*",
-        ],
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "iam:GetOpenIDConnectProvider",
-        ]
-        Resource = [
-          "arn:aws:iam::162173573602:oidc-provider/token.actions.githubusercontent.com",
         ],
       },
     ]
