@@ -9,7 +9,7 @@ resource "aws_iam_role" "ec2_connect" {
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 
   inline_policy {
-    name = "ecr-pull"
+    name = "ecr-connect"
 
     policy = jsonencode({
       Version = "2012-10-17"
