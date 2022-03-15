@@ -89,13 +89,6 @@ module "terraform" {
         ]
         Resource = "${aws_s3_bucket.terraform_main.arn}",
       },
-      {
-        Effect = "Allow"
-        Action = [
-          "iam:*OpenIDConnectProvider*",
-        ]
-        Resource = "arn:aws:iam::162173573602:oidc-provider/*",
-      },
     ]
   })
 }
@@ -226,15 +219,6 @@ module "terraform_ecr" {
         ]
         Resource = [
           "arn:aws:iam::162173573602:role/ecr/*",
-        ],
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "iam:GetOpenIDConnectProvider",
-        ]
-        Resource = [
-          "arn:aws:iam::162173573602:oidc-provider/token.actions.githubusercontent.com",
         ],
       },
     ]

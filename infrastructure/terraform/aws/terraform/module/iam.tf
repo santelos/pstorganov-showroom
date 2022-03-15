@@ -20,6 +20,13 @@ resource "aws_iam_role" "terraform" {
           Effect   = "Allow",
           Resource = "${var.terraform_bucket_arn}/${var.project_name}.tfstate",
         },
+        {
+          Effect = "Allow"
+          Action = [
+            "iam:GetOpenIDConnectProvider",
+          ]
+          Resource = "${var.oidc_provider_arn}",
+        },
       ]
     })
   }
