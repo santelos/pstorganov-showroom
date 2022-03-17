@@ -51,3 +51,49 @@ data "aws_iam_policy_document" "assume_role_policy" {
     }
   }
 }
+
+resource "aws_iam_role" "ec2_main" {
+  name = "ec2-main"
+  path = "/common/"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  inline_policy {
+    name = "ecr-connect"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = [
+            "ecr:GetAuthorizationToken",
+            "ecr:BatchCheckLayerAvailability",
+            "ecr:GetDownloadUrlForLayer",
+            "ecr:GetRepositoryPolicy",
+            "ecr:DescribeRepositories",
+            "ecr:ListImages",
+            "ecr:DescribeImages",
+            "ecr:BatchGetImage",
+            "ecr:GetLifecyclePolicy",
+            "ecr:GetLifecyclePolicyPreview",
+            "ecr:ListTagsForResource",
+            "ecr:DescribeImageScanFindings"
+          ]
+          Resource = "*"
+        },
+      ]
+    })
+  }
+}
