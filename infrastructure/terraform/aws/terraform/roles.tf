@@ -147,7 +147,6 @@ module "terraform-common" {
           "iam:DetachRolePolicy",
           "iam:DeleteRolePolicy",
           "iam:PutRolePolicy",
-          "iam:PassRole"
         ]
         Resource = [
           "arn:aws:iam::162173573602:role/common/*",
@@ -167,8 +166,18 @@ module "terraform-common" {
           "iam:RemoveRoleFromInstanceProfile",
         ]
         Resource = [
-          "arn:aws:iam::162173573602:instance-profile/common/*",
+          "*",
         ],
+      },
+      {
+        Effect = "Allow"
+        Action = "iam:PassRole"
+        Resource =  "arn:aws:iam::162173573602:role/common/*"
+        Condition = {
+          StringEquals = {
+            "iam:PassedToService": "ec2.amazonaws.com"
+          }
+        }
       },
     ]
   })
