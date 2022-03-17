@@ -147,6 +147,7 @@ module "terraform-common" {
           "iam:DetachRolePolicy",
           "iam:DeleteRolePolicy",
           "iam:PutRolePolicy",
+          "iam:PassRole"
         ]
         Resource = [
           "arn:aws:iam::162173573602:role/common/*",
