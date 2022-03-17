@@ -9,6 +9,7 @@ resource "aws_instance" "main" {
   }
 
   vpc_security_group_ids = [aws_security_group.main.id]
+  iam_instance_profile   = aws_iam_instance_profile.main.id
 
   tags = {
     Name = "Main"
