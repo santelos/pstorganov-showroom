@@ -18,5 +18,5 @@ resource "aws_instance" "main" {
 resource "aws_iam_instance_profile" "main" {
   name_prefix = "main"
   path        = "/common/"
-  role        = aws_iam_role.ec2_main.arn
+  role        = aws_iam_role.ec2_main.id
 }
