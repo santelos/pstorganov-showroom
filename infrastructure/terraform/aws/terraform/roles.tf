@@ -170,12 +170,12 @@ module "terraform-common" {
         ],
       },
       {
-        Effect = "Allow"
-        Action = "iam:PassRole"
-        Resource =  "arn:aws:iam::162173573602:role/common/*"
+        Effect   = "Allow"
+        Action   = "iam:PassRole"
+        Resource = "arn:aws:iam::162173573602:role/common/*"
         Condition = {
           StringEquals = {
-            "iam:PassedToService": "ec2.amazonaws.com"
+            "iam:PassedToService" : "ec2.amazonaws.com"
           }
         }
       },
