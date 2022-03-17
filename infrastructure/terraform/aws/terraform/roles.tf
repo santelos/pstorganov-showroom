@@ -152,6 +152,23 @@ module "terraform-common" {
           "arn:aws:iam::162173573602:role/common/*",
         ],
       },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:ListInstanceProfiles",
+          "iam:ListInstanceProfileTags",
+          "iam:GetInstanceProfile",
+          "iam:TagInstanceProfile",
+          "iam:UntagInstanceProfile",
+          "iam:AddRoleToInstanceProfile",
+          "iam:CreateInstanceProfile",
+          "iam:DeleteInstanceProfile",
+          "iam:RemoveRoleFromInstanceProfile",
+        ]
+        Resource = [
+          "arn:aws:iam::162173573602:instance-profile/common/*",
+        ],
+      },
     ]
   })
 }
