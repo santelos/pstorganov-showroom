@@ -3,7 +3,7 @@ name: 'Terraform | AWS | Terraform'
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - infrastructure/terraform/aws/terraform/**
       - .github/workflows/infrastructure_terraform_aws__terraform.yml

@@ -3,7 +3,7 @@ name: 'Terraform | AWS | ECR'
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - infrastructure/terraform/aws/ecr/**
       - .github/workflows/infrastructure_terraform_aws__ecr.yml

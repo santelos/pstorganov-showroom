@@ -1,0 +1,48 @@
+name: 'Docker-Compose | Main'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - infrastructure/docker-compose/main/**
+      - .github/workflows/infrastructure_docker-compose_main.yml
+  pull_request:
+    paths:
+      - infrastructure/docker-compose/main/**
+      - .github/workflows/infrastructure_docker-compose_main.yml
+  
+defaults:
+  run:
+    working-directory: infrastructure/docker-compose/main/
+
+env:
+  AWS_ROLE: arn:aws:iam::162173573602:role/common/ec2-connect
+  AWS_REGION: eu-central-1
+  TARGET_PATH: main
+
+jobs:
+  aws_push:
+    name: 'AWS Push'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+    - uses: Install mssh
+      run: pip install ec2instanceconnectcli
+
+    - name: Configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ env.AWS_ROLE }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Sync Docker-Compose
+      run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
+
+    - name: Apply Docker-Compose
+      run: |
+        mssh i-0b72ce901b6b43f8a << 'EOF'
+        cd ~/${{ env.TARGET_PATH }}
+        
