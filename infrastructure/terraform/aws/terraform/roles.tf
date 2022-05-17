@@ -124,7 +124,9 @@ module "terraform-common" {
           "ec2:RevokeSecurityGroupEgress",
           "ec2:RevokeSecurityGroupIngress",
           "ec2:RunInstances",
+          "ec2:StartInstances",
           "ec2:TerminateInstances",
+          "ec2:StopInstances",
         ]
         Resource = ["*"],
       },
