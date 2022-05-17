@@ -2,6 +2,8 @@ resource "aws_instance" "main" {
   ami           = "ami-0f61af304b14f15fb"
   instance_type = "t2.micro"
 
+  user_data_base64 = filebase64("./resources/main--user-data.sh")
+
   ebs_block_device {
     volume_size           = "30"
     device_name           = "/dev/xvda"
