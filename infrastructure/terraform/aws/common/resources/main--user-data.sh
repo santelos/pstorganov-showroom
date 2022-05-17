@@ -1,7 +1,7 @@
 #!/bin/bash
-sudo yum install docker
+sudo yum -y update
+sudo yum -y install docker
 sudo usermod -a -G docker ec2-user
-id ec2-user
-sudo pip3 install docker-compose
+sudo pip3 --no-input install docker-compose
 sudo systemctl enable docker.service
 sudo systemctl start docker.service
