@@ -57,6 +57,5 @@ jobs:
         host: ec2-3-127-27-215.eu-central-1.compute.amazonaws.com
         username: ec2-user
         key_path: ~/.ssh/aws_rsa
-        port: ${{ secrets.PORT }}
         script: ls
         
