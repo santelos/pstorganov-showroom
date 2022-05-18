@@ -45,7 +45,7 @@ jobs:
         mkdir ~/.ssh && touch ~/.ssh/known_hosts
         ssh-keyscan -H ${{ secrets.HOST_IP }} >> ~/.ssh/known_hosts
     - name: Run SSH
-    - run: |
+      run: |
         mssh ${{ secrets.HOST_ID }} << EOF
         ls
 
