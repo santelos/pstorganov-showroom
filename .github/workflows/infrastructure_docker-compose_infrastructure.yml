@@ -48,6 +48,8 @@ jobs:
           --availability-zone eu-central-1c \
           --instance-os-user ec2-user \
           --ssh-public-key file://~/.ssh/aws_rsa.pub
+    
+    - run: ls ~/.ssh/
 
     # - name: Sync Docker-Compose
     #   run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
