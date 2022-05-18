@@ -20,7 +20,7 @@ defaults:
     working-directory: infrastructure/docker-compose/infrastructure/
 
 env:
-  AWS_ROLE: arn:aws:iam::162173573602:role/common/ec2-connect
+  AWS_ROLE: ${{ secrets.AWS_ROLE }}
   AWS_REGION: eu-central-1
   TARGET_PATH: infrastructure
 
@@ -28,6 +28,7 @@ jobs:
   aws_push:
     name: 'AWS Push'
     runs-on: ubuntu-latest
+    environment: Infrastructure | Docker-Compose | Infrastructure
 
     steps:
     - uses: actions/checkout@v2
@@ -39,34 +40,14 @@ jobs:
       with:
         role-to-assume: ${{ env.AWS_ROLE }}
         aws-region: ${{ env.AWS_REGION }}
-
+    - name: Configure SSH    
     - run: |
         mkdir ~/.ssh && touch ~/.ssh/known_hosts
-        ssh-keyscan -H 3.127.27.215 >> ~/.ssh/known_hosts 
+        ssh-keyscan -H ${{ secrets.HOST_IP }} >> ~/.ssh/known_hosts 
     - run: |
-        mssh i-01fc62f4e0ddefc27 << EOF
+        mssh ${{ secrets.HOST_ID }} << EOF
         ls
-
-    
-    # - name: Configure SSH
-      # run: ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/aws_rsa
-    # - name: Push key to AWS
-    #   run: |
-    #     aws ec2-instance-connect send-ssh-public-key \
-    #       --instance-id i-01fc62f4e0ddefc27 \
-    #       --availability-zone eu-central-1c \
-    #       --instance-os-user ec2-user \
-    #       --ssh-public-key file://~/.ssh/aws_rsa.pub
-    
-    # - run: ls -lah ~/.ssh
 
     # - name: Sync Docker-Compose
     #   run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
-
-    # - uses: appleboy/ssh-action@master
-    #   with:
-    #     host: ec2-3-127-27-215.eu-central-1.compute.amazonaws.com
-    #     username: ec2-user
-    #     key_path: ~/.ssh/aws_rsa
-    #     script: ls
         
