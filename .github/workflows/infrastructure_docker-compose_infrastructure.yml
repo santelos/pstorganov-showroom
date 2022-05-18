@@ -41,11 +41,12 @@ jobs:
         role-to-assume: ${{ env.AWS_ROLE }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Sync Docker-Compose
-      run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
+    # - name: Sync Docker-Compose
+    #   run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
 
     - name: Apply Docker-Compose
       run: |
         mssh i-0b72ce901b6b43f8a << 'EOF'
         cd ~/${{ env.TARGET_PATH }}
+        ls
         
