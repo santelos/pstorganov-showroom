@@ -9,7 +9,7 @@ resource "aws_iam_role" "ec2_connect" {
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 
   inline_policy {
-    name = "ec2-connect"
+    name   = "ec2-connect"
     policy = aws_iam_policy_document.ec2_connect.json
   }
 }
@@ -48,9 +48,9 @@ data "aws_iam_policy_document" "ec2_connect" {
       identifiers = [aws_instance.main.arn]
     }
     condition {
-      test = "StringEquals"
+      test     = "StringEquals"
       variable = "ec2:osuser"
-      values = "ec2-user"
+      values   = "ec2-user"
     }
   }
 }
