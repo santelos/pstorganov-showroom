@@ -53,4 +53,5 @@ jobs:
         mssh ${{ secrets.HOST_ID }} << EOF
         cd ${{ env.TARGET_PATH }}
         docker-compose up -d
+        EOF
         
