@@ -1,0 +1,15 @@
+version: '3.3'
+
+services:
+  atlantis:
+    image: ghcr.io/runatlantis/atlantis:v0.19.4-pre.20220513
+    environment:
+      ATLANTIS_ATLANTIS_URL: ${ATLANTIS__URL}
+    ports:
+      - 81:4141
+    restart: unless-stopped
+    command: > 
+      server 
+      --gh-user fake 
+      --gh-token fake 
+      --repo-allowlist 'github.com/santelos/pstorganov-showroom'
