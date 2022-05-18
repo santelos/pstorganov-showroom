@@ -25,8 +25,8 @@ env:
   TARGET_PATH: infrastructure
 
 jobs:
-  aws_push:
-    name: 'AWS Push'
+  ec2_sync:
+    name: 'EC2 Sync'
     runs-on: ubuntu-latest
     environment: Infrastructure | Docker-Compose | Infrastructure
 
@@ -44,11 +44,13 @@ jobs:
       run: |
         mkdir ~/.ssh && touch ~/.ssh/known_hosts
         ssh-keyscan -H ${{ secrets.HOST_IP }} >> ~/.ssh/known_hosts
+
+    - name: Sync
+      run: rsync -a -e mssh . ${{ secrets.HOST_ID }}:~/${{ env.TARGET_PATH }}
+
     - name: Run SSH
       run: |
         mssh ${{ secrets.HOST_ID }} << EOF
-        ls
-
-    # - name: Sync Docker-Compose
-    #   run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
+        cd ${{ env.TARGET_PATH }}
+        docker-compose up -d
         
