@@ -45,8 +45,5 @@ jobs:
     #   run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
 
     - name: Apply Docker-Compose
-      run: |
-        mssh i-01fc62f4e0ddefc27 << 'EOF'
-        cd ~/${{ env.TARGET_PATH }}
-        ls
+      run: mssh i-01fc62f4e0ddefc27
         
