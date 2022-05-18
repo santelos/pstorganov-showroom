@@ -46,7 +46,7 @@ jobs:
         ssh-keyscan -H ${{ secrets.HOST_IP }} >> ~/.ssh/known_hosts
 
     - name: Sync
-      run: rsync -a -e mssh . ${{ secrets.HOST_ID }}:~/${{ env.TARGET_PATH }}
+      run: rsync -a -e mssh . ${{ secrets.HOST_ID }}:${{ env.TARGET_PATH }}
 
     - name: Run SSH
       run: |
