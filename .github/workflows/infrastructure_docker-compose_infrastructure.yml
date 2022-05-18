@@ -11,7 +11,10 @@ on:
     paths:
       - infrastructure/docker-compose/infrastructure/**
       - .github/workflows/infrastructure_docker-compose_infrastructure.yml
-  
+
+permissions:
+  id-token: write
+
 defaults:
   run:
     working-directory: infrastructure/docker-compose/infrastructure/
