@@ -1,0 +1,9 @@
+version: '3.3'
+
+services:
+  oauth2-server:
+    image: 162173573602.dkr.ecr.eu-central-1.amazonaws.com/oauth2-server
+  oauth2-web-client:
+    image: 162173573602.dkr.ecr.eu-central-1.amazonaws.com/oauth2-web-client
+  resource-server:
+    image: 162173573602.dkr.ecr.eu-central-1.amazonaws.com/resource-server
