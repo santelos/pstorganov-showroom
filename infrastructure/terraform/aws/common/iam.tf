@@ -39,14 +39,12 @@ data "aws_iam_policy_document" "assume_role_policy" {
 
 data "aws_iam_policy_document" "ec2_connect" {
   statement {
-    actions = ["ec2:DescribeInstances"]
+    actions   = ["ec2:DescribeInstances"]
+    resources = ["*"]
   }
   statement {
-    actions = ["ec2-instance-connect:SendSSHPublicKey"]
-    principals {
-      type        = "Federated"
-      identifiers = [aws_instance.main.arn]
-    }
+    actions   = ["ec2-instance-connect:SendSSHPublicKey"]
+    resources = [aws_instance.main.arn]
     condition {
       test     = "StringEquals"
       variable = "ec2:osuser"
