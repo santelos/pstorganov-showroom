@@ -41,7 +41,7 @@ jobs:
         aws-region: ${{ env.AWS_REGION }}
 
     - run: |
-        touch ~/.ssh/known_hosts
+        mkdir ~/.ssh && touch ~/.ssh/known_hosts
         ssh-keyscan -H 3.127.27.215 >> ~/.ssh/known_hosts 
     - run: mssh -d i-01fc62f4e0ddefc27
     
