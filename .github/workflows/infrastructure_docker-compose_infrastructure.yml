@@ -46,7 +46,7 @@ jobs:
 
     - name: Apply Docker-Compose
       run: |
-        mssh i-0b72ce901b6b43f8a << 'EOF'
+        mssh i-01fc62f4e0ddefc27 << 'EOF'
         cd ~/${{ env.TARGET_PATH }}
         ls
         
