@@ -27,7 +27,7 @@ resource "aws_security_group_rule" "main_ingress_ssh" {
   security_group_id = aws_security_group.main.id
 }
 
-resource "aws_security_group_rule" "main_ingress_ssh" {
+resource "aws_security_group_rule" "main_ingress_81" {
   description       = "SSH"
   type              = "ingress"
   from_port         = 81
