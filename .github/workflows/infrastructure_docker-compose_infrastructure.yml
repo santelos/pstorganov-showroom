@@ -47,7 +47,7 @@ jobs:
           --instance-id i-01fc62f4e0ddefc27 \
           --availability-zone eu-central-1c \
           --instance-os-user ec2-user \
-          --ssh-public-key file://~/.ssh/aws_rsa
+          --ssh-public-key file://~/.ssh/aws_rsa.pub
     
     - run: ls -lah ~/.ssh
 
