@@ -32,8 +32,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
-    - name: Install mssh
-      run: pip install ec2instanceconnectcli
 
     - name: Configure aws credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -42,12 +40,18 @@ jobs:
         aws-region: ${{ env.AWS_REGION }}
     
     - name: Configure SSH
+      run: ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/aws_rsa
+    - name: Push key to AWS
       run: |
-        ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/id_rsa   
+        aws ec2-instance-connect send-ssh-public-key \
+          --instance-id i-01fc62f4e0ddefc27 \
+          --availability-zone ${{ env.AWS_REGION }} \
+          --instance-os-user ec2-user \
+          --ssh-public-key file://~/.ssh/aws_rsa.pub
 
     # - name: Sync Docker-Compose
     #   run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
 
-    - name: Apply Docker-Compose
-      run: mssh i-01fc62f4e0ddefc27
+    # - name: Apply Docker-Compose
+    #   run: 
         
