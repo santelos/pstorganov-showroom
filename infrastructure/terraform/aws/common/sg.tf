@@ -26,3 +26,13 @@ resource "aws_security_group_rule" "main_ingress_ssh" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.main.id
 }
+
+resource "aws_security_group_rule" "main_ingress_ssh" {
+  description       = "SSH"
+  type              = "ingress"
+  from_port         = 81
+  to_port           = 81
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.main.id
+}
