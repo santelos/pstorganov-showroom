@@ -40,7 +40,7 @@ jobs:
         role-to-assume: ${{ env.AWS_ROLE }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - run: mssh -d i-01fc62f4e0ddefc27
+    - run: echo "yes" | mssh -d i-01fc62f4e0ddefc27
     
     # - name: Configure SSH
       # run: ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/aws_rsa
