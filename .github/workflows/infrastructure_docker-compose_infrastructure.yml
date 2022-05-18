@@ -52,6 +52,11 @@ jobs:
     # - name: Sync Docker-Compose
     #   run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
 
-    # - name: Apply Docker-Compose
-    #   run: 
+    - uses: appleboy/ssh-action@master
+      with:
+        host: ec2-3-127-27-215.eu-central-1.compute.amazonaws.com
+        username: ec2-user
+        key_path: ~/.ssh/aws_rsa
+        port: ${{ secrets.PORT }}
+        script: ls
         
