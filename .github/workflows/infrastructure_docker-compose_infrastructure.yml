@@ -43,7 +43,7 @@ jobs:
     
     - name: Configure SSH
       run: |
-        ssh-keygen -t dsa -b 4096 -N "" -f ~/.ssh/id_rsa   
+        ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/id_rsa   
 
     # - name: Sync Docker-Compose
     #   run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
