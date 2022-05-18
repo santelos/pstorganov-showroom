@@ -40,14 +40,14 @@ jobs:
         aws-region: ${{ env.AWS_REGION }}
     
     - name: Configure SSH
-      run: ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/aws_rsa
+      run: ssh-keygen -t rsa -b 4096 -N "" -f .ssh/aws_rsa
     - name: Push key to AWS
       run: |
         aws ec2-instance-connect send-ssh-public-key \
           --instance-id i-01fc62f4e0ddefc27 \
           --availability-zone eu-central-1c \
           --instance-os-user ec2-user \
-          --ssh-public-key file://~/.ssh/aws_rsa.pub
+          --ssh-public-key file://.ssh/aws_rsa.pub
     
     - run: ls ~/.ssh/
 
@@ -58,6 +58,6 @@ jobs:
       with:
         host: ec2-3-127-27-215.eu-central-1.compute.amazonaws.com
         username: ec2-user
-        key_path: ~/.ssh/aws_rsa
+        key_path: .ssh/aws_rsa
         script: ls
         
