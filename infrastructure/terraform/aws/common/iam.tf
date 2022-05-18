@@ -9,23 +9,8 @@ resource "aws_iam_role" "ec2_connect" {
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 
   inline_policy {
-    name = "ecr-connect"
-
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Effect   = "Allow"
-          Action   = "ec2:DescribeInstances"
-          Resource = "*"
-        },
-        {
-          Effect   = "Allow"
-          Action   = "ec2-instance-connect:SendSSHPublicKey"
-          Resource = "${aws_instance.main.arn}"
-        },
-      ]
-    })
+    name = "ec2-connect"
+    policy = aws_iam_policy_document.ec2_connect.json
   }
 }
 
@@ -48,6 +33,24 @@ data "aws_iam_policy_document" "assume_role_policy" {
       variable = "token.actions.githubusercontent.com:sub"
 
       values = ["repo:santelos/pstorganov-showroom*"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "ec2_connect" {
+  statement {
+    actions = ["ec2:DescribeInstances"]
+  }
+  statement {
+    actions = ["ec2-instance-connect:SendSSHPublicKey"]
+    principals {
+      type        = "Federated"
+      identifiers = [aws_instance.main.arn]
+    }
+    condition {
+      test = "StringEquals"
+      variable = "ec2:osuser"
+      values = "ec2-user"
     }
   }
 }
