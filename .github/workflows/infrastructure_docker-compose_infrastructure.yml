@@ -32,32 +32,35 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
+    - run: pip install ec2instanceconnectcli
 
     - name: Configure aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         role-to-assume: ${{ env.AWS_ROLE }}
         aws-region: ${{ env.AWS_REGION }}
+
+    - run: mssh i-01fc62f4e0ddefc27
     
-    - name: Configure SSH
-      run: ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/aws_rsa
-    - name: Push key to AWS
-      run: |
-        aws ec2-instance-connect send-ssh-public-key \
-          --instance-id i-01fc62f4e0ddefc27 \
-          --availability-zone eu-central-1c \
-          --instance-os-user ec2-user \
-          --ssh-public-key file://~/.ssh/aws_rsa.pub
+    # - name: Configure SSH
+      # run: ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/aws_rsa
+    # - name: Push key to AWS
+    #   run: |
+    #     aws ec2-instance-connect send-ssh-public-key \
+    #       --instance-id i-01fc62f4e0ddefc27 \
+    #       --availability-zone eu-central-1c \
+    #       --instance-os-user ec2-user \
+    #       --ssh-public-key file://~/.ssh/aws_rsa.pub
     
-    - run: ls -lah ~/.ssh
+    # - run: ls -lah ~/.ssh
 
     # - name: Sync Docker-Compose
     #   run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
 
-    - uses: appleboy/ssh-action@master
-      with:
-        host: ec2-3-127-27-215.eu-central-1.compute.amazonaws.com
-        username: ec2-user
-        key_path: ~/.ssh/aws_rsa
-        script: ls
+    # - uses: appleboy/ssh-action@master
+    #   with:
+    #     host: ec2-3-127-27-215.eu-central-1.compute.amazonaws.com
+    #     username: ec2-user
+    #     key_path: ~/.ssh/aws_rsa
+    #     script: ls
         
