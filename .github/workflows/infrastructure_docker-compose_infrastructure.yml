@@ -45,7 +45,7 @@ jobs:
       run: |
         aws ec2-instance-connect send-ssh-public-key \
           --instance-id i-01fc62f4e0ddefc27 \
-          --availability-zone ${{ env.AWS_REGION }} \
+          --availability-zone eu-central-1c \
           --instance-os-user ec2-user \
           --ssh-public-key file://~/.ssh/aws_rsa.pub
 
