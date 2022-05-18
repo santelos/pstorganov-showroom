@@ -11,38 +11,47 @@ on:
     paths:
       - infrastructure/docker-compose/main/**
       - .github/workflows/infrastructure_docker-compose_main.yml
+
+permissions:
+  id-token: write
   
 defaults:
   run:
-    working-directory: infrastructure/docker-compose/main/
+    working-directory: infrastructure/docker-compose/main
 
 env:
-  AWS_ROLE: arn:aws:iam::162173573602:role/common/ec2-connect
+  AWS_ROLE: ${{ secrets.AWS_ROLE }}
   AWS_REGION: eu-central-1
   TARGET_PATH: main
 
 jobs:
-  aws_push:
-    name: 'AWS Push'
+  ec2_sync:
+    name: 'EC2 Sync'
     runs-on: ubuntu-latest
+    environment: Infrastructure | Docker-Compose | Main
 
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
-    - uses: Install mssh
-      run: pip install ec2instanceconnectcli
+    - run: pip install ec2instanceconnectcli
 
     - name: Configure aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         role-to-assume: ${{ env.AWS_ROLE }}
         aws-region: ${{ env.AWS_REGION }}
-
-    - name: Sync Docker-Compose
-      run: rsync -a -e mssh . ${{ secrets.INSTANCE_ID }}:~/${{ env.TARGET_PATH }}
-
-    - name: Apply Docker-Compose
+    - name: Configure SSH
       run: |
-        mssh i-0b72ce901b6b43f8a << 'EOF'
-        cd ~/${{ env.TARGET_PATH }}
+        mkdir ~/.ssh && touch ~/.ssh/known_hosts
+        ssh-keyscan -H ${{ secrets.HOST_IP }} >> ~/.ssh/known_hosts
+
+    - name: Sync
+      run: rsync -a -e mssh . ${{ secrets.HOST_ID }}:${{ env.TARGET_PATH }}
+
+    - name: Run SSH
+      run: |
+        mssh ${{ secrets.HOST_ID }} << EOF
+        cd ${{ env.TARGET_PATH }}
+        # docker-compose up -d
+        EOF
         
