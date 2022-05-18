@@ -10,7 +10,7 @@ resource "aws_iam_role" "ec2_connect" {
 
   inline_policy {
     name   = "ec2-connect"
-    policy = aws_iam_policy_document.ec2_connect.json
+    policy = data.aws_iam_policy_document.ec2_connect.json
   }
 }
 
@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "ec2_connect" {
     condition {
       test     = "StringEquals"
       variable = "ec2:osuser"
-      values   = "ec2-user"
+      values   = ["ec2-user"]
     }
   }
 }
