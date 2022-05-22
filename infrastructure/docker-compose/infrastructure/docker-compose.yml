@@ -6,7 +6,7 @@ services:
     environment:
       ATLANTIS_ATLANTIS_URL: ${ATLANTIS__URL}
       ATLANTIS_GH_APP_ID: ${ATLANTIS__GH_APP_ID}
-      ATLANTIS_GH_APP_KEY_FILE: ./atlantis.pem
+      ATLANTIS_GH_APP_KEY_FILE: /conf/atlantis.pem
       ATLANTIS_GH_WEBHOOK_SECRET: ${ATLANTIS__GH_WEBHOOK_SECRET}
       ATLANTIS_REPO_ALLOWLIST: github.com/santelos/pstorganov-showroom
       ATLANTIS_WRITE_GIT_CREDS: "true"
@@ -14,5 +14,5 @@ services:
       - 81:4141
     restart: unless-stopped
     volumes:
-      - ./atlantis.pem:./atlantis.pem:ro
+      - ./atlantis.pem:/conf/atlantis.pem:ro
     command: server
