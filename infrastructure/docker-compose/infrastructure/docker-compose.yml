@@ -5,11 +5,14 @@ services:
     image: ghcr.io/runatlantis/atlantis:v0.19.4-pre.20220513
     environment:
       ATLANTIS_ATLANTIS_URL: ${ATLANTIS__URL}
+      ATLANTIS_GH_APP_ID: ${ATLANTIS__GH_APP_ID}
+      ATLANTIS_GH_APP_KEY_FILE: atlantis.pem
+      ATLANTIS_GH_WEBHOOK_SECRET: ${ATLANTIS__GH_WEBHOOK_SECRET}
+      ATLANTIS_REPO_ALLOWLIST: github.com/santelos/pstorganov-showroom
+      ATLANTIS_WRITE_GIT_CREDS: true
     ports:
       - 81:4141
     restart: unless-stopped
-    command: > 
-      server 
-      --gh-user fake 
-      --gh-token fake 
-      --repo-allowlist 'github.com/santelos/pstorganov-showroom'
+    volumes:
+      - atlantis.pem:atlantis.pem:ro
+    command: server
