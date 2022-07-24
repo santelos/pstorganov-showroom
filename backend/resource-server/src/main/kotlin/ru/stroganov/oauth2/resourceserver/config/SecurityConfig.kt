@@ -10,14 +10,12 @@ import org.springframework.security.web.SecurityFilterChain
 @EnableWebSecurity
 class SecurityConfig {
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http.mvcMatcher("/messages/**")
-            .authorizeRequests()
-            .mvcMatchers("/messages/**")
-            .access("hasAuthority('SCOPE_resource.read')")
-            .and()
-            .oauth2ResourceServer()
-            .jwt()
-        return http.build()
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain = http {
+        authorizeExchange {
+            authorize(anyExchange, authenticated)
+        }
+        oauth2ResourceServer {
+            opaqueToken { }
+        }
     }
 }

@@ -1,21 +1,35 @@
-version: "3.3"
+version: "3.8"
 
 services:
-  auth-server:
-    image: docker.io/library/oauth2-server:0.0.1-SNAPSHOT
-    ports:
-      - "8082:8080"
-      - "8002:8000"
-    environment:
-      BPL_DEBUG_ENABLED: "true"
   resource:
-    image: docker.io/library/resource-server:0.0.1-SNAPSHOT
+    build: "./resource-server"
+    depends_on:
+      - hydra
     ports:
-      - "8081:8080"
-      - "8001:8000"
+      - "8080:8080"
+  hydra:
+    build: "./hydra"
+    depends_on:
+      - db
+    ports:
+      - "4444:4444" # Public port
+      - "4445:4445" # Admin port
+      - "5555:5555" # Port for hydra token user
+    command: "serve all --dangerous-force-http"
     environment:
-      BPL_DEBUG_ENABLED: "true"
-#  client:
-#    image: docker.io/library/client:0.0.1-SNAPSHOT
-#    ports:
-#      - "8080:80"
+      - DSN=postgres://hydra:secret@db:5432/hydra
+  hydra-migrate:
+    build: "./hydra"
+    depends_on:
+      - db
+    command: "migrate sql -e --yes"
+    environment:
+      - DSN=postgres://hydra:secret@db:5432/hydra
+  db:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=hydra
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=hydra
