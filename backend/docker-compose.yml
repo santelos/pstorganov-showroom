@@ -18,6 +18,7 @@ services:
     command: "serve all --dangerous-force-http"
     environment:
       - DSN=postgres://hydra:secret@db:5432/hydra
+      - HYDRA_ADMIN_URL=http://hydra:4445/
   hydra-migrate:
     build: "./hydra"
     depends_on:
