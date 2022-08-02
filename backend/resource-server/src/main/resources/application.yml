@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
 
 spring:
   security:
@@ -7,5 +7,5 @@ spring:
       resourceserver:
         opaque-token:
           introspection-uri: http://127.0.0.1:4445/oauth2/introspect
-          client-id: client
-          client-secret: secret
+          client-id: empty
+          client-secret: empty

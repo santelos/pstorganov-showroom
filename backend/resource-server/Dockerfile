@@ -1,4 +1,4 @@
-FROM openjdk:17 as build
+FROM openjdk:11 as build
 WORKDIR /build
 
 COPY gradlew /build/graldew
@@ -9,7 +9,7 @@ RUN ./gradlew clean --no-daemon
 COPY src /build/src
 RUN ./gradlew bootJar --no-daemon
 
-FROM openjdk:17-slim
+FROM openjdk:11-slim
 WORKDIR /app
 COPY --from=build /build/build/libs/*.jar /app/app.jar
 
