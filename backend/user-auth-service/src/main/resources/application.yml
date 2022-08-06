@@ -1,0 +1,16 @@
+server:
+  port: 8081
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          hydra:
+            client-id: ${OAUTH2_CLIENT_ID}
+            client-secret: ${OAUTH2_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope: asd:test
+        provider:
+          hydra:
+            token-uri: ${OAUTH2_URL}/oauth2/token
