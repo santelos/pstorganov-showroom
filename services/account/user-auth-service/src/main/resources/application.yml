@@ -1,0 +1,19 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          self:
+            client-id: ${OAUTH2_CLIENT_ID}
+            client-secret: ${OAUTH2_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope: asd:test
+        provider:
+          self:
+            token-uri: ${OAUTH2_PUBLIC_URI}/oauth2/token
+
+hydra:
+  adminUri: ${HYDRA_ADMIN_URI}
