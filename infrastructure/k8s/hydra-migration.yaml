@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hydra-migration
+spec:
+  template:
+    spec:
+      containers:
+      - name: hydra-migration
+        image: 162173573602.dkr.ecr.ap-northeast-1.amazonaws.com/hydra
+        command: ["hydra", "migrate", "sql", "-e", "--yes"]
+        envFrom:
+          - secretRef:
+              name: hydra-migration
+      restartPolicy: Never
+  backoffLimit: 1

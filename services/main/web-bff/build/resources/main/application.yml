@@ -1,0 +1,23 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          user:
+            client-id: ${OAUTH2_CLIENT_ID}
+            client-secret: ${OAUTH2_CLIENT_SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://localhost:8080/web-bff/authorized/user"
+            scope: asd:test
+        provider:
+          user:
+            authorization-uri: ${OAUTH2_PUBLIC_URI}/oauth2/auth
+            token-uri: ${OAUTH2_TOKEN_URI}/oauth2/token
+  redis:
+    database: 1
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT:6379}
+#    password: ${REDIS_PASSWORD}
