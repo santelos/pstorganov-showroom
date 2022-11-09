@@ -11,8 +11,9 @@ spec:
     storage: 5Gi
   accessModes:
     - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
   hostPath:
-    path: "/data/hydra-db"
+    path: "/pv/hydra-db"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
