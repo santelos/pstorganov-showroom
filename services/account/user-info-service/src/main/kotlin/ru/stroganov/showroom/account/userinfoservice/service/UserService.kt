@@ -2,7 +2,7 @@ package ru.stroganov.showroom.account.userinfoservice.service
 
 import ru.stroganov.showroom.account.userinfoservice.repo.CreateUserRepoRequest
 import ru.stroganov.showroom.account.userinfoservice.repo.UsersRepo
-import ru.stroganov.showroom.account.userinfoservice.repo.UsersRepoImpl
+import ru.stroganov.showroom.account.userinfoservice.repo.UsersRepoObject
 
 data class UserId(
     val id: Int
@@ -30,12 +30,10 @@ interface UserService {
     suspend fun getUserCredentials(userId: UserId): UserCredentials
 }
 
-private val usersRepoImpl = UsersRepoImpl()
-private val hashingImpl = HashingImpl()
-
+internal object UserServiceObject : UserService by UserServiceImpl()
 internal class UserServiceImpl(
-    private val usersRepo: UsersRepo = usersRepoImpl,
-    private val hashing: Hashing = hashingImpl,
+    private val usersRepo: UsersRepo = UsersRepoObject,
+    private val hashing: Hashing = HashingObject,
 ) : UserService {
     override suspend fun createUser(newUser: NewUser): UserId {
         val passwordHash = hashing.hash(newUser.password)

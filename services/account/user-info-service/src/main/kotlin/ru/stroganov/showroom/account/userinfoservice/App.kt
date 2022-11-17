@@ -7,7 +7,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import ru.stroganov.showroom.account.userinfoservice.repo.FlywayRepo
-import ru.stroganov.showroom.account.userinfoservice.repo.FlywayRepoImpl
+import ru.stroganov.showroom.account.userinfoservice.repo.FlywayRepoObject
 import ru.stroganov.showroom.account.userinfoservice.routing.v1.userModule
 
 fun main() {
@@ -25,7 +25,6 @@ private fun Application.serverConfig() {
     }
 }
 
-val liquibaseRepoImpl = FlywayRepoImpl()
-private fun Application.onStartup(flywayRepo: FlywayRepo = liquibaseRepoImpl) {
+private fun Application.onStartup(flywayRepo: FlywayRepo = FlywayRepoObject) {
     flywayRepo.applyMigration()
 }

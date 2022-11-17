@@ -7,6 +7,7 @@ interface Hashing {
     fun compare(input: String, hash: String): Boolean
 }
 
+internal object HashingObject : Hashing by HashingImpl()
 internal class HashingImpl : Hashing {
     private val cost = 12
     private val bcrypt = BCrypt.withDefaults()

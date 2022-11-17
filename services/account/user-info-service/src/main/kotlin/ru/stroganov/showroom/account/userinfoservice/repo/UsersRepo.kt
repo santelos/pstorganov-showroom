@@ -29,8 +29,9 @@ interface UsersRepo {
     suspend fun createUser(newUser: CreateUserRepoRequest): UserId
 }
 
-class UsersRepoImpl(
-    private val dbConnectionFactory: ConnectionFactory = dbConnectionFactoryImpl
+internal object UsersRepoObject : UsersRepo by UsersRepoImpl()
+internal class UsersRepoImpl(
+    private val connectionFactory: ConnectionFactory = r2dbcConnectionFactory
 ) : UsersRepo {
 
     private val getUserInfoQuery = """
@@ -40,7 +41,7 @@ class UsersRepoImpl(
     """.trimIndent()
     override suspend fun getUserInfo(userId: UserId): UserInfoRepoResponse = coroutineScope {
         val result = runCatching {
-            dbConnectionFactory.create().awaitFirst()
+            connectionFactory.create().awaitFirst()
                 .createStatement(getUserInfoQuery)
                 .bind("$1", userId.id)
                 .execute().awaitFirst()
@@ -60,7 +61,7 @@ class UsersRepoImpl(
     """.trimIndent()
     override suspend fun getUserCredentials(userId: UserId): UserCredentialsRepoResponse = coroutineScope {
         val result = runCatching {
-            dbConnectionFactory.create().awaitFirst()
+            connectionFactory.create().awaitFirst()
                 .createStatement(getUserCredentialsQuery)
                 .bind("$1", userId.id)
                 .execute().awaitFirst()
@@ -80,7 +81,7 @@ class UsersRepoImpl(
     """.trimIndent()
     override suspend fun createUser(newUser: CreateUserRepoRequest): UserId = coroutineScope {
         val result = runCatching {
-            dbConnectionFactory.create().awaitFirst()
+            connectionFactory.create().awaitFirst()
                 .createStatement(createUserQuery)
                 .bind("$1", newUser.login)
                 .bind("$2", newUser.passwordHash)

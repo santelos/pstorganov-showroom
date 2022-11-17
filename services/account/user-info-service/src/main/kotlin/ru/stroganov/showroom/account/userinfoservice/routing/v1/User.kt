@@ -11,11 +11,9 @@ import ru.stroganov.showroom.account.userinfoservice.routing.v1.request.toServic
 import ru.stroganov.showroom.account.userinfoservice.routing.v1.request.toUserId
 import ru.stroganov.showroom.account.userinfoservice.routing.v1.response.toUserInfoResponse
 import ru.stroganov.showroom.account.userinfoservice.service.UserService
-import ru.stroganov.showroom.account.userinfoservice.service.UserServiceImpl
+import ru.stroganov.showroom.account.userinfoservice.service.UserServiceObject
 
-private val userServiceImpl = UserServiceImpl()
-
-fun Application.userModule(userService: UserService = userServiceImpl) {
+fun Application.userModule(userService: UserService = UserServiceObject) {
     routing {
         route("/v1/user") {
             route("/{id}") {
