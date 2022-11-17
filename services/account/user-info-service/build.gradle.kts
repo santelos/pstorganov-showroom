@@ -60,7 +60,6 @@ dependencies {
     testImplementation("org.testcontainers", "postgresql", testContainersVersion)
     val mockkVersion: String by project
     testImplementation("io.mockk", "mockk", mockkVersion)
-
 }
 
 application {

@@ -4,9 +4,8 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 import ru.stroganov.showroom.account.userinfoservice.repo.CreateUserRepoRequest
 import ru.stroganov.showroom.account.userinfoservice.repo.UserCredentialsRepoResponse
 import ru.stroganov.showroom.account.userinfoservice.repo.UserInfoRepoResponse
@@ -45,7 +44,7 @@ internal class UserServiceImplTest {
             id = input.id,
             name = "test--name",
         )
-        val dbResponse =  UserInfoRepoResponse(
+        val dbResponse = UserInfoRepoResponse(
             id = expected.id,
             name = expected.name,
         )
