@@ -30,6 +30,11 @@ dependencies {
     implementation("io.ktor", "ktor-client-content-negotiation", ktorVersion)
     implementation("io.ktor", "ktor-client-logging", ktorVersion)
 
+    // Monitoring
+    val micrometerPrometheusVersion: String by project
+    implementation("io.ktor", "ktor-server-metrics-micrometer", ktorVersion)
+    implementation("io.micrometer", "micrometer-registry-prometheus", micrometerPrometheusVersion)
+
     // Logger
     val logbackVersion: String by project
     implementation("ch.qos.logback", "logback-classic", logbackVersion)

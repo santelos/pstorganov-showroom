@@ -34,6 +34,11 @@ dependencies {
     val shOryHydraVersion: String by project
     implementation("sh.ory.hydra", "hydra-client", shOryHydraVersion)
 
+    // Monitoring
+    val micrometerPrometheusVersion: String by project
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus:${micrometerPrometheusVersion}")
+
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
