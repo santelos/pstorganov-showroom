@@ -51,8 +51,14 @@ dependencies {
     implementation("at.favre.lib", "bcrypt", bcryptVersion)
 
     // Test
-    val junitVersion: String by project
-    testImplementation("org.junit.jupiter", "junit-jupiter", junitVersion)
+    val kotestVersion: String by project
+    testImplementation("io.kotest", "kotest-runner-junit5", kotestVersion)
+    testImplementation("io.kotest", "kotest-assertions-core", kotestVersion)
+    testImplementation("io.kotest", "kotest-assertions-core", kotestVersion)
+    val kotestKtorVersion: String by project
+    testImplementation("io.kotest.extensions", "kotest-assertions-ktor", kotestKtorVersion)
+    val kotestTestcontainersVersion: String by project
+    testImplementation("io.kotest.extensions", "kotest-extensions-testcontainers", kotestTestcontainersVersion)
     val testContainersVersion: String by project
     testImplementation("org.testcontainers", "testcontainers", testContainersVersion)
     testImplementation("org.testcontainers", "junit-jupiter", testContainersVersion)
@@ -83,7 +89,7 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     testLogging {
         events("passed", "skipped", "failed")

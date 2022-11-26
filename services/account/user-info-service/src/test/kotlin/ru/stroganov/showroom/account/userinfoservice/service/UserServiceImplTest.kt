@@ -1,24 +1,22 @@
 package ru.stroganov.showroom.account.userinfoservice.service
 
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import ru.stroganov.showroom.account.userinfoservice.repo.CreateUserRepoRequest
 import ru.stroganov.showroom.account.userinfoservice.repo.UserCredentialsRepoResponse
 import ru.stroganov.showroom.account.userinfoservice.repo.UserInfoRepoResponse
 import ru.stroganov.showroom.account.userinfoservice.repo.UsersRepo
 
-internal class UserServiceImplTest {
+internal class UserServiceImplTest : FunSpec({
+    val usersRepoMock: UsersRepo = mockk()
+    val hashingMock: Hashing = mockk()
+    val userService: UserService = UserServiceImpl(usersRepoMock, hashingMock)
 
-    private val usersRepoMock: UsersRepo = mockk()
-    private val hashingMock: Hashing = mockk()
-    private val userService: UserService = UserServiceImpl(usersRepoMock, hashingMock)
-
-    @Test
-    fun createUser() = runBlocking {
+    test("createUser") {
         val input = NewUser(
             login = "test--login",
             password = "test--password",
@@ -34,11 +32,10 @@ internal class UserServiceImplTest {
         val expected = UserId(1)
         coEvery { usersRepoMock.createUser(createUserRepoRequest) } returns expected
         val actual = userService.createUser(input)
-        assertEquals(expected, actual)
+        expected shouldBe actual
     }
 
-    @Test
-    fun getUserInfo() = runBlocking {
+    test("getUserInfo") {
         val input = UserId(1)
         val expected = UserInfo(
             id = input.id,
@@ -50,11 +47,10 @@ internal class UserServiceImplTest {
         )
         coEvery { usersRepoMock.getUserInfo(input) } returns dbResponse
         val actual = userService.getUserInfo(input)
-        assertEquals(expected, actual)
+        expected shouldBe actual
     }
 
-    @Test
-    fun getUserCredentials() = runBlocking {
+    test("getUserCredentials") {
         val input = UserId(1)
         val expected = UserCredentials(
             login = "test--login",
@@ -66,6 +62,6 @@ internal class UserServiceImplTest {
         )
         coEvery { usersRepoMock.getUserCredentials(input) } returns dbResponse
         val actual = userService.getUserCredentials(input)
-        assertEquals(expected, actual)
+        expected shouldBe actual
     }
-}
+})
