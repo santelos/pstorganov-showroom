@@ -1,21 +1,23 @@
 package ru.stroganov.oauth2.userauthservice.service
 
 import kotlinx.coroutines.reactor.mono
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.annotation.Primary
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import ru.stroganov.oauth2.userauthservice.exception.authentication.UserAuthFailedException
 import ru.stroganov.oauth2.userauthservice.repo.UserServiceRepo
 import ru.stroganov.oauth2.userauthservice.repo.request.CheckUserPasswordRequest
 import ru.stroganov.oauth2.userauthservice.repo.request.GetUserAuthInfoRequest
-import ru.stroganov.oauth2.userauthservice.repo.response.CheckUserPasswordResponse
 import ru.stroganov.oauth2.userauthservice.repo.response.UserAuthInfoResponse
 
 @Service
+@Qualifier("LoginPassword")
+@Primary
 class RemoteReactiveAuthenticationManager(
     private val userServiceRepo: UserServiceRepo,
 ) : ReactiveAuthenticationManager {
