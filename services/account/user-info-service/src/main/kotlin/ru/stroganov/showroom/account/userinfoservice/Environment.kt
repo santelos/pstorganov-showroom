@@ -1,7 +1,6 @@
 package ru.stroganov.showroom.account.userinfoservice
 
-// val OAUTH2__CLIENT_ID: String = System.getenv("OAUTH2__CLIENT_ID")
-// val OAUTH2__CLIENT_SECRET: String = System.getenv("OAUTH2__CLIENT_SECRET")
+val OAUTH2__ADMIN_HOST: String = System.getenv("OAUTH2__ADMIN_HOST")
 val DATABASE__HOST: String = System.getenv("DATABASE__HOST")
 val DATABASE__PORT: String = System.getenv("DATABASE__PORT") ?: "5432"
 val DATABASE__USERNAME: String = System.getenv("DATABASE__USERNAME")

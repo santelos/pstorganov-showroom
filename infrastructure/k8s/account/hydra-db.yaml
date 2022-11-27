@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hydra-db-volume-claim
+  labels:
+    app: hydra-db
+spec:
+  storageClassName: gp2
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hydra-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hydra-db
+  template:
+    metadata:
+      labels:
+        app: hydra-db
+    spec:
+      containers:
+        - name: hydra-db
+          image: postgres:14
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: hydra-db
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresdata
+              subPath: postgres-data
+      volumes:
+        - name: postgresdata
+          persistentVolumeClaim:
+            claimName: hydra-db-volume-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hydra-db
+  labels:
+    app: hydra-db
+spec:
+  selector:
+    app: hydra-db
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
