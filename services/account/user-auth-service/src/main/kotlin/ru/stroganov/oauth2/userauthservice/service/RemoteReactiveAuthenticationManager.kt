@@ -1,6 +1,7 @@
 package ru.stroganov.oauth2.userauthservice.service
 
 import kotlinx.coroutines.reactor.mono
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Primary
 import org.springframework.security.authentication.ReactiveAuthenticationManager
@@ -21,6 +22,8 @@ import ru.stroganov.oauth2.userauthservice.repo.response.UserAuthInfoResponse
 class RemoteReactiveAuthenticationManager(
     private val userServiceRepo: UserServiceRepo,
 ) : ReactiveAuthenticationManager {
+
+    private val log = KotlinLogging.logger {  }
 
     override fun authenticate(authentication: Authentication): Mono<Authentication> = mono {
         val username = authentication.name
