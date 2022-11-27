@@ -1,6 +1,7 @@
 package ru.stroganov.oauth2.userauthservice.config
 
 import kotlinx.coroutines.reactor.mono
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.security.authentication.ReactiveAuthenticationManager
@@ -21,12 +22,18 @@ import org.springframework.web.server.ServerWebExchange
 @EnableWebFluxSecurity
 class SecurityConfig {
 
+    private val log = KotlinLogging.logger {  }
+
     @Bean
     fun configure(http: ServerHttpSecurity,
                   authFilter: AuthenticationWebFilter
     ): SecurityWebFilterChain = http {
 
+        csrf {
+            disable()
+        }
         authorizeExchange {
+            authorize("/metrics", hasAuthority("SCOPE_internal:metrics"))
             authorize(anyExchange, authenticated)
         }
         requestCache {
@@ -42,8 +49,10 @@ class SecurityConfig {
     ): ReactiveAuthenticationManagerResolver<ServerWebExchange> = ReactiveAuthenticationManagerResolver {
         mono {
             if (it.request.path.pathWithinApplication().value().startsWith("/metrics")) {
+                log.info { "For path: [${it.request.path}].oauth2 manager"  }
                 oauth2Manager
             } else {
+                log.info { "For path: [${it.request.path}].login password manager"  }
                 loginPasswordManager
             }
         }

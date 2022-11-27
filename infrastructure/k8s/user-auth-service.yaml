@@ -6,6 +6,7 @@ metadata:
     app: user-auth-service
 data:
   OAUTH2_ADMIN_URL: "http://hydra:4445"
+  LOGGING_LEVEL_ROOT: "debug"
 ---
 apiVersion: apps/v1
 kind: Deployment
