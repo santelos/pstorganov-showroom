@@ -28,11 +28,16 @@ dependencies {
 
     // Spring
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
     // Hydra
     val shOryHydraVersion: String by project
     implementation("sh.ory.hydra", "hydra-client", shOryHydraVersion)
+
+    // Monitoring
+    val micrometerPrometheusVersion: String by project
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus:${micrometerPrometheusVersion}")
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")

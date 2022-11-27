@@ -1,19 +1,23 @@
 server:
   port: ${SERVER_PORT:8080}
 
+management:
+  endpoints:
+    web:
+      base-path: "/"
+      exposure:
+        include: "prometheus"
+      path-mapping:
+        prometheus: "metrics"
+
 spring:
   security:
     oauth2:
-      client:
-        registration:
-          self:
-            client-id: ${OAUTH2_CLIENT_ID}
-            client-secret: ${OAUTH2_CLIENT_SECRET}
-            authorization-grant-type: client_credentials
-            scope: asd:test
-        provider:
-          self:
-            token-uri: ${OAUTH2_PUBLIC_URI}/oauth2/token
+      resourceserver:
+        opaque-token:
+          introspection-uri: ${OAUTH2_ADMIN_URL}/oauth2/introspect
+          client-id: empty
+          client-secret: empty
 
 hydra:
-  adminUri: ${HYDRA_ADMIN_URI}
+  adminUri: ${OAUTH2_ADMIN_URL}
