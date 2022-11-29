@@ -4,7 +4,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt
 
 interface Hashing {
     fun hash(input: String): String
-    fun compare(input: String, hash: String): Boolean
+    fun isEqual(input: String, hash: String): Boolean
 }
 
 internal object HashingObject : Hashing by HashingImpl()
@@ -16,6 +16,6 @@ internal class HashingImpl : Hashing {
     override fun hash(input: String): String =
         bcrypt.hashToString(cost, input.toCharArray())
 
-    override fun compare(input: String, hash: String): Boolean =
+    override fun isEqual(input: String, hash: String): Boolean =
         verifyer.verify(input.toByteArray(), hash.toByteArray()).verified
 }

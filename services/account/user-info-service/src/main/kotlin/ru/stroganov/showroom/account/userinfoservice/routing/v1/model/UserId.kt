@@ -1,4 +1,4 @@
-package ru.stroganov.showroom.account.userinfoservice.routing.v1.request
+package ru.stroganov.showroom.account.userinfoservice.routing.v1.model
 
 import io.konform.validation.Validation
 import ru.stroganov.showroom.account.userinfoservice.common.ValidationException
@@ -7,6 +7,10 @@ import ru.stroganov.showroom.account.userinfoservice.service.UserId
 
 data class UserIdRequest(
     val userId: String
+)
+
+data class UserIdResponse(
+    val userId: Int
 )
 
 val userIdRequestValidation = Validation {
@@ -22,3 +26,5 @@ fun UserIdRequest.toUserId(): UserId {
     }
     return UserId(id = userId.toInt())
 }
+
+fun UserId.toResponse(): UserIdResponse = UserIdResponse(id)

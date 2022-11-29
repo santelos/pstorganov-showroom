@@ -8,13 +8,13 @@ import io.ktor.http.auth.*
 import io.ktor.http.content.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-/**
- * https://www.rfc-editor.org/rfc/rfc7662
- */
-data class Introspection(
+data class OAuth2Principal(
+    val token: String,
     val active: Boolean,
-    val scope: Set<String>,
+    val scope: String?,
     val clientId: String?,
     val username: String?,
     val tokenType: String?,
@@ -59,22 +59,28 @@ class OAuth2ResourceServerProvider(val config: Config): AuthenticationProvider(c
 }
 
 sealed interface TokenIntrospectionResponse {
+
+    /**
+     * https://www.rfc-editor.org/rfc/rfc7662
+     */
+    @Serializable
     data class Success(
         val active: Boolean,
-        val aud: List<String>,
-        val clientId: String?,
-        val exp: Int?,
-        val ext: Map<String, String?>,
-        val iat: Int?,
-        val iss: String?,
-        val nbf: Int?,
-        val obfuscatedSubject: String?,
-        val scope: Set<String>,
-        val sub: String?,
-        val tokenType: String?,
-        val tokenUse: String?,
-        val username: String?,
-    ): TokenIntrospectionResponse
+        val aud: List<String> = emptyList(),
+        @SerialName("client_id") val clientId: String? = null,
+        val exp: Int? = null,
+        val ext: Map<String, String?> = emptyMap(),
+        val iat: Int? = null,
+        val iss: String? = null,
+        val nbf: Int? = null,
+        @SerialName("obfuscated_subject") val obfuscatedSubject: String? = null,
+        val scope: String? = null,
+        val sub: String? = null,
+        @SerialName("token_type") val tokenType: String? = null,
+        @SerialName("token_use") val tokenUse: String? = null,
+        val username: String? = null,
+    ): TokenIntrospectionResponse, Principal
+    @Serializable
     data class Error(
         val error: String,
         val errorDebug: String,
@@ -107,7 +113,8 @@ private fun TokenIntrospectionResponse.Error.authenticationFailedCause(): Authen
     if (statusCode != 500) AuthenticationFailedCause.InvalidCredentials
     else AuthenticationFailedCause.Error(errorDescription)
 
-private fun TokenIntrospectionResponse.Success.principal(token: String): Introspection = Introspection(
+private fun TokenIntrospectionResponse.Success.principal(token: String): OAuth2Principal = OAuth2Principal(
+    token = token,
     active = active,
     scope = scope,
     clientId = clientId,

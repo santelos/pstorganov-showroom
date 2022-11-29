@@ -18,6 +18,16 @@ spring:
           introspection-uri: ${OAUTH2_ADMIN_URL}/oauth2/introspect
           client-id: empty
           client-secret: empty
+      client:
+        registration:
+          main:
+            client-id: ${OAUTH2__MAIN__CLIENT_ID}
+            client-secret: ${OAUTH2__MAIN__CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope: user:CreateUser, user:VerifyCredentials
+        provider:
+          okta:
+            token-uri: ${OAUTH2__PUBLIC_URL}/oauth2/token
 
 hydra:
   adminUri: ${OAUTH2_ADMIN_URL}

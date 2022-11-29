@@ -7,7 +7,9 @@ import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.reactive.awaitFirst
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
+import ru.stroganov.showroom.account.userinfoservice.service.UserCredentials
 import ru.stroganov.showroom.account.userinfoservice.service.UserId
+import ru.stroganov.showroom.account.userinfoservice.service.UserLogin
 
 @Testcontainers
 internal class UsersRepoImplTest : FunSpec({
@@ -23,19 +25,37 @@ internal class UsersRepoImplTest : FunSpec({
     beforeSpec { migration(ds) }
     afterTest { connectionFactory.truncate("users") }
 
-    test("getUserInfo") {
+    test("getUserInfo | Success") {
         val name = "test--name"
         val userId = connectionFactory.createUser(login = name)
-        val expected = UserInfoRepoResponse(userId, name)
+        val expected = UserInfoRepoResponse.Success(userId, name)
         val actual = usersRepo.getUserInfo(UserId(userId))
-        expected shouldBe actual
+        actual shouldBe expected
     }
 
-    test("getUserCredentials") {
-        val expected = UserCredentialsRepoResponse("test--login", "test--password-hash")
-        val userId = connectionFactory.createUser(login = expected.login, passwordHash = expected.passwordHash)
-        val actual = usersRepo.getUserCredentials(UserId(userId))
-        expected shouldBe actual
+    test("getUserInfo | UserNotFound") {
+        val userId = connectionFactory.createUser()
+        val expected = UserInfoRepoResponse.UserNotFound
+        val actual = usersRepo.getUserInfo(UserId(userId + 1))
+        actual shouldBe expected
+    }
+
+    test("getPasswordHash | Success") {
+        val login = "test--login"
+        val passwordHash = "test--password-hash"
+        val expected = GetPasswordHashResponse.Success(passwordHash)
+        connectionFactory.createUser(login = login, passwordHash = passwordHash)
+        val actual = usersRepo.getPasswordHash(UserLogin(login))
+        actual shouldBe expected
+    }
+
+    test("getPasswordHash | UserNotFound") {
+        val login = "test--login"
+        val passwordHash = "test--password-hash"
+        val expected = GetPasswordHashResponse.UserNotFound
+        connectionFactory.createUser(login = "$login-broken", passwordHash = passwordHash)
+        val actual = usersRepo.getPasswordHash(UserLogin(login))
+        actual shouldBe expected
     }
 
     test("createUser") {

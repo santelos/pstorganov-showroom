@@ -6,10 +6,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.*
-import ru.stroganov.showroom.account.userinfoservice.repo.CreateUserRepoRequest
-import ru.stroganov.showroom.account.userinfoservice.repo.UserCredentialsRepoResponse
-import ru.stroganov.showroom.account.userinfoservice.repo.UserInfoRepoResponse
-import ru.stroganov.showroom.account.userinfoservice.repo.UsersRepo
+import ru.stroganov.showroom.account.userinfoservice.repo.*
 
 internal class UserServiceImplTest : FunSpec({
     val usersRepoMock: UsersRepo = mockk()
@@ -41,7 +38,7 @@ internal class UserServiceImplTest : FunSpec({
             id = input.id,
             name = "test--name",
         )
-        val dbResponse = UserInfoRepoResponse(
+        val dbResponse = UserInfoRepoResponse.Success(
             id = expected.id,
             name = expected.name,
         )
@@ -50,18 +47,46 @@ internal class UserServiceImplTest : FunSpec({
         expected shouldBe actual
     }
 
-    test("getUserCredentials") {
-        val input = UserId(1)
-        val expected = UserCredentials(
+    test("validateCredentials | Valid") {
+        val input = UserCredentials(
             login = "test--login",
-            passwordHash = "test--password-hash",
+            password = "test--password",
         )
-        val dbResponse = UserCredentialsRepoResponse(
-            login = expected.login,
-            passwordHash = expected.passwordHash,
+        val expected = UserCredentialsValidation.Valid
+        val passwordHash = "test--password--hash"
+        val dbResponse = GetPasswordHashResponse.Success(
+            passwordHash = passwordHash,
         )
-        coEvery { usersRepoMock.getUserCredentials(input) } returns dbResponse
-        val actual = userService.getUserCredentials(input)
-        expected shouldBe actual
+        coEvery { usersRepoMock.getPasswordHash(UserLogin(input.login)) } returns dbResponse
+        every { hashingMock.isEqual(input.password, passwordHash) } returns true
+        val actual = userService.validateCredentials(input)
+        actual shouldBe expected
+    }
+
+    test("validateCredentials | Invalid | User not found") {
+        val input = UserCredentials(
+            login = "test--login",
+            password = "test--password",
+        )
+        val expected = UserCredentialsValidation.Invalid(listOf("User not found"))
+        val dbResponse = GetPasswordHashResponse.UserNotFound
+        coEvery { usersRepoMock.getPasswordHash(UserLogin(input.login)) } returns dbResponse
+        every { hashingMock.isEqual(input.password, any()) } returns true
+        val actual = userService.validateCredentials(input)
+        actual shouldBe expected
+    }
+
+    test("validateCredentials | Invalid | Password doesn't match") {
+        val input = UserCredentials(
+            login = "test--login",
+            password = "test--password",
+        )
+        val expected = UserCredentialsValidation.Invalid(listOf("Password doesn't match"))
+        val passwordHash = "test--password--hash"
+        val dbResponse = GetPasswordHashResponse.Success(passwordHash)
+        coEvery { usersRepoMock.getPasswordHash(UserLogin(input.login)) } returns dbResponse
+        every { hashingMock.isEqual(input.password, passwordHash) } returns false
+        val actual = userService.validateCredentials(input)
+        actual shouldBe expected
     }
 })

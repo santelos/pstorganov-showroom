@@ -1,4 +1,4 @@
-package ru.stroganov.showroom.account.userinfoservice.routing.v1.request
+package ru.stroganov.showroom.account.userinfoservice.routing.v1.model
 
 import ru.stroganov.showroom.account.userinfoservice.service.NewUser
 

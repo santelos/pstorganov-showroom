@@ -29,6 +29,9 @@ dependencies {
     implementation("io.ktor", "ktor-server-content-negotiation", ktorVersion)
     implementation("io.ktor", "ktor-server-sessions", ktorVersion)
     implementation("io.ktor", "ktor-server-call-logging", ktorVersion)
+    implementation("io.ktor", "ktor-client-cio", ktorVersion)
+    implementation("io.ktor", "ktor-client-content-negotiation", ktorVersion)
+    implementation("io.ktor", "ktor-client-logging", ktorVersion)
 
     // Logger
     val logbackVersion: String by project

@@ -36,17 +36,17 @@ val RoleBasedAuthorizationRoute = createRouteScopedPlugin(
 
 private object RoleBasedAuthHook : Hook<suspend (ApplicationCall) -> Unit> {
     private val RoleBasedAuthorizationPhase: PipelinePhase = PipelinePhase("RoleBasedAuthorization")
-    private val AuthPhase: PipelinePhase = PipelinePhase("AfterAuthentication")
 
     override fun install(pipeline: ApplicationCallPipeline, handler: suspend (ApplicationCall) -> Unit) {
         pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, RoleBasedAuthorizationPhase)
-        pipeline.insertPhaseAfter(AuthPhase, RoleBasedAuthorizationPhase)
+        pipeline.intercept(RoleBasedAuthorizationPhase) { handler(call) }
+        println()
     }
 }
 
-private fun RoleRule.authorized(roles: Set<String>): Boolean = when(this) {
+private fun RoleRule.authorized(actualRoles: Set<String>): Boolean = when(this) {
     RoleRule.DenyAll -> false
-    is RoleRule.HasRoles -> roles.intersect(roles).isNotEmpty()
+    is RoleRule.HasRoles -> roles.intersect(actualRoles).isNotEmpty()
 }
 
 fun Route.roleAuthorize(
