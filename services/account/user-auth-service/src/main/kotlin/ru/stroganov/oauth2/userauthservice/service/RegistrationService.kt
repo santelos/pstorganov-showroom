@@ -1,5 +1,6 @@
 package ru.stroganov.oauth2.userauthservice.service
 
+import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import ru.stroganov.oauth2.userauthservice.repo.userinfo.UserInfoServiceRepo
 import ru.stroganov.oauth2.userauthservice.repo.userinfo.UserInfoServiceRepoCreateUserRequest
@@ -15,6 +16,7 @@ interface RegistrationService {
     suspend fun new(request: RegistrationNewServiceRequest): UserId
 }
 
+@Service
 internal class RegistrationServiceImpl(
     private val userInfoServiceRepo: UserInfoServiceRepo,
 ) : RegistrationService {

@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:80}
 
 management:
   endpoints:
@@ -15,7 +15,7 @@ spring:
     oauth2:
       resourceserver:
         opaque-token:
-          introspection-uri: ${OAUTH2_ADMIN_URL}/oauth2/introspect
+          introspection-uri: ${OAUTH2__ADMIN_URL}/oauth2/introspect
           client-id: empty
           client-secret: empty
       client:
@@ -26,8 +26,11 @@ spring:
             authorization-grant-type: client_credentials
             scope: user:CreateUser, user:VerifyCredentials
         provider:
-          okta:
+          main:
             token-uri: ${OAUTH2__PUBLIC_URL}/oauth2/token
 
 hydra:
-  adminUri: ${OAUTH2_ADMIN_URL}
+  adminUri: ${OAUTH2__ADMIN_URL}
+
+user-info-service:
+  url: ${USER_INFO_SERVICE__URL}

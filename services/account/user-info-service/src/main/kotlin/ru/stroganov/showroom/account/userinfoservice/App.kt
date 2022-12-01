@@ -10,16 +10,14 @@ import io.ktor.server.plugins.contentnegotiation.*
 import ru.stroganov.showroom.account.userinfoservice.config.authConfig
 import ru.stroganov.showroom.account.userinfoservice.repo.FlywayRepo
 import ru.stroganov.showroom.account.userinfoservice.repo.FlywayRepoObject
-import ru.stroganov.showroom.account.userinfoservice.routing.v1.testModule
 import ru.stroganov.showroom.account.userinfoservice.routing.v1.userModule
 
 fun main() {
-    embeddedServer(Netty, 8080) {
+    embeddedServer(Netty) {
         onStartup()
         authConfig()
         serverConfig()
         userModule()
-        testModule()
     }.start(wait = true)
 }
 

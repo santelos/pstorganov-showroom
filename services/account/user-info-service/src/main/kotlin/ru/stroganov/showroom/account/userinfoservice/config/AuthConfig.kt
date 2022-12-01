@@ -6,7 +6,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import ru.stroganov.showroom.account.userinfoservice.OAUTH2__ADMIN_HOST
+import ru.stroganov.showroom.account.userinfoservice.OAUTH2__ADMIN_URI
 import ru.stroganov.showroom.account.userinfoservice.common.OAuth2Principal
 import ru.stroganov.showroom.account.userinfoservice.common.oauth2ResourceServer
 
@@ -20,7 +20,7 @@ fun Application.authConfig() {
     install(Authentication) {
         oauth2ResourceServer("main") {
             client = oauth2HttpClient
-            tokenEndpoint = "$OAUTH2__ADMIN_HOST/oauth2/introspect"
+            tokenEndpoint = "$OAUTH2__ADMIN_URI/oauth2/introspect"
         }
     }
 }

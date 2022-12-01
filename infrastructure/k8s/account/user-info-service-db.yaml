@@ -1,36 +1,36 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: hydra-db
+  name: user-info-service-db
 spec:
   replicas: 1
-  serviceName: hydra-db
+  serviceName: user-info-service-db
   selector:
     matchLabels:
-      app: hydra-db
+      app: user-info-service-db
   template:
     metadata:
       labels:
-        app: hydra-db
+        app: user-info-service-db
     spec:
       containers:
-        - name: hydra-db
+        - name: user-info-service-db
           image: postgres:14
           imagePullPolicy: "IfNotPresent"
           ports:
             - containerPort: 5432
           envFrom:
             - secretRef:
-                name: hydra-db
+                name: user-info-service-db
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
-              name: hydra-db-volume-claim
+              name: user-info-service-db-volume-claim
               subPath: postgres-data
   volumeClaimTemplates:
     - metadata:
-        name: hydra-db-volume-claim
+        name: user-info-service-db-volume-claim
         labels:
-          app: hydra-db
+          app: user-info-service-db
       spec:
         storageClassName: gp2
         accessModes:
@@ -42,12 +42,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hydra-db
+  name: user-info-service-db
   labels:
-    app: hydra-db
+    app: user-info-service-db
 spec:
   selector:
-    app: hydra-db
+    app: user-info-service-db
   ports:
   - protocol: TCP
     port: 5432

@@ -1,13 +1,16 @@
 package ru.stroganov.showroom.account.userinfoservice.routing.v1.model
 
+import kotlinx.serialization.Serializable
 import ru.stroganov.showroom.account.userinfoservice.service.UserCredentials
 import ru.stroganov.showroom.account.userinfoservice.service.UserCredentialsValidation
 
+@Serializable
 data class VerifyCredentialsRequest(
     val login: String,
     val password: String,
 )
 
+@Serializable
 data class VerifyCredentialsResponse(
     val isValid: Boolean,
     val errors: List<String>,

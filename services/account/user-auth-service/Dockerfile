@@ -1,5 +1,6 @@
-FROM openjdk:11 as build
+FROM openjdk:17 as build
 WORKDIR /build
+RUN microdnf install findutils
 
 COPY gradlew /build/graldew
 COPY gradle /build/gradle
@@ -9,10 +10,11 @@ RUN ./gradlew clean --no-daemon
 COPY src /build/src
 RUN ./gradlew bootJar --no-daemon
 
-FROM openjdk:11-slim
+FROM openjdk:17-slim
 WORKDIR /app
 COPY --from=build /build/build/libs/*.jar /app/app.jar
 
-EXPOSE 8080
+EXPOSE 80
+EXPOSE 5005
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "/app/app.jar"]

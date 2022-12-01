@@ -19,7 +19,7 @@ data class UserInfoServiceRepoCreateUserResponse(
 
 data class UserInfoServiceRepoVerifyCredentialsRequest(
     val login: String,
-    val passwordHash: String,
+    val password: String,
 )
 
 data class UserInfoServiceRepoVerifyCredentialsResponseInternal(
@@ -43,7 +43,7 @@ interface UserInfoServiceRepo {
 @Repository
 internal class UserInfoServiceRepoImpl(
     private val webClient: WebClient,
-    @Value("service.user-info-service.host") private val host: String,
+    @Value("\${user-info-service.url}") private val host: String,
 ) : UserInfoServiceRepo {
 
     override suspend fun createUser(

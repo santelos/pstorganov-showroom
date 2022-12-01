@@ -9,12 +9,12 @@ import ru.stroganov.oauth2.userauthservice.controller.response.UserIdResponse
 import ru.stroganov.oauth2.userauthservice.controller.response.toResponse
 import ru.stroganov.oauth2.userauthservice.service.RegistrationService
 
-@RestController("/registration")
+@RestController()
 class Registration(
     private val registrationService: RegistrationService
 ) {
 
-    @PostMapping("/new")
+    @PostMapping("/registration/new")
     suspend fun new(@RequestBody request: RegistrationNewRequest): UserIdResponse {
         val result = registrationService.new(request.toService())
         return result.toResponse()
