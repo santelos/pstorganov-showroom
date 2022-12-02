@@ -1,0 +1,69 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: atlantis
+  namespace: atlantis
+spec:
+  serviceName: atlantis
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  selector:
+    matchLabels:
+      app: atlantis
+  template:
+    metadata:
+      labels:
+        app: atlantis
+      namespace: atlantis
+    spec:
+      securityContext:
+        fsGroup: 1000 # Atlantis group (1000) read/write access to volumes.
+      containers:
+      - name: atlantis
+        image: ghcr.io/runatlantis/atlantis:v0.20.1
+        env:
+        - name: ATLANTIS_DATA_DIR
+          value: /atlantis
+        - name: ATLANTIS_PORT
+          value: "4141" # Kubernetes sets an ATLANTIS_PORT variable so we need to override.
+        volumeMounts:
+        - name: atlantis
+          mountPath: /atlantis
+        ports:
+        - name: atlantis
+          containerPort: 4141
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 100m
+          limits:
+            memory: 256Mi
+            cpu: 100m
+        livenessProbe:
+          # We only need to check every 60s since Atlantis is not a
+          # high-throughput service.
+          periodSeconds: 60
+          httpGet:
+            path: /healthz
+            port: 4141
+            # If using https, change this to HTTPS
+            scheme: HTTP
+        readinessProbe:
+          periodSeconds: 60
+          httpGet:
+            path: /healthz
+            port: 4141
+            # If using https, change this to HTTPS
+            scheme: HTTP
+  volumeClaimTemplates:
+  - metadata:
+      name: atlantis
+      namespace: atlantis
+    spec:
+      accessModes: ["ReadWriteOnce"] # Volume should not be shared by multiple nodes.
+      resources:
+        requests:
+          storage: 2Gi

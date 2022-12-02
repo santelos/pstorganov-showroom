@@ -1,0 +1,8 @@
+resources:
+- ../../base
+
+resources:
+- namespace.yaml
+- service.yaml
+- statefulset.yaml
+- pv.yaml

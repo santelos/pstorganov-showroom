@@ -5,8 +5,9 @@ metadata:
   labels:
     app: user-auth-service
 data:
-  OAUTH2_ADMIN_URL: "http://hydra:4445"
-  LOGGING_LEVEL_ROOT: "debug"
+  OAUTH2__ADMIN_URL: "http://hydra:4445"
+  OAUTH2__PUBLIC_URL: "https://id.santelos.com/o"
+  USER_INFO_SERVICE__URL: "http://user-info-service"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -28,7 +29,8 @@ spec:
       - name: user-auth-service
         image: 162173573602.dkr.ecr.ap-northeast-1.amazonaws.com/user-auth-service
         ports:
-        - containerPort: 8080
+        - containerPort: 80
+        - containerPort: 5005
         envFrom:
           - configMapRef:
               name: user-auth-service
@@ -48,7 +50,7 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 8080
+    targetPort: 80
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

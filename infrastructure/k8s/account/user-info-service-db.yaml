@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: user-info-service-db
+spec:
+  replicas: 1
+  serviceName: user-info-service-db
+  selector:
+    matchLabels:
+      app: user-info-service-db
+  template:
+    metadata:
+      labels:
+        app: user-info-service-db
+    spec:
+      containers:
+        - name: user-info-service-db
+          image: postgres:14
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: user-info-service-db
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: user-info-service-db-volume-claim
+              subPath: postgres-data
+  volumeClaimTemplates:
+    - metadata:
+        name: user-info-service-db-volume-claim
+        labels:
+          app: user-info-service-db
+      spec:
+        storageClassName: gp2
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-info-service-db
+  labels:
+    app: user-info-service-db
+spec:
+  selector:
+    app: user-info-service-db
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432

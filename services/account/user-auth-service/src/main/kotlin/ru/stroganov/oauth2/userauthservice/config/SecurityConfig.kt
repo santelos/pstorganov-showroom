@@ -28,11 +28,11 @@ class SecurityConfig {
     fun configure(http: ServerHttpSecurity,
                   authFilter: AuthenticationWebFilter
     ): SecurityWebFilterChain = http {
-
         csrf {
             disable()
         }
         authorizeExchange {
+            authorize("/registration/new", permitAll)
             authorize("/metrics", hasAuthority("SCOPE_internal:metrics"))
             authorize(anyExchange, authenticated)
         }
