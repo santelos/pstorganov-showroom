@@ -1,17 +1,18 @@
 <template>
   <div class="main">
-    <a v-bind:href="signInUrl">SignIn</a>
+    <a v-bind:href="signUpUrl">SignUp</a>
   </div>
 </template>
 
 <script>
+const baseIdUrl = process.env.VUE_APP_ID_BASE_API_URL
 const baseUrl = process.env.VUE_APP_BASE_API_URL
 
 export default {
-  name: 'SignInButton',
+  name: 'SignUpButton',
   computed: {
-    signInUrl() {
-      return baseUrl + '/o/login'
+    signUpUrl() {
+      return baseIdUrl + '/sign-up?source=' + encodeURIComponent(baseUrl)
     }
   }
 }

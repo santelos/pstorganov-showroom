@@ -1,10 +1,12 @@
 import { createStore } from "vuex";
 import auth from "./auth";
+import signUp from "./signUp";
 
 export default createStore({
   namespaced: true,
   modules: {
-    auth
+    auth,
+    signUp
   },
   state: {},
   getters: {},
