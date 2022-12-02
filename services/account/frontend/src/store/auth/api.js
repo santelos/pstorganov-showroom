@@ -48,14 +48,17 @@ export default {
                 commit('setConsentRequest', response.data)
             })
         },
-        async acceptConsent({getters}, {consentChallenge}) {
+        async acceptConsent({getters}, {consentChallenge, acceptedScope}) {
             await axios({
                 url: '/user-auth/accept-consent',
+                method: 'POST',
                 params: {
                     consent_challenge: consentChallenge
                 },
+                data: {
+                    scope: acceptedScope
+                },
                 auth: getters.baseAuth,
-                method: 'GET',
             }).then(response => {
                 console.log(response.data)
                 window.location = response.data.redirectTo

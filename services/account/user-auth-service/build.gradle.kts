@@ -27,12 +27,21 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:${kotlinLoggingVersion}")
 
     // Spring
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot", "spring-boot-starter-webflux")
+    implementation("org.springframework.boot", "spring-boot-starter-oauth2-resource-server")
+    implementation("org.springframework.boot", "spring-boot-starter-oauth2-client")
+
+    // Jackson
+    implementation("com.fasterxml.jackson.module", "jackson-module-kotlin")
 
     // Hydra
     val shOryHydraVersion: String by project
     implementation("sh.ory.hydra", "hydra-client", shOryHydraVersion)
+
+    // Monitoring
+    val micrometerPrometheusVersion: String by project
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus:${micrometerPrometheusVersion}")
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")

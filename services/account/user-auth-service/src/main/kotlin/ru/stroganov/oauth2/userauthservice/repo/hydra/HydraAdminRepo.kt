@@ -21,7 +21,7 @@ interface HydraAdminRepo {
     suspend fun getLoginRequest(loginRequestId: String): LoginRequestResponse
     suspend fun acceptLogin(loginRequestId: String, subject: String): String
     suspend fun getConsent(consentChallenge: String): GetConsentRepoResponse
-    suspend fun acceptConsent(consentChallenge: String): AcceptConsentRepoResponse
+    suspend fun acceptConsent(consentChallenge: String, scope: List<String>): AcceptConsentRepoResponse
 }
 
 @Service
@@ -55,8 +55,13 @@ class HydraAdminRepoImpl(
         })
     }
 
-    override suspend fun acceptConsent(consentChallenge: String): AcceptConsentRepoResponse = suspendCoroutine { cont ->
-        val request = AcceptConsentRequest()
+    override suspend fun acceptConsent(
+        consentChallenge: String,
+        scope: List<String>
+    ): AcceptConsentRepoResponse = suspendCoroutine { cont ->
+        val request = AcceptConsentRequest().apply {
+            grantScope = scope
+        }
         hydraAdminClient.acceptConsentRequestAsync(consentChallenge, request, cont.hydraCallback {
             AcceptConsentRepoResponse(it.redirectTo)
         })

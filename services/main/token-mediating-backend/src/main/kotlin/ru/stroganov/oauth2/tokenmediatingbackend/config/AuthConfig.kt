@@ -37,6 +37,7 @@ fun Application.authConfigModule(oauth2HttpClient: HttpClient = oauth2flowHttpCl
                     clientId = OAUTH2__CLIENT_ID,
                     clientSecret = OAUTH2__CLIENT_SECRET,
                     defaultScopes = listOf("asd:test")
+
                 )
             }
             client = oauth2HttpClient

@@ -1,0 +1,21 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: atlantis
+  namespace: atlantis
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: atlantis
+        env:
+          - name: ATLANTIS_REPO_ALLOWLIST
+            value: github.com/santelos/pstorganov-showroom
+          - name: ATLANTIS_ATLANTIS_URL
+            value: https://atlantis.santelos.com
+        envFrom:
+          - secretRef:
+              name: atlantis
+

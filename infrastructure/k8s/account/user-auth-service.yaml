@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-auth-service
+  labels:
+    app: user-auth-service
+data:
+  OAUTH2__ADMIN_URL: "http://hydra:4445"
+  OAUTH2__PUBLIC_URL: "https://id.santelos.com/o"
+  USER_INFO_SERVICE__URL: "http://user-info-service"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-auth-service
+  labels:
+    app: user-auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-auth-service
+  template:
+    metadata:
+      labels:
+        app: user-auth-service
+    spec:
+      containers:
+      - name: user-auth-service
+        image: 162173573602.dkr.ecr.ap-northeast-1.amazonaws.com/user-auth-service
+        ports:
+        - containerPort: 80
+        - containerPort: 5005
+        envFrom:
+          - configMapRef:
+              name: user-auth-service
+          - secretRef:
+              name: user-auth-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-auth-service
+spec:
+  selector:
+    app: user-auth-service
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: user-auth-service
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - host: id.santelos.com
+    http:
+      paths:
+      - path: /user-auth(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: user-auth-service
+            port:
+              number: 80

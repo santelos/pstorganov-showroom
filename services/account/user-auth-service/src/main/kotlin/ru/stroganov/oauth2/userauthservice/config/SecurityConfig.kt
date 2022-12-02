@@ -1,28 +1,39 @@
 package ru.stroganov.oauth2.userauthservice.config
 
+import kotlinx.coroutines.reactor.mono
+import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.security.authentication.ReactiveAuthenticationManager
+import org.springframework.security.authentication.ReactiveAuthenticationManagerResolver
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.config.web.server.invoke
-import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProviderBuilder
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService
-import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
+import org.springframework.security.oauth2.server.resource.authentication.OpaqueTokenReactiveAuthenticationManager
+import org.springframework.security.oauth2.server.resource.introspection.ReactiveOpaqueTokenIntrospector
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter
 import org.springframework.security.web.server.authentication.ServerHttpBasicAuthenticationConverter
 import org.springframework.security.web.server.savedrequest.NoOpServerRequestCache
+import org.springframework.web.server.ServerWebExchange
 
 @EnableWebFluxSecurity
 class SecurityConfig {
 
+    private val log = KotlinLogging.logger {  }
+
     @Bean
-    fun configure(http: ServerHttpSecurity, authFilter: AuthenticationWebFilter): SecurityWebFilterChain = http {
+    fun configure(http: ServerHttpSecurity,
+                  authFilter: AuthenticationWebFilter
+    ): SecurityWebFilterChain = http {
+        csrf {
+            disable()
+        }
         authorizeExchange {
+            authorize("/registration/new", permitAll)
+            authorize("/metrics", hasAuthority("SCOPE_internal:metrics"))
             authorize(anyExchange, authenticated)
         }
         requestCache {
@@ -32,24 +43,32 @@ class SecurityConfig {
     }
 
     @Bean
-    fun clientManager(
-        clientRegistrationRepository: ReactiveClientRegistrationRepository,
-        authorizedClientService: ReactiveOAuth2AuthorizedClientService
-    ): ReactiveOAuth2AuthorizedClientManager {
-        val authorizedClientProvider = ReactiveOAuth2AuthorizedClientProviderBuilder.builder()
-            .clientCredentials()
-            .build()
-        val authorizedClientManager = AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(
-            clientRegistrationRepository, authorizedClientService)
-        authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
-        return authorizedClientManager
+    fun resolver(
+        @Qualifier("LoginPassword") loginPasswordManager: ReactiveAuthenticationManager,
+        @Qualifier("Oauth2") oauth2Manager: ReactiveAuthenticationManager
+    ): ReactiveAuthenticationManagerResolver<ServerWebExchange> = ReactiveAuthenticationManagerResolver {
+        mono {
+            if (it.request.path.pathWithinApplication().value().startsWith("/metrics")) {
+                log.info { "For path: [${it.request.path}].oauth2 manager"  }
+                oauth2Manager
+            } else {
+                log.info { "For path: [${it.request.path}].login password manager"  }
+                loginPasswordManager
+            }
+        }
+    }
+
+    @Bean
+    @Qualifier("Oauth2")
+    fun oauth2Manager(introspector: ReactiveOpaqueTokenIntrospector): ReactiveAuthenticationManager {
+        return OpaqueTokenReactiveAuthenticationManager(introspector)
     }
 
     @Bean
     fun authFilter(
-        authManager: ReactiveAuthenticationManager,
+        authManagerResolver: ReactiveAuthenticationManagerResolver<ServerWebExchange>,
         authConverter: ServerAuthenticationConverter,
-    ): AuthenticationWebFilter = AuthenticationWebFilter(authManager).apply {
+    ): AuthenticationWebFilter = AuthenticationWebFilter(authManagerResolver).apply {
         setServerAuthenticationConverter(authConverter)
     }
 

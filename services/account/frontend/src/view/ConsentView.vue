@@ -28,6 +28,7 @@ export default {
     onClick() {
       this.acceptConsent({
         consentChallenge: this.consentChallenge,
+        acceptedScope: this.consentScopes,
       })
     }
   }
