@@ -35,6 +35,7 @@ class WebClientConfig {
         val oauth2Client = ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
         oauth2Client.setDefaultClientRegistrationId("main")
         return WebClient.builder()
+            .filter(oauth2Client)
             .build()
     }
 }

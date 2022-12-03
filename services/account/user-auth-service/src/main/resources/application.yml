@@ -10,15 +10,6 @@ management:
       path-mapping:
         prometheus: "metrics"
 
-management:
-  endpoints:
-    web:
-      base-path: "/"
-      exposure:
-        include: "prometheus"
-      path-mapping:
-        prometheus: "metrics"
-
 spring:
   security:
     oauth2:

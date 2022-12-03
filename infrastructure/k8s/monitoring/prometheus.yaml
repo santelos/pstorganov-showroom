@@ -42,7 +42,7 @@ data:
           target_label: k8s_service_name
         - action: labelmap
           regex: __meta_kubernetes_service_label_(.+)
-      - job_name: 'web-services-job-oath2'
+      - job_name: 'web-services-job-oauth2'
         kubernetes_sd_configs:
           - role: endpoints
         relabel_configs:
@@ -61,7 +61,7 @@ data:
         - action: labelmap
           regex: __meta_kubernetes_service_label_(.+)
         oauth2:
-          client_id: d56d3fcc-2ad8-4ac8-bdab-eb0e50a6f730
+          client_id: 8577ae59-9617-433b-b58e-fba04dcb77da
           client_secret_file: /k8s-secret/oauth2-client-secret
           scopes:
             - internal:metrics
