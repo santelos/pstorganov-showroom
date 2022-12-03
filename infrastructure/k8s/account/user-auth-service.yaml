@@ -24,6 +24,9 @@ spec:
     metadata:
       labels:
         app: user-auth-service
+      annotations:
+        prometheus.io/scrape: "true"
+        metrics_auth_type: "oauth2"
     spec:
       containers:
       - name: user-auth-service
@@ -41,9 +44,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: user-auth-service
-  annotations:
-    prometheus.io/scrape: "true"
-    metrics_auth_type: "oauth2"
 spec:
   selector:
     app: user-auth-service
