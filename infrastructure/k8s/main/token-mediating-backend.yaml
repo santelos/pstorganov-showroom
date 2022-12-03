@@ -24,6 +24,9 @@ spec:
     metadata:
       labels:
         app: token-mediating-backend
+      annotations:
+        prometheus.io/scrape: "true"
+        metrics_auth_type: "none"
     spec:
       containers:
       - name: token-mediating-backend

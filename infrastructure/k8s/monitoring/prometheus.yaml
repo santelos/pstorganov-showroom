@@ -28,29 +28,14 @@ data:
         kubernetes_sd_configs:
           - role: endpoints
         relabel_configs:
-        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
           regex: 'true'
           action: keep
-        - source_labels: [__meta_kubernetes_service_annotation_metrics_auth_type]
+        - source_labels: [__meta_kubernetes_pod_annotation_metrics_auth_type]
           regex: 'none'
           action: keep
-        - source_labels: [__meta_kubernetes_namespace]
-          action: replace
-          target_label: k8s_namespace
-        - source_labels: [__meta_kubernetes_service_name]
-          action: replace
-          target_label: k8s_service_name
-        - action: labelmap
-          regex: __meta_kubernetes_service_label_(.+)
-      - job_name: 'web-services-job-oath2'
-        kubernetes_sd_configs:
-          - role: endpoints
-        relabel_configs:
-        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
-          regex: 'true'
-          action: keep
-        - source_labels: [__meta_kubernetes_service_annotation_metrics_auth_type]
-          regex: 'oauth2'
+        - source_labels: [__meta_kubernetes_endpoint_address_target_name]
+          regex: (.+)
           action: keep    
         - source_labels: [__meta_kubernetes_namespace]
           action: replace
@@ -59,9 +44,30 @@ data:
           action: replace
           target_label: k8s_service_name
         - action: labelmap
-          regex: __meta_kubernetes_service_label_(.+)
+          regex: __meta_kubernetes_pod_label_(.+)
+      - job_name: 'web-services-job-oauth2'
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          regex: 'true'
+          action: keep
+        - source_labels: [__meta_kubernetes_pod_annotation_metrics_auth_type]
+          regex: 'oauth2'
+          action: keep    
+        - source_labels: [__meta_kubernetes_endpoint_address_target_name]
+          regex: (.+)
+          action: keep
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: k8s_namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          action: replace
+          target_label: k8s_service_name
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
         oauth2:
-          client_id: d56d3fcc-2ad8-4ac8-bdab-eb0e50a6f730
+          client_id: 8577ae59-9617-433b-b58e-fba04dcb77da
           client_secret_file: /k8s-secret/oauth2-client-secret
           scopes:
             - internal:metrics

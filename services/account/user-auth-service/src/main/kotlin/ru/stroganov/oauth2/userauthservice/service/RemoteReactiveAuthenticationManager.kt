@@ -2,13 +2,10 @@ package ru.stroganov.oauth2.userauthservice.service
 
 import kotlinx.coroutines.reactor.mono
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.annotation.Primary
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import ru.stroganov.oauth2.userauthservice.exception.authentication.UserAuthFailedException
 import ru.stroganov.oauth2.userauthservice.repo.UserServiceRepo
@@ -19,9 +16,6 @@ import ru.stroganov.oauth2.userauthservice.repo.userinfo.UserInfoServiceRepo
 import ru.stroganov.oauth2.userauthservice.repo.userinfo.UserInfoServiceRepoVerifyCredentialsRequest
 import ru.stroganov.oauth2.userauthservice.repo.userinfo.UserInfoServiceRepoVerifyCredentialsResponse
 
-@Service
-@Qualifier("LoginPassword")
-@Primary
 class RemoteReactiveAuthenticationManager(
     private val userInfoServiceRepo: UserInfoServiceRepo,
 ) : ReactiveAuthenticationManager {
