@@ -117,3 +117,16 @@ spec:
             items:
               - key: OAUTH2_CLIENT_SECRET
                 path: oauth2-client-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: monitoring
+  name: prometheus
+spec:
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+  selector:
+    app: prometheus-server 

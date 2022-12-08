@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-conf
+  labels:
+    name: grafana-conf
+  namespace: monitoring
+data:
+  grafana.ini: |-
+    [auth]
+    oauth_auto_login = false
+
+    [auth.basic]
+    enabled = false
+
+    [auth.generic_oauth]
+    name = OAuth
+    icon = signin
+    enabled = true
+    client_id = 310ddf4b-962d-41dd-ae7e-1aa032c9059b
+    client_secret =
+    scopes =
+    empty_scopes = true
+    auth_url = 	https://id.santelos.com/o/oauth2/auth
+    token_url = https://id.santelos.com/o/oauth2/token
+    api_url =
+    allowed_domains =
+    allow_sign_up = true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: monitoring
+  name: grafana
+  labels:
+    app: grafana
+spec:
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:9.3.1
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          volumeMounts:
+            - name: grafana-config-volume
+              mountPath: "/etc/grafana/"
+          env: 
+          - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+            valueFrom: 
+              secretKeyRef: 
+                name: grafana
+                key: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+      volumes:
+        - name: grafana-config-volume
+          configMap:
+            defaultMode: 420
+            name: grafana-conf              
