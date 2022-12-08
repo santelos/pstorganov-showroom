@@ -12,7 +12,7 @@ RUN ./gradlew bootJar --no-daemon
 
 FROM openjdk:17-slim
 WORKDIR /app
-COPY --from=build /build/build/libs/*.jar /app/app.jar
+COPY --from=build /build/build/libs/*-1.jar /app/app.jar
 
 EXPOSE 80
 EXPOSE 5005

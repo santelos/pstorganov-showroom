@@ -22,7 +22,7 @@ val RoleBasedAuthorizationRoute = createRouteScopedPlugin(
     createConfiguration = ::RoleRuleConfig
 ) {
     on(RoleBasedAuthHook) { call ->
-        val principal = call.authentication.principal
+        val principal = call.authentication.principal<Principal>()
         if (principal == null) {
             call.respond(HttpStatusCode.Unauthorized)
         } else {
