@@ -7,7 +7,6 @@ import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.reactive.awaitFirst
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
-import ru.stroganov.showroom.account.userinfoservice.service.UserCredentials
 import ru.stroganov.showroom.account.userinfoservice.service.UserId
 import ru.stroganov.showroom.account.userinfoservice.service.UserLogin
 
@@ -37,6 +36,22 @@ internal class UsersRepoImplTest : FunSpec({
         val userId = connectionFactory.createUser()
         val expected = UserInfoRepoResponse.UserNotFound
         val actual = usersRepo.getUserInfo(UserId(userId + 1))
+        actual shouldBe expected
+    }
+
+    test("getUserId | Success") {
+        val name = "test--name"
+        val userId = connectionFactory.createUser(login = name)
+        val expected = UserIdRepoResponse.Success(userId)
+        val actual = usersRepo.getUserId(UserLogin(name))
+        actual shouldBe expected
+    }
+
+    test("getUserId | UserNotFound") {
+        val name = "test--name"
+        connectionFactory.createUser(login = name)
+        val expected = UserIdRepoResponse.UserNotFound
+        val actual = usersRepo.getUserId(UserLogin(name + "broken"))
         actual shouldBe expected
     }
 

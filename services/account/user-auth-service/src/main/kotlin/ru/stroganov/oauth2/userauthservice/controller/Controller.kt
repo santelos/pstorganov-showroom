@@ -23,7 +23,7 @@ class Controller(
     suspend fun acceptLogin(
         @RequestParam("login_challenge") loginChallenge: String,
         authentication: Authentication,
-    ): AcceptLoginResponse = AcceptLoginResponse(loginAcceptService.acceptLogin(loginChallenge, authentication.name))
+    ): AcceptLoginResponse = AcceptLoginResponse(loginAcceptService.acceptLogin(authentication, loginChallenge))
 
     @GetMapping("/accept-consent")
     suspend fun acceptConsent(

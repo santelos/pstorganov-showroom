@@ -28,10 +28,10 @@ fun Application.userModule(userService: UserService = UserServiceObject) {
                         }
                     }
                 }
-                roleAuthorize(rule = RoleRule.HasRoles(setOf("user:VerifyCredentials")), ::principalToRolesMapping) {
-                    post("/credentials") {
-                        val request = call.receive<VerifyCredentialsRequest>()
-                        val result = userService.validateCredentials(request.toService())
+                roleAuthorize(rule = RoleRule.HasRoles(setOf("user:GetAuthInfo")), ::principalToRolesMapping) {
+                    post("/auth-info") {
+                        val request = call.receive<GetUserAuthInfoRequest>()
+                        val result = userService.getUserAuthInfo(request.toService())
                         call.respond(result.toResponse())
                     }
                 }

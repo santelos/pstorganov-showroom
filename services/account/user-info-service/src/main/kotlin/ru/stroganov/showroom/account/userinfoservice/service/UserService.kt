@@ -24,19 +24,19 @@ data class UserInfo(
 )
 
 data class UserCredentials(
-    val login: String,
+    val login: UserLogin,
     val password: String,
 )
 
-sealed interface UserCredentialsValidation {
-    object Valid : UserCredentialsValidation
-    data class Invalid(val errors: List<String>) : UserCredentialsValidation
+sealed interface UserAuthInfo {
+    data class Invalid(val errors: List<String>) : UserAuthInfo
+    data class Success(val userId: UserId) : UserAuthInfo
 }
 
 interface UserService {
     suspend fun createUser(newUser: NewUser): UserId
     suspend fun getUserInfo(userId: UserId): UserInfo
-    suspend fun validateCredentials(credentials: UserCredentials): UserCredentialsValidation
+    suspend fun getUserAuthInfo(credentials: UserCredentials): UserAuthInfo
 }
 
 internal object UserServiceObject : UserService by UserServiceImpl()
@@ -63,15 +63,18 @@ internal class UserServiceImpl(
             UserInfoRepoResponse.UserNotFound -> throw ServiceException.UserIdNotFoundException(userId)
         }
 
-    override suspend fun validateCredentials(credentials: UserCredentials): UserCredentialsValidation =
-        when(val dbPasswordHash = usersRepo.getPasswordHash(UserLogin(credentials.login))) {
+    override suspend fun getUserAuthInfo(credentials: UserCredentials): UserAuthInfo =
+        when(val dbPasswordHash = usersRepo.getPasswordHash(credentials.login)) {
             is GetPasswordHashResponse.Success -> {
                 if (hashing.isEqual(credentials.password, dbPasswordHash.passwordHash)) {
-                    UserCredentialsValidation.Valid
+                    when(val userId = usersRepo.getUserId(credentials.login)) {
+                        is UserIdRepoResponse.Success -> UserAuthInfo.Success(UserId(userId.id))
+                        UserIdRepoResponse.UserNotFound -> throw ServiceException.UserLoginNotFound(credentials.login)
+                    }
                 } else {
-                    UserCredentialsValidation.Invalid(listOf("Password doesn't match"))
+                    UserAuthInfo.Invalid(listOf("Password doesn't match"))
                 }
             }
-            GetPasswordHashResponse.UserNotFound -> UserCredentialsValidation.Invalid(listOf("User not found"))
+            GetPasswordHashResponse.UserNotFound -> UserAuthInfo.Invalid(listOf("User not found"))
         }
 }

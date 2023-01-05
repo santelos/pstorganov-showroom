@@ -17,27 +17,28 @@ data class UserInfoServiceRepoCreateUserResponse(
     val userId: Int,
 )
 
-data class UserInfoServiceRepoVerifyCredentialsRequest(
+data class UserInfoServiceRepoGetUserAuthInfoRequest(
     val login: String,
     val password: String,
 )
 
-data class UserInfoServiceRepoVerifyCredentialsResponseInternal(
+data class UserInfoServiceRepoUserAuthInfoResponseInternal(
     val isValid: Boolean,
     val errors: List<String>,
+    val userId: Int,
 )
-sealed interface UserInfoServiceRepoVerifyCredentialsResponse{
-    object Valid : UserInfoServiceRepoVerifyCredentialsResponse
-    data class Invalid(val errors: List<String>) : UserInfoServiceRepoVerifyCredentialsResponse
+sealed interface UserInfoServiceRepoUserAuthInfoResponse {
+    data class Success(val userId: Int) : UserInfoServiceRepoUserAuthInfoResponse
+    data class Invalid(val errors: List<String>) : UserInfoServiceRepoUserAuthInfoResponse
 }
 
 interface UserInfoServiceRepo {
     suspend fun createUser(
         request: UserInfoServiceRepoCreateUserRequest
     ) : UserInfoServiceRepoCreateUserResponse
-    suspend fun verifyCredentials(
-        request: UserInfoServiceRepoVerifyCredentialsRequest
-    ) : UserInfoServiceRepoVerifyCredentialsResponse
+    suspend fun getUserAuthInfo(
+        request: UserInfoServiceRepoGetUserAuthInfoRequest
+    ) : UserInfoServiceRepoUserAuthInfoResponse
 }
 
 @Repository
@@ -55,15 +56,15 @@ internal class UserInfoServiceRepoImpl(
             it.awaitBody()
         }
 
-    override suspend fun verifyCredentials(
-        request: UserInfoServiceRepoVerifyCredentialsRequest
-    ): UserInfoServiceRepoVerifyCredentialsResponse = webClient.post()
-        .uri("$host/v1/user/credentials")
+    override suspend fun getUserAuthInfo(
+        request: UserInfoServiceRepoGetUserAuthInfoRequest
+    ): UserInfoServiceRepoUserAuthInfoResponse = webClient.post()
+        .uri("$host/v1/user/auth-info")
         .body(BodyInserters.fromValue(request))
         .awaitExchange {
-            it.awaitBody<UserInfoServiceRepoVerifyCredentialsResponseInternal>()
+            it.awaitBody<UserInfoServiceRepoUserAuthInfoResponseInternal>()
         }.let {
-            if (it.isValid) UserInfoServiceRepoVerifyCredentialsResponse.Valid
-            else UserInfoServiceRepoVerifyCredentialsResponse.Invalid(it.errors)
+            if (it.isValid) UserInfoServiceRepoUserAuthInfoResponse.Success(it.userId)
+            else UserInfoServiceRepoUserAuthInfoResponse.Invalid(it.errors)
         }
 }

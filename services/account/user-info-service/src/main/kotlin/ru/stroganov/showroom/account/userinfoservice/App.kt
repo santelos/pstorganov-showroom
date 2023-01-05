@@ -12,7 +12,7 @@ import ru.stroganov.showroom.account.userinfoservice.repo.FlywayRepoObject
 import ru.stroganov.showroom.account.userinfoservice.routing.v1.userModule
 
 fun main() {
-    embeddedServer(Netty, 8080) {
+    embeddedServer(Netty) {
         onStartup()
         authConfig()
         serverConfig()
