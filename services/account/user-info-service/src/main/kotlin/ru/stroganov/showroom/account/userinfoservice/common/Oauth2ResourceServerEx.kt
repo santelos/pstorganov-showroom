@@ -61,7 +61,7 @@ class OAuth2ResourceServerProvider(val config: Config): AuthenticationProvider(c
 sealed interface TokenIntrospectionResponse {
 
     /**
-     * https://www.rfc-editor.org/rfc/rfc7662
+     * https://www.rfc-editor.org/rfc/rfc7662#section-2.2
      */
     @Serializable
     data class Success(

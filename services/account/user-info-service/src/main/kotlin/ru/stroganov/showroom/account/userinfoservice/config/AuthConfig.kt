@@ -25,5 +25,8 @@ fun Application.authConfig() {
     }
 }
 
-fun principalToRolesMapping(principal: Principal): Set<String> = (principal as OAuth2Principal)
-    .scope?.split(Regex("\\s"))?.toSet() ?: emptySet()
+fun principalToRolesMapping(principal: Principal): Set<String>? = (principal as OAuth2Principal)
+    .scope?.split(Regex("\\s"))?.toSet()
+
+fun principalToUserId(principal: Principal): String? = (principal as OAuth2Principal)
+    .sub

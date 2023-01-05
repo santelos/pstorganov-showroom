@@ -9,12 +9,13 @@ services:
       - 5432:5432
   service:
     build: .
-    ports:
-      - 80:80
-      - 5005:5005
+#    ports:
+#      - 80:80
+#      - 5005:5005
     environment:
       DATABASE__DATABASE_NAME: postgres
-      DATABASE__HOST: database
+      DATABASE__HOST: localhost
       DATABASE__PASSWORD: postgres
       DATABASE__USERNAME: postgres
-      OAUTH2__ADMIN_HOST: http://localhost:4445
+      OAUTH2__ADMIN_URI: http://localhost:4445
+    network_mode: host

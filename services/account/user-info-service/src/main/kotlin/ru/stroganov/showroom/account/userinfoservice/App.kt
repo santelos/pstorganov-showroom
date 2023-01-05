@@ -2,7 +2,6 @@ package ru.stroganov.showroom.account.userinfoservice
 
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.callloging.*
@@ -13,7 +12,7 @@ import ru.stroganov.showroom.account.userinfoservice.repo.FlywayRepoObject
 import ru.stroganov.showroom.account.userinfoservice.routing.v1.userModule
 
 fun main() {
-    embeddedServer(Netty) {
+    embeddedServer(Netty, 8080) {
         onStartup()
         authConfig()
         serverConfig()
