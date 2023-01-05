@@ -24,7 +24,7 @@ spring:
             client-id: ${OAUTH2__MAIN__CLIENT_ID}
             client-secret: ${OAUTH2__MAIN__CLIENT_SECRET}
             authorization-grant-type: client_credentials
-            scope: user:CreateUser, user:VerifyCredentials
+            scope: user:CreateUser, user:GetAuthInfo
         provider:
           main:
             token-uri: ${OAUTH2__PUBLIC_URL}/oauth2/token

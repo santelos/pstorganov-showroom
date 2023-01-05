@@ -7,9 +7,14 @@ import ru.stroganov.showroom.account.userinfoservice.common.DatabaseException
 import ru.stroganov.showroom.account.userinfoservice.service.UserId
 import ru.stroganov.showroom.account.userinfoservice.service.UserLogin
 
-sealed interface UserInfoRepoResponse{
+sealed interface UserInfoRepoResponse {
     data class Success(val id: Int, val name: String) : UserInfoRepoResponse
     object UserNotFound : UserInfoRepoResponse
+}
+
+sealed interface UserIdRepoResponse {
+    data class Success(val id: Int) : UserIdRepoResponse
+    object UserNotFound : UserIdRepoResponse
 }
 
 sealed interface GetPasswordHashResponse {
@@ -30,6 +35,7 @@ data class ValidatePasswordRequest(
 
 interface UsersRepo {
     suspend fun getUserInfo(userId: UserId): UserInfoRepoResponse
+    suspend fun getUserId(login: UserLogin): UserIdRepoResponse
     suspend fun getPasswordHash(login: UserLogin): GetPasswordHashResponse
     suspend fun createUser(newUser: CreateUserRepoRequest): UserId
 }
@@ -56,6 +62,23 @@ internal class UsersRepoImpl(
                 name = t.get("name", String::class.java)!!
             )
         }.awaitFirstOrNull() ?: UserInfoRepoResponse.UserNotFound
+
+    private val getUserIdQuery = """
+        SELECT id
+        FROM users 
+        WHERE login=$1
+    """.trimIndent()
+    override suspend fun getUserId(login: UserLogin): UserIdRepoResponse = runCatching {
+        connectionFactory.create().awaitFirst()
+            .createStatement(getUserIdQuery)
+            .bind("$1", login.login)
+            .execute().awaitFirst()
+    }.getOrElse { throw DatabaseException.DriverException(it) }
+        .map { t, _ ->
+            UserIdRepoResponse.Success(
+                id = t.get("id", Integer::class.java)!!.toInt()
+            )
+        }.awaitFirstOrNull() ?: UserIdRepoResponse.UserNotFound
 
 
     private val validatePasswordQuery = """

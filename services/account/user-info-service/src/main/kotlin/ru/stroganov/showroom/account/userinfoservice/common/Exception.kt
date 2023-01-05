@@ -14,4 +14,5 @@ sealed class DatabaseException(msg: String, cause: Throwable? = null) : RuntimeE
 
 sealed class ServiceException(msg: String, cause: Throwable? = null) : RuntimeException(msg, cause) {
     class UserIdNotFoundException(userId: UserId) : ServiceException("User not found with ID=[${userId.id}]")
+    class UserLoginNotFound(userLogin: UserLogin) : ServiceException("User not found with LOGIN=[${userLogin.login}]")
 }

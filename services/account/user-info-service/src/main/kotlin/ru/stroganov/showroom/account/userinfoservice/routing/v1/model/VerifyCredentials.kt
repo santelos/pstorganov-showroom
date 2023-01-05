@@ -2,32 +2,36 @@ package ru.stroganov.showroom.account.userinfoservice.routing.v1.model
 
 import kotlinx.serialization.Serializable
 import ru.stroganov.showroom.account.userinfoservice.service.UserCredentials
-import ru.stroganov.showroom.account.userinfoservice.service.UserCredentialsValidation
+import ru.stroganov.showroom.account.userinfoservice.service.UserAuthInfo
+import ru.stroganov.showroom.account.userinfoservice.service.UserLogin
 
 @Serializable
-data class VerifyCredentialsRequest(
+data class GetUserAuthInfoRequest(
     val login: String,
     val password: String,
 )
 
 @Serializable
-data class VerifyCredentialsResponse(
+data class UserAuthResponse(
     val isValid: Boolean,
     val errors: List<String>,
+    val userId: Int?,
 )
 
-fun VerifyCredentialsRequest.toService(): UserCredentials = UserCredentials(
-    login = login,
+fun GetUserAuthInfoRequest.toService(): UserCredentials = UserCredentials(
+    login = UserLogin(login),
     password = password,
 )
 
-fun UserCredentialsValidation.toResponse(): VerifyCredentialsResponse = when(this) {
-    is UserCredentialsValidation.Invalid -> VerifyCredentialsResponse(
+fun UserAuthInfo.toResponse(): UserAuthResponse = when(this) {
+    is UserAuthInfo.Invalid -> UserAuthResponse(
         isValid = false,
-        errors = errors
+        errors = errors,
+        userId = null,
     )
-    UserCredentialsValidation.Valid -> VerifyCredentialsResponse(
+    is UserAuthInfo.Success -> UserAuthResponse(
         isValid = true,
-        errors = emptyList()
+        errors = emptyList(),
+        userId = userId.id,
     )
 }
