@@ -8,13 +8,27 @@ metadata:
 data:
   prometheus.yml: |-
     global:
-      scrape_interval: 15s
+      scrape_interval: 30s
       evaluation_interval: 15s
     scrape_configs:
+      - job_name: 'kube-state-job'
+        scrape_interval: 60s
+        kubernetes_sd_configs:
+          - role: endpoints
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_endpoints_name]
+          regex: 'kube-state-metrics'
+          action: keep
+        - source_labels: [__meta_kubernetes_endpoints_label_app_kubernetes_io_component]
+          regex: 'exporter'
+          action: keep
       - job_name: 'node-exporter-job'
         kubernetes_sd_configs:
           - role: endpoints
         relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_host_ip]
+          action: replace
+          target_label: host_ip
         - source_labels: [__meta_kubernetes_endpoints_name]
           regex: 'node-exporter'
           action: keep
@@ -97,7 +111,6 @@ spec:
             - "--storage.tsdb.retention.time=12h"
             - "--config.file=/etc/prometheus/prometheus.yml"
             - "--storage.tsdb.path=/prometheus/"
-            - "--log.level=debug"
           ports:
             - containerPort: 9090
           volumeMounts:
