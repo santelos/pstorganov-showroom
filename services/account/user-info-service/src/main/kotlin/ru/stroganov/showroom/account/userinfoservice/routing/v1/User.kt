@@ -7,8 +7,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.util.*
 import ru.stroganov.showroom.account.userinfoservice.common.RoleRule
+import ru.stroganov.showroom.account.userinfoservice.common.pathAuthorize
 import ru.stroganov.showroom.account.userinfoservice.common.roleAuthorize
 import ru.stroganov.showroom.account.userinfoservice.config.principalToRolesMapping
+import ru.stroganov.showroom.account.userinfoservice.config.principalToUserId
 import ru.stroganov.showroom.account.userinfoservice.routing.v1.model.*
 import ru.stroganov.showroom.account.userinfoservice.service.UserService
 import ru.stroganov.showroom.account.userinfoservice.service.UserServiceObject
@@ -17,7 +19,7 @@ fun Application.userModule(userService: UserService = UserServiceObject) {
     routing {
         authenticate("main") {
             route("/v1/user") {
-                route("/{id}") {
+                pathAuthorize("/{id}", ::principalToUserId) {
                     roleAuthorize(rule = RoleRule.HasRoles(setOf("user:GetInfo")), ::principalToRolesMapping) {
                         get("/info") {
                             val request = UserIdRequest(call.parameters.getOrFail("id"))

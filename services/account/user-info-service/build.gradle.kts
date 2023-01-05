@@ -36,6 +36,8 @@ dependencies {
     // Logger
     val logbackVersion: String by project
     implementation("ch.qos.logback", "logback-classic", logbackVersion)
+    val kotlinLoggingVersion: String by project
+    implementation("io.github.microutils:kotlin-logging:${kotlinLoggingVersion}")
 
     // Konform
     val konformVersion: String by project
