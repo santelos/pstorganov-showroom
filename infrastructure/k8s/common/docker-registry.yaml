@@ -1,16 +1,25 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/instance: docker-registry
+    app.kubernetes.io/name: docker-registry
+  name: docker-registry
+---
+apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: hydra-db
+  name: docker-registry
+  namespace: docker-registry
 spec:
   capacity:
-    storage: 100Gi
+    storage: 50Gi
   volumeMode: Filesystem
   accessModes:
   - ReadWriteOnce
   storageClassName: local-storage
   local:
-    path: /mnt/md0/hydra-db
+    path: /mnt/md0/docker-registry
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -23,54 +32,52 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: hydra-db
+  name: docker-registry
+  namespace: docker-registry
 spec:
   replicas: 1
-  serviceName: hydra-db
+  serviceName: docker-registry
   selector:
     matchLabels:
-      app: hydra-db
+      app: docker-registry
   template:
     metadata:
       labels:
-        app: hydra-db
+        app: docker-registry
     spec:
       containers:
-        - name: hydra-db
-          image: postgres:14
+        - name: docker-registry
+          image: registry:2
           imagePullPolicy: "IfNotPresent"
           ports:
-            - containerPort: 5432
-          envFrom:
-            - secretRef:
-                name: hydra-db
+            - containerPort: 5000
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: hydra-db-volume-claim
-              subPath: postgres-data
+            - mountPath: /var/lib/registry
+              name: docker-registry-volume-claim
   volumeClaimTemplates:
     - metadata:
-        name: hydra-db-volume-claim
+        name: docker-registry-volume-claim
         labels:
-          app: hydra-db
+          app: docker-registry
       spec:
         storageClassName: local-storage
         accessModes:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 100Gi
+            storage: 50Gi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: hydra-db
+  name: docker-registry
   labels:
-    app: hydra-db
+    app: docker-registry
+  namespace: docker-registry
 spec:
   selector:
-    app: hydra-db
+    app: docker-registry
   ports:
   - protocol: TCP
-    port: 5432
-    targetPort: 5432
+    port: 5000
+    targetPort: 5000

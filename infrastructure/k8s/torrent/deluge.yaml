@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/instance: torrent
+    app.kubernetes.io/name: torrent
+  name: torrent
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: torrent
+  name: deluge
+spec:
+  capacity:
+    storage: 4Ti
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: local-storage
+  local:
+    path: /mnt/md0/torrent
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - pstroganov
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: torrent
+  name: deluge
+  labels:
+    app: deluge
+data:
+  PUID: "1000"
+  PGID: "1000"
+  TZ: "Etc/UTC"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: torrent
+  name: deluge
+spec:
+  replicas: 1
+  serviceName: deluge
+  selector:
+    matchLabels:
+      app: deluge
+  template:
+    metadata:
+      labels:
+        app: deluge
+    spec:
+      containers:
+      - name: deluge
+        image: lscr.io/linuxserver/deluge:latest
+        ports:
+        - containerPort: 8112
+        - containerPort: 6881
+        - containerPort: 6881
+          protocol: UDP
+        envFrom:
+          - configMapRef:
+              name: deluge
+        volumeMounts:
+          - mountPath: /downloads
+            name: deluge-volume-claim
+            subPath: downloads
+  volumeClaimTemplates:
+    - metadata:
+        name: deluge-volume-claim
+        labels:
+          app: deluge
+      spec:
+        storageClassName: local-storage
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 4Ti
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: torrent
+  name: deluge
+spec:
+  selector:
+    app: deluge
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8112
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: torrent
+  name: deluge
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - "*.santelos.com"
+    secretName: santelos-cert
+  rules:
+  - host: deluge.santelos.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: deluge
+            port:
+              number: 80
