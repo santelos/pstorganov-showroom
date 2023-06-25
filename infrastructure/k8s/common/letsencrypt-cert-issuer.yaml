@@ -1,0 +1,18 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: petr.stroganov@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt
+    solvers:
+      - dns01:
+          route53:
+            region: ap-northeast-1
+            accessKeyID: AKIASLQSMLHRDJUVHZHV
+            secretAccessKeySecretRef:
+              name: acme-route53-credentials-secret
+              key: secret-access-key
