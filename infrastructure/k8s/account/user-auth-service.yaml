@@ -1,18 +1,32 @@
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: user-auth-service
+#   namespace: account
+#   labels:
+#     app: user-auth-service
+# type: Opaque
+# data:
+#   OAUTH2__MAIN__CLIENT_ID: ""
+#   OAUTH2__MAIN__CLIENT_SECRET: ""
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: user-auth-service
+  namespace: account
   labels:
     app: user-auth-service
 data:
   OAUTH2__ADMIN_URL: "http://hydra:4445"
-  OAUTH2__PUBLIC_URL: "https://id.santelos.com/o"
+  OAUTH2__PUBLIC_URL: "http://hydra:4444"
   USER_INFO_SERVICE__URL: "http://user-info-service"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-auth-service
+  namespace: account
   labels:
     app: user-auth-service
 spec:
@@ -30,7 +44,7 @@ spec:
     spec:
       containers:
       - name: user-auth-service
-        image: 162173573602.dkr.ecr.ap-northeast-1.amazonaws.com/user-auth-service
+        image: docker.santelos.com/user-auth-service
         ports:
         - containerPort: 80
         - containerPort: 5005
@@ -39,11 +53,14 @@ spec:
               name: user-auth-service
           - secretRef:
               name: user-auth-service
+      imagePullSecrets:
+        - name: regcred
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: user-auth-service
+  namespace: account
 spec:
   selector:
     app: user-auth-service
@@ -56,10 +73,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: user-auth-service
+  namespace: account
   annotations:
-    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - "id.santelos.com"
+    secretName: id-santelos-cert
   rules:
   - host: id.santelos.com
     http:

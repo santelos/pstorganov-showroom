@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  namespace: main
   labels:
     app: frontend
 spec:
@@ -16,15 +17,18 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: 162173573602.dkr.ecr.ap-northeast-1.amazonaws.com/frontend
+        image: docker.santelos.com/frontend
         imagePullPolicy: Always
         ports:
         - containerPort: 80
+      imagePullSecrets:
+        - name: regcred
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: frontend
+  namespace: main
 spec:
   selector:
     app: frontend
@@ -37,10 +41,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: frontend
+  namespace: main
   annotations:
-    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - "santelos.com"
+    secretName: santelos-cert
   rules:
   - host: santelos.com
     http:
