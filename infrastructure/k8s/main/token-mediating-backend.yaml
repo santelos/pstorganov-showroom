@@ -1,11 +1,25 @@
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: token-mediating-backend
+#   namespace: main
+#   labels:
+#     app: token-mediating-backend
+# type: Opaque
+# data:
+#   OAUTH2__CLIENT_ID: ""
+#   OAUTH2__CLIENT_SECRET: ""
+# ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: token-mediating-backend
+  namespace: main
   labels:
     app: token-mediating-backend
 data:
   OAUTH2__PROVIDER_URL: "https://id.santelos.com/o"
+  OAUTH2__PROVIDER_INTERNAL_URL: "http://hydra.account.svc.cluster.local:4444"
   OAUTH2__CALLBACK_URL: "https://santelos.com/o"
   SUCCESS_REDIRECT: "https://santelos.com"
 ---
@@ -13,6 +27,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: token-mediating-backend
+  namespace: main
   labels:
     app: token-mediating-backend
 spec:
@@ -30,7 +45,7 @@ spec:
     spec:
       containers:
       - name: token-mediating-backend
-        image: 162173573602.dkr.ecr.ap-northeast-1.amazonaws.com/token-mediating-backend
+        image: docker.santelos.com/token-mediating-backend
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -40,11 +55,14 @@ spec:
               name: token-mediating-backend
           - secretRef:
               name: token-mediating-backend
+      imagePullSecrets:
+        - name: regcred
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: token-mediating-backend
+  namespace: main
 spec:
   selector:
     app: token-mediating-backend
@@ -57,11 +75,17 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: token-mediating-backend
+  namespace: main
   annotations:
-    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/x-forwarded-prefix: "/o"
 spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - "santelos.com"
+    secretName: santelos-cert
   rules:
   - host: santelos.com
     http:

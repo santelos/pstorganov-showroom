@@ -1,16 +1,30 @@
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: hydra-migration
+#   namespace: account
+#   labels:
+#     app: hydra-migration
+# type: Opaque
+# data:
+#   DSN: ""
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: hydra-migration
+  namespace: account
 spec:
   template:
     spec:
       containers:
       - name: hydra-migration
-        image: 162173573602.dkr.ecr.ap-northeast-1.amazonaws.com/hydra
+        image: docker.santelos.com/hydra
         command: ["hydra", "migrate", "sql", "-e", "--yes"]
         envFrom:
           - secretRef:
               name: hydra-migration
+      imagePullSecrets:
+        - name: regcred
       restartPolicy: Never
   backoffLimit: 1

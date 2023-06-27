@@ -5,6 +5,36 @@ metadata:
     app.kubernetes.io/instance: docker-registry
     app.kubernetes.io/name: docker-registry
   name: docker-registry
+# ---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: basic-auth
+#   namespace: docker-registry
+# type: Opaque
+# data:
+#   htpasswd: ""
+# ---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: http-secret
+#   namespace: docker-registry
+# type: Opaque
+# data:
+#   REGISTRY_HTTP_SECRET: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docker-registry
+  namespace: docker-registry
+  labels:
+    app: docker-registry
+data:
+  REGISTRY_AUTH: htpasswd
+  REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+  REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -54,6 +84,18 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/registry
               name: docker-registry-volume-claim
+            - mountPath: /auth
+              name: basic-auth
+              readOnly: true
+          envFrom:
+            - configMapRef:
+                name: docker-registry
+            - secretRef:
+                name: http-secret
+      volumes:
+        - name: basic-auth
+          secret:
+            secretName: basic-auth
   volumeClaimTemplates:
     - metadata:
         name: docker-registry-volume-claim
@@ -79,5 +121,31 @@ spec:
     app: docker-registry
   ports:
   - protocol: TCP
-    port: 5000
+    port: 80
     targetPort: 5000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: docker-registry
+  name: docker-registry
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - "*.santelos.com"
+    secretName: santelos-cert
+  rules:
+  - host: docker.santelos.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: docker-registry
+            port:
+              number: 80

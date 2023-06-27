@@ -9,9 +9,7 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
-import ru.stroganov.oauth2.tokenmediatingbackend.OAUTH2__CALLBACK_URL
-import ru.stroganov.oauth2.tokenmediatingbackend.OAUTH2__CLIENT_ID
-import ru.stroganov.oauth2.tokenmediatingbackend.OAUTH2__CLIENT_SECRET
+import ru.stroganov.oauth2.tokenmediatingbackend.*
 import ru.stroganov.oauth2.tokenmediatingbackend.OAUTH2__PROVIDER_URL
 import ru.stroganov.oauth2.tokenmediatingbackend.model.UserSession
 
@@ -32,7 +30,7 @@ fun Application.authConfigModule(oauth2HttpClient: HttpClient = oauth2flowHttpCl
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "id-santelos",
                     authorizeUrl = "$OAUTH2__PROVIDER_URL/oauth2/auth",
-                    accessTokenUrl = "$OAUTH2__PROVIDER_URL/oauth2/token",
+                    accessTokenUrl = "$OAUTH2__PROVIDER_INTERNAL_URL/oauth2/token",
                     requestMethod = HttpMethod.Post,
                     clientId = OAUTH2__CLIENT_ID,
                     clientSecret = OAUTH2__CLIENT_SECRET,
