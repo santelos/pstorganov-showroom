@@ -1,15 +1,17 @@
-FROM openjdk:11 as build
+FROM openjdk:17 as build
 WORKDIR /build
+
+RUN microdnf install findutils
 
 COPY gradlew /build/graldew
 COPY gradle /build/gradle
 COPY *gradle* /build/
-RUN ./gradlew clean --no-daemon
+RUN ./gradlew dependencies --no-daemon
 
 COPY src /build/src
 RUN ./gradlew buildFatJar --no-daemon
 
-FROM openjdk:11-slim
+FROM openjdk:17-slim
 WORKDIR /app
 COPY --from=build /build/build/libs/app.jar /app/app.jar
 
