@@ -10,7 +10,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import ru.stroganov.oauth2.tokenmediatingbackend.*
-import ru.stroganov.oauth2.tokenmediatingbackend.OAUTH2__PROVIDER_URL
 import ru.stroganov.oauth2.tokenmediatingbackend.model.UserSession
 
 private val oauth2flowHttpClient = HttpClient(CIO) {
@@ -19,21 +18,24 @@ private val oauth2flowHttpClient = HttpClient(CIO) {
     }
 }
 
-fun Application.authConfigModule(oauth2HttpClient: HttpClient = oauth2flowHttpClient) {
+fun Application.authConfigModule(
+    oauth2Conf: AppConfig.Oauth2Config = appConfig.oauth2Config,
+    oauth2HttpClient: HttpClient = oauth2flowHttpClient
+) {
     install(Sessions) {
         cookie<UserSession>("SESSION", SessionStorageMemory())
     }
     install(Authentication) {
         oauth("oauth2") {
-            urlProvider = { "$OAUTH2__CALLBACK_URL/callback" }
+            urlProvider = { "${oauth2Conf.callbackUrl}/callback" }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "id-santelos",
-                    authorizeUrl = "$OAUTH2__PROVIDER_URL/oauth2/auth",
-                    accessTokenUrl = "$OAUTH2__PROVIDER_INTERNAL_URL/oauth2/token",
+                    authorizeUrl = "${oauth2Conf.providerUrl}/oauth2/auth",
+                    accessTokenUrl = "${oauth2Conf.providerInternalUrl}/oauth2/token",
                     requestMethod = HttpMethod.Post,
-                    clientId = OAUTH2__CLIENT_ID,
-                    clientSecret = OAUTH2__CLIENT_SECRET,
+                    clientId = oauth2Conf.clientId,
+                    clientSecret = oauth2Conf.clientSecret,
                     defaultScopes = listOf("asd:test")
 
                 )
@@ -42,11 +44,7 @@ fun Application.authConfigModule(oauth2HttpClient: HttpClient = oauth2flowHttpCl
         }
         session<UserSession>("session") {
             validate {
-                if (it.accessToken.isNotEmpty()) {
-                    it
-                } else {
-                    null
-                }
+                it.takeIf { us -> us.accessToken.isNotEmpty() }
             }
             challenge {
                 call.respond(HttpStatusCode.Unauthorized)
