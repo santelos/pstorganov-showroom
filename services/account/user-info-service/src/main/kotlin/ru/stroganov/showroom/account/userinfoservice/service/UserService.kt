@@ -39,10 +39,13 @@ interface UserService {
     suspend fun getUserAuthInfo(credentials: UserCredentials): UserAuthInfo
 }
 
-internal object UserServiceObject : UserService by UserServiceImpl()
+internal object UserServiceObject : UserService by UserServiceImpl(
+    usersRepo = UsersRepoObject,
+    hashing = HashingObject,
+)
 internal class UserServiceImpl(
-    private val usersRepo: UsersRepo = UsersRepoObject,
-    private val hashing: Hashing = HashingObject,
+    private val usersRepo: UsersRepo,
+    private val hashing: Hashing,
 ) : UserService {
     override suspend fun createUser(newUser: NewUser): UserId {
         val passwordHash = hashing.hash(newUser.password)

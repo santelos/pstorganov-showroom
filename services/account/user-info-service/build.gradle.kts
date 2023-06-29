@@ -9,7 +9,6 @@ plugins {
 
 group = "ru.stroganov.showroom.account.userinfoservice"
 version = "0.0.1"
-java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
@@ -45,7 +44,7 @@ dependencies {
 
     // DB
     val r2dbcPostgresDriver: String by project
-    implementation("io.r2dbc", "r2dbc-postgresql", r2dbcPostgresDriver)
+    implementation("org.postgresql", "r2dbc-postgresql", r2dbcPostgresDriver)
     val flywayVersion: String by project
     implementation("org.flywaydb", "flyway-core", flywayVersion)
     val jdbcPostgresDriver: String by project
@@ -59,9 +58,8 @@ dependencies {
     val kotestVersion: String by project
     testImplementation("io.kotest", "kotest-runner-junit5", kotestVersion)
     testImplementation("io.kotest", "kotest-assertions-core", kotestVersion)
-    testImplementation("io.kotest", "kotest-assertions-core", kotestVersion)
     val kotestKtorVersion: String by project
-    testImplementation("io.kotest.extensions", "kotest-assertions-ktor", kotestKtorVersion)
+    testImplementation("io.kotest", "kotest-assertions-ktor", kotestKtorVersion)
     val kotestTestcontainersVersion: String by project
     testImplementation("io.kotest.extensions", "kotest-extensions-testcontainers", kotestTestcontainersVersion)
     val testContainersVersion: String by project
@@ -77,6 +75,10 @@ application {
     mainClass.set("ru.stroganov.showroom.account.userinfoservice.AppKt")
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 ktor {
     fatJar {
         archiveFileName.set("app.jar")
@@ -85,13 +87,6 @@ ktor {
 
 ktlint {
     disabledRules.set(setOf("no-wildcard-imports"))
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
-    }
 }
 
 tasks.withType<Test>().configureEach {

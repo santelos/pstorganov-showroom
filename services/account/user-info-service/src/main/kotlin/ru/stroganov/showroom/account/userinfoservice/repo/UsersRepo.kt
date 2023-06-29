@@ -40,9 +40,11 @@ interface UsersRepo {
     suspend fun createUser(newUser: CreateUserRepoRequest): UserId
 }
 
-internal object UsersRepoObject : UsersRepo by UsersRepoImpl()
+internal object UsersRepoObject : UsersRepo by UsersRepoImpl(
+    connectionFactory = r2dbcConnectionFactory
+)
 internal class UsersRepoImpl(
-    private val connectionFactory: ConnectionFactory = r2dbcConnectionFactory
+    private val connectionFactory: ConnectionFactory
 ) : UsersRepo {
 
     private val getUserInfoQuery = """

@@ -6,9 +6,11 @@ interface FlywayRepo {
     fun applyMigration()
 }
 
-internal object FlywayRepoObject : FlywayRepo by FlywayRepoImpl()
+internal object FlywayRepoObject : FlywayRepo by FlywayRepoImpl(
+    flyway = flywayLoaded
+)
 internal class FlywayRepoImpl(
-    private val flyway: Flyway = flywayLoaded
+    private val flyway: Flyway
 ) : FlywayRepo {
 
     override fun applyMigration() {

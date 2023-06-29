@@ -6,7 +6,8 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import ru.stroganov.showroom.account.userinfoservice.OAUTH2__ADMIN_URI
+import ru.stroganov.showroom.account.userinfoservice.AppConfig
+import ru.stroganov.showroom.account.userinfoservice.appConfig
 import ru.stroganov.showroom.account.userinfoservice.common.OAuth2Principal
 import ru.stroganov.showroom.account.userinfoservice.common.oauth2ResourceServer
 
@@ -16,11 +17,13 @@ private val oauth2HttpClient = HttpClient(CIO) {
     }
 }
 
-fun Application.authConfig() {
+fun Application.authConfig(
+    oauth2Config: AppConfig.Oauth2Config = appConfig.oauth2
+) {
     install(Authentication) {
         oauth2ResourceServer("main") {
             client = oauth2HttpClient
-            tokenEndpoint = "$OAUTH2__ADMIN_URI/oauth2/introspect"
+            tokenEndpoint = "${oauth2Config.adminUri}/oauth2/introspect"
         }
     }
 }
