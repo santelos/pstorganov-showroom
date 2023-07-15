@@ -29,6 +29,7 @@ dependencies {
     implementation("io.ktor", "ktor-server-auth", ktorVersion)
     implementation("io.ktor", "ktor-server-content-negotiation", ktorVersion)
     implementation("io.ktor", "ktor-server-call-logging", ktorVersion)
+    implementation("io.ktor", "ktor-server-status-pages", ktorVersion)
     implementation("io.ktor", "ktor-client-cio", ktorVersion)
     implementation("io.ktor", "ktor-client-content-negotiation", ktorVersion)
 
@@ -36,7 +37,7 @@ dependencies {
     val logbackVersion: String by project
     implementation("ch.qos.logback", "logback-classic", logbackVersion)
     val kotlinLoggingVersion: String by project
-    implementation("io.github.microutils:kotlin-logging:${kotlinLoggingVersion}")
+    implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
 
     // Test
     testImplementation(kotlin("test"))

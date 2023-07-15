@@ -3,7 +3,6 @@ package ru.stroganov.account.userauthservicek.service
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
-import kotlin.test.*
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.assertThrows
@@ -12,6 +11,7 @@ import ru.stroganov.account.userauthservicek.common.BaseException.RepoException.
 import ru.stroganov.account.userauthservicek.repo.AcceptConsentRepoResponse
 import ru.stroganov.account.userauthservicek.repo.GetConsentRepoResponse
 import ru.stroganov.account.userauthservicek.repo.HydraAdminRepo
+import kotlin.test.*
 
 internal class ConsentServiceImplTest {
 
@@ -29,8 +29,13 @@ internal class ConsentServiceImplTest {
         )
         coEvery { hydraRepo.getConsent(any()) } returns getConsentResponse
 
+        val expected = GetConsentResponse(
+            getConsentResponse.requestedAccessTokenAudience,
+            getConsentResponse.requestedScope,
+            getConsentResponse.subject
+        )
         val actual = runBlocking { consentService.getConsent(consentChallenge) }
-        assertEquals(getConsentResponse, actual)
+        assertEquals(expected, actual)
         coVerify(exactly = 1) { hydraRepo.getConsent(consentChallenge) }
         confirmVerified(hydraRepo)
     }

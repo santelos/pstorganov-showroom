@@ -4,9 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ru.stroganov.account.userauthservicek.common.BaseException
 import ru.stroganov.account.userauthservicek.common.BaseException.RepoException.CreateUserException
 import ru.stroganov.account.userauthservicek.common.BaseException.RepoException.GetUserInfoException
 import ru.stroganov.account.userauthservicek.config.AppConfig
@@ -17,25 +15,25 @@ import ru.stroganov.account.userauthservicek.repo.config.httpClient
 data class UserInfoServiceRepoCreateUserRequest(
     val login: String,
     val password: String,
-    val name: String,
+    val name: String
 )
 
 @Serializable
 data class UserInfoServiceRepoCreateUserResponse(
-    val userId: Int,
+    val userId: Int
 )
 
 @Serializable
 data class UserInfoServiceRepoGetUserAuthInfoRequest(
     val login: String,
-    val password: String,
+    val password: String
 )
 
 @Serializable
 data class UserInfoServiceRepoUserAuthInfoResponseInternal(
     val isValid: Boolean,
     val errors: List<String>,
-    val userId: Int,
+    val userId: Int
 )
 sealed interface UserInfoServiceRepoUserAuthInfoResponse {
     data class Success(val userId: Int) : UserInfoServiceRepoUserAuthInfoResponse
@@ -45,10 +43,10 @@ sealed interface UserInfoServiceRepoUserAuthInfoResponse {
 interface UserInfoServiceRepo {
     suspend fun createUser(
         request: UserInfoServiceRepoCreateUserRequest
-    ) : UserInfoServiceRepoCreateUserResponse
+    ): UserInfoServiceRepoCreateUserResponse
     suspend fun getUserAuthInfo(
         request: UserInfoServiceRepoGetUserAuthInfoRequest
-    ) : UserInfoServiceRepoUserAuthInfoResponse
+    ): UserInfoServiceRepoUserAuthInfoResponse
 }
 
 val userInfoServiceRepoImpl: UserInfoServiceRepo by lazy {
@@ -64,14 +62,13 @@ internal class UserInfoServiceRepoImpl(
 
     override suspend fun createUser(
         request: UserInfoServiceRepoCreateUserRequest
-    ) : UserInfoServiceRepoCreateUserResponse = runCatching {
+    ): UserInfoServiceRepoCreateUserResponse = runCatching {
         client
             .post("${config.host}/v1/user") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }.body<UserInfoServiceRepoCreateUserResponse>()
     }.getOrElse { throw CreateUserException(request.login, it) }
-
 
     override suspend fun getUserAuthInfo(
         request: UserInfoServiceRepoGetUserAuthInfoRequest
@@ -83,8 +80,11 @@ internal class UserInfoServiceRepoImpl(
             }
             .body<UserInfoServiceRepoUserAuthInfoResponseInternal>()
             .let {
-                if (it.isValid) UserInfoServiceRepoUserAuthInfoResponse.Success(it.userId)
-                else UserInfoServiceRepoUserAuthInfoResponse.Invalid(it.errors)
+                if (it.isValid) {
+                    UserInfoServiceRepoUserAuthInfoResponse.Success(it.userId)
+                } else {
+                    UserInfoServiceRepoUserAuthInfoResponse.Invalid(it.errors)
+                }
             }
     }.getOrElse { throw GetUserInfoException(request.login, it) }
 }

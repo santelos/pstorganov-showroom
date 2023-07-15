@@ -23,7 +23,7 @@ val remoteAuthenticationImpl: RemoteAuthentication by lazy {
 internal class RemoteAuthenticationImpl(
     private val userInfoServiceRepo: UserInfoServiceRepo
 ) : RemoteAuthentication {
-    private val log = KotlinLogging.logger {  }
+    private val log = KotlinLogging.logger { }
 
     override suspend fun getUserAuthInfo(login: String, password: String): UserAuthInfo {
         val request = UserInfoServiceRepoGetUserAuthInfoRequest(login, password)

@@ -1,7 +1,5 @@
 plugins {
     kotlin("jvm")
-    kotlin("plugin.serialization")
-    id("io.ktor.plugin")
     id("org.jlleitschuh.gradle.ktlint")
 }
 
@@ -24,7 +22,7 @@ dependencies {
     val logbackVersion: String by project
     implementation("ch.qos.logback", "logback-classic", logbackVersion)
     val kotlinLoggingVersion: String by project
-    implementation("io.github.microutils:kotlin-logging:${kotlinLoggingVersion}")
+    implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
 
     // Test
     testImplementation(kotlin("test"))

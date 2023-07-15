@@ -13,9 +13,9 @@ val loginServiceImpl: LoginService by lazy {
     LoginServiceImpl(hydraAdminRepoImpl)
 }
 internal class LoginServiceImpl(
-    private val hydraAdminRepo: HydraAdminRepo,
+    private val hydraAdminRepo: HydraAdminRepo
 ) : LoginService {
-    private val log = KotlinLogging.logger {  }
+    private val log = KotlinLogging.logger { }
 
     override suspend fun acceptLogin(user: UserId, loginRequest: String): String {
         log.info { "Accepting login request. Request: [$loginRequest]" }

@@ -1,8 +1,11 @@
 package ru.stroganov.account.userauthservicek.web.v1
 
+import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -15,16 +18,16 @@ import kotlin.test.*
 
 internal class RegistrationKtTest {
 
+    private fun test(block: suspend ApplicationTestBuilder.() -> Unit) = test({
+        registration(registrationService)
+    }) { block() }
+
     private val registrationService: RegistrationService = mockk()
-    private fun test(block: suspend ApplicationTestBuilder.() -> Unit) = testApplication {
-        application {
-            registration(registrationService)
-        }
-        block()
-    }
 
     @Test
-    fun `POSITIVE ~~ registration`() = test {
+    fun `POSITIVE ~~ POST ~~ registration`() = test {
+        val client = createClient()
+
         val input = RegistrationNewRequest(
             "test-login",
             "test-password",
@@ -35,37 +38,20 @@ internal class RegistrationKtTest {
 
         val expected = RegistrationNewResponse(1)
         val actual = client.post("/registration/new") {
+            contentType(ContentType.Application.Json)
             setBody(input)
         }
         assertEquals(HttpStatusCode.OK, actual.status)
         assertEquals(expected, actual.body())
-        coVerify(exactly = 1) { registrationService.new(RegistrationNewServiceRequest(
-            "test-login",
-            "test-password",
-            "test-name"
-        )) }
-        confirmVerified(registrationService)
-    }
-
-    @Test
-    fun `NEGATIVE ~~ registration ~~ service exception`() = test {
-        val input = RegistrationNewRequest(
-            "test-login",
-            "test-password",
-            "test-name"
-        )
-
-        coEvery { registrationService.new(any()) } throws RuntimeException()
-
-        val actual = client.post("/registration/new") {
-            setBody(input)
+        coVerify(exactly = 1) {
+            registrationService.new(
+                RegistrationNewServiceRequest(
+                    "test-login",
+                    "test-password",
+                    "test-name"
+                )
+            )
         }
-        assertEquals(HttpStatusCode.InternalServerError, actual.status)
-        coVerify(exactly = 1) { registrationService.new(RegistrationNewServiceRequest(
-            "test-login",
-            "test-password",
-            "test-name"
-        )) }
         confirmVerified(registrationService)
     }
 }

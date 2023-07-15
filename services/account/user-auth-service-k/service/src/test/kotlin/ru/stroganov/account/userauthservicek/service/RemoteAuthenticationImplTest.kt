@@ -6,7 +6,6 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.assertThrows
-import ru.stroganov.account.userauthservicek.common.BaseException
 import ru.stroganov.account.userauthservicek.common.BaseException.RepoException.GetUserInfoException
 import ru.stroganov.account.userauthservicek.common.UserId
 import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepo

@@ -13,12 +13,12 @@ import ru.stroganov.account.userauthservicek.service.registrationServiceImpl
 data class RegistrationNewRequest(
     val login: String,
     val password: String,
-    val name: String,
+    val name: String
 )
 
 @Serializable
 data class RegistrationNewResponse(
-    val id: Int,
+    val id: Int
 )
 
 fun Application.registration(
@@ -27,11 +27,13 @@ fun Application.registration(
     routing {
         post("/registration/new") {
             val request = call.receive<RegistrationNewRequest>()
-            val response = registrationService.new(RegistrationNewServiceRequest(
-                request.login,
-                request.password,
-                request.name
-            ))
+            val response = registrationService.new(
+                RegistrationNewServiceRequest(
+                    request.login,
+                    request.password,
+                    request.name
+                )
+            )
             call.respond(RegistrationNewResponse(response.id))
         }
     }

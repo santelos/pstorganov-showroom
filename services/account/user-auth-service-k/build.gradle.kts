@@ -13,11 +13,13 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":web"))
+//    implementation(project(":config"))
+//    implementation(project(":common"))
+//    implementation(project(":web"))
 }
 
 application {
-    mainClass.set("ru.stroganov.showroom.account.userinfoservicek.AppKt")
+    mainClass.set("ru.stroganov.account.userauthservicek.AppKt")
 }
 
 kotlin {

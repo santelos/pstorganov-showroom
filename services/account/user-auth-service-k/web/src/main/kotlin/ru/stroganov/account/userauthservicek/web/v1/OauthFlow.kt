@@ -15,30 +15,30 @@ import ru.stroganov.account.userauthservicek.service.loginServiceImpl
 import ru.stroganov.account.userauthservicek.web.config.BASIC_AUTH
 
 @Serializable
-data class AcceptLoginResponse(
-    val redirectTo: String,
+data class AcceptLoginWebResponse(
+    val redirectTo: String
 )
 
 @Serializable
-data class AcceptConsentPostRequest(
+data class AcceptConsentPostWebRequest(
     val scope: List<String>
 )
 
 @Serializable
-data class AcceptConsentResponse(
-    val redirectTo: String,
+data class AcceptConsentWebResponse(
+    val redirectTo: String
 )
 
 @Serializable
-data class GetConsentResponse(
+data class GetConsentWebResponse(
     val requestedAccessTokenAudience: List<String>?,
     val requestedScope: List<String>?,
-    val subject: String?,
+    val subject: String?
 )
 
 internal fun Application.oauthFlow(
     loginService: LoginService = loginServiceImpl,
-    consentService: ConsentService = consentServiceImpl,
+    consentService: ConsentService = consentServiceImpl
 ) {
     routing {
         authenticate(BASIC_AUTH) {
@@ -46,27 +46,29 @@ internal fun Application.oauthFlow(
                 val loginChallenge = call.parameters.getOrFail("login_challenge")
                 val userId = UserId(call.principal<UserIdPrincipal>()!!.name.toInt())
                 val response = loginService.acceptLogin(userId, loginChallenge)
-                call.respond(AcceptLoginResponse(response))
+                call.respond(AcceptLoginWebResponse(response))
             }
             get("/accept-consent") {
                 val consentChallenge = call.parameters.getOrFail("consent_challenge")
                 val response = consentService.acceptConsent(consentChallenge, emptyList())
-                call.respond(AcceptConsentResponse(response))
+                call.respond(AcceptConsentWebResponse(response))
             }
             post("/accept-consent") {
                 val consentChallenge = call.parameters.getOrFail("consent_challenge")
-                val requestBody = call.receive<AcceptConsentPostRequest>()
+                val requestBody = call.receive<AcceptConsentPostWebRequest>()
                 val response = consentService.acceptConsent(consentChallenge, requestBody.scope)
-                call.respond(AcceptConsentResponse(response))
+                call.respond(AcceptConsentWebResponse(response))
             }
             get("/get-consent") {
                 val consentChallenge = call.parameters.getOrFail("consent_challenge")
                 val response = consentService.getConsent(consentChallenge)
-                call.respond(GetConsentResponse(
-                    response.requestedAccessTokenAudience,
-                    response.requestedScope,
-                    response.subject,
-                ))
+                call.respond(
+                    GetConsentWebResponse(
+                        response.requestedAccessTokenAudience,
+                        response.requestedScope,
+                        response.subject
+                    )
+                )
             }
         }
     }

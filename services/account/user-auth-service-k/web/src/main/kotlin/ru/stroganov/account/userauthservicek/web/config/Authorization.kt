@@ -11,7 +11,7 @@ import io.ktor.util.*
 import io.ktor.util.pipeline.*
 import mu.KotlinLogging
 
-private val log = KotlinLogging.logger {  }
+private val log = KotlinLogging.logger { }
 
 class AuthorizationInterceptorsConfig {
     var interceptors: List<AuthorizationInterceptor> = emptyList()
@@ -49,7 +49,7 @@ private fun ApplicationCall.authorized(auth: AuthorizationInterceptor, principal
     if (verifiable == null) {
         log.trace { "Authorization verifiable is null, returning FALSE" }
         return false
-    } else if(!auth.isVerified(this, verifiable)) {
+    } else if (!auth.isVerified(this, verifiable)) {
         log.trace { "Authorization unsuccessful, executing FailureHandler, returning FALSE" }
         auth.failureHandler(this, verifiable)
         return false
@@ -63,22 +63,25 @@ fun Route.roleAuthorize(
     build: Route.() -> Unit
 ): Route {
     val authorizedRoute = createChild(RoleBasedAuthorizationRouteSelector())
-    return authorizedRoute.authorize(AuthorizationInterceptor(
-        name = "RoleAuthorization",
-        principalToVerifiable = mapToRoles,
-        isVerified = { rule.authorized(it) },
-        failureHandler = {
-            log.debug { "Authorization did not pass role verification. Principal role: [$it]" }
-        }
-    ), build)
+    return authorizedRoute.authorize(
+        AuthorizationInterceptor(
+            name = "RoleAuthorization",
+            principalToVerifiable = mapToRoles,
+            isVerified = { rule.authorized(it) },
+            failureHandler = {
+                log.debug { "Authorization did not pass role verification. Principal role: [$it]" }
+            }
+        ),
+        build
+    )
 }
 
 sealed interface RoleRule {
     object DenyAll : RoleRule
-    data class HasRoles(val roles: Set<String>): RoleRule
+    data class HasRoles(val roles: Set<String>) : RoleRule
 }
 
-private fun RoleRule.authorized(verifiable: Set<String>): Boolean = when(this) {
+private fun RoleRule.authorized(verifiable: Set<String>): Boolean = when (this) {
     RoleRule.DenyAll -> false
     is RoleRule.HasRoles -> roles.intersect(verifiable).isNotEmpty()
 }
@@ -92,24 +95,29 @@ fun Route.pathAuthorize(
     val parsedPathParam = RoutingPath.parse(pathVariable)
         .parts.single().value
         .removePrefix("{").removeSuffix("}")
-    return childRoute.authorize(AuthorizationInterceptor(
-        name = "PathVariableAuthorization",
-        principalToVerifiable = { mapTo(it)?.let(::setOf) },
-        isVerified = {
-            val resolvedPathParam = parameters.getOrFail(parsedPathParam)
-            log.trace { "Path var: [$resolvedPathParam]" }
-            it.contains(resolvedPathParam)
-        },
-        failureHandler = {
-            val resolvedPathParam = parameters.getOrFail(parsedPathParam)
+    return childRoute.authorize(
+        AuthorizationInterceptor(
+            name = "PathVariableAuthorization",
+            principalToVerifiable = { mapTo(it)?.let(::setOf) },
+            isVerified = {
+                val resolvedPathParam = parameters.getOrFail(parsedPathParam)
+                log.trace { "Path var: [$resolvedPathParam]" }
+                it.contains(resolvedPathParam)
+            },
+            failureHandler = {
+                val resolvedPathParam = parameters.getOrFail(parsedPathParam)
 
-            log.debug { "Authorization did not pass path verification. " +
-                    "Path: [${request.path()}], " +
-                    "Variable: [$parsedPathParam]. " +
-                    "Required: [$resolvedPathParam], " +
-                    "Got: [$it]" }
-        }
-    ), build)
+                log.debug {
+                    "Authorization did not pass path verification. " +
+                        "Path: [${request.path()}], " +
+                        "Variable: [$parsedPathParam]. " +
+                        "Required: [$resolvedPathParam], " +
+                        "Got: [$it]"
+                }
+            }
+        ),
+        build
+    )
 }
 
 fun Route.authorize(authReg: AuthorizationInterceptor, build: Route.() -> Unit): Route {
@@ -133,7 +141,7 @@ data class AuthorizationInterceptor(
     val name: String,
     val principalToVerifiable: (Principal) -> Set<String>?,
     val isVerified: ApplicationCall.(Set<String>) -> Boolean,
-    val failureHandler: ApplicationCall.(Set<String>) -> Unit,
+    val failureHandler: ApplicationCall.(Set<String>) -> Unit
 )
 
 private val authorizationInterceptorAttributeKey =

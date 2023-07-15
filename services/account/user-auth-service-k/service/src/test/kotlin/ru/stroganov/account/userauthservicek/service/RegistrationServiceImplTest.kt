@@ -6,7 +6,6 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.assertThrows
-import ru.stroganov.account.userauthservicek.common.BaseException
 import ru.stroganov.account.userauthservicek.common.BaseException.RepoException.CreateUserException
 import ru.stroganov.account.userauthservicek.common.UserId
 import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepo
@@ -33,14 +32,17 @@ class RegistrationServiceImplTest {
         val expected = UserId(1)
         val actual = runBlocking { registrationService.new(input) }
         assertEquals(expected, actual)
-        coVerify(exactly = 1) { userServiceRepo.createUser(UserInfoServiceRepoCreateUserRequest(
-            "test-login",
-            "test-password",
-            "test-name"
-        )) }
+        coVerify(exactly = 1) {
+            userServiceRepo.createUser(
+                UserInfoServiceRepoCreateUserRequest(
+                    "test-login",
+                    "test-password",
+                    "test-name"
+                )
+            )
+        }
         confirmVerified(userServiceRepo)
     }
-
 
     @Test
     fun `NEGATIVE ~~ new ~~ repo throws exception`() {
@@ -57,11 +59,15 @@ class RegistrationServiceImplTest {
             runBlocking { registrationService.new(input) }
         }
         assertEquals(repoException, actual)
-        coVerify(exactly = 1) { userServiceRepo.createUser(UserInfoServiceRepoCreateUserRequest(
-            "test-login",
-            "test-password",
-            "test-name"
-        )) }
+        coVerify(exactly = 1) {
+            userServiceRepo.createUser(
+                UserInfoServiceRepoCreateUserRequest(
+                    "test-login",
+                    "test-password",
+                    "test-name"
+                )
+            )
+        }
         confirmVerified(userServiceRepo)
     }
 }

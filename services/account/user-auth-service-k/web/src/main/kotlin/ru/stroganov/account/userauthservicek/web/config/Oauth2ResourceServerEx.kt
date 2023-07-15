@@ -24,7 +24,7 @@ data class OAuth2Principal(
     val sub: String?,
     val aud: List<String>,
     val iss: String?,
-    val jti: String?,
+    val jti: String?
 ) : Principal
 
 fun AuthenticationConfig.oauth2ResourceServer(
@@ -35,14 +35,14 @@ fun AuthenticationConfig.oauth2ResourceServer(
     register(provider)
 }
 
-class OAuth2ResourceServerProvider(val config: Config): AuthenticationProvider(config) {
+class OAuth2ResourceServerProvider(val config: Config) : AuthenticationProvider(config) {
 
     override suspend fun onAuthenticate(context: AuthenticationContext) {
         val authHeaderValue = context.call.request.bearerHeaderValue()
         if (authHeaderValue == null) {
             context.error(OAuthKey, AuthenticationFailedCause.NoCredentials)
         } else {
-            when(val tokenIntrospection = tokenIntrospection(authHeaderValue, null)) {
+            when (val tokenIntrospection = tokenIntrospection(authHeaderValue, null)) {
                 is TokenIntrospectionResponse.Error ->
                     context.error(OAuthKey, tokenIntrospection.authenticationFailedCause())
                 is TokenIntrospectionResponse.Success ->
@@ -78,30 +78,33 @@ sealed interface TokenIntrospectionResponse {
         val sub: String? = null,
         @SerialName("token_type") val tokenType: String? = null,
         @SerialName("token_use") val tokenUse: String? = null,
-        val username: String? = null,
-    ): TokenIntrospectionResponse, Principal
+        val username: String? = null
+    ) : TokenIntrospectionResponse, Principal
+
     @Serializable
     data class Error(
         val error: String,
         val errorDebug: String,
         val errorDescription: String,
         val errorHint: String,
-        val statusCode: Int,
-    ): TokenIntrospectionResponse
+        val statusCode: Int
+    ) : TokenIntrospectionResponse
 }
 private suspend fun OAuth2ResourceServerProvider.tokenIntrospection(
     token: String,
-    scope: String?,
+    scope: String?
 ): TokenIntrospectionResponse {
     val request = Parameters.build {
         append("token", token)
         scope?.let { append("scope", scope) }
     }
     val httpResponse = config.client.post(config.tokenEndpoint) {
-        setBody(TextContent(
-            request.formUrlEncode(),
-            ContentType.Application.FormUrlEncoded
-        ))
+        setBody(
+            TextContent(
+                request.formUrlEncode(),
+                ContentType.Application.FormUrlEncoded
+            )
+        )
     }
     if (!httpResponse.status.isSuccess()) {
         return httpResponse.body<TokenIntrospectionResponse.Error>()
@@ -110,8 +113,11 @@ private suspend fun OAuth2ResourceServerProvider.tokenIntrospection(
 }
 
 private fun TokenIntrospectionResponse.Error.authenticationFailedCause(): AuthenticationFailedCause =
-    if (statusCode != 500) AuthenticationFailedCause.InvalidCredentials
-    else AuthenticationFailedCause.Error(errorDescription)
+    if (statusCode != 500) {
+        AuthenticationFailedCause.InvalidCredentials
+    } else {
+        AuthenticationFailedCause.Error(errorDescription)
+    }
 
 private fun TokenIntrospectionResponse.Success.principal(token: String): OAuth2Principal = OAuth2Principal(
     token = token,
@@ -126,7 +132,7 @@ private fun TokenIntrospectionResponse.Success.principal(token: String): OAuth2P
     sub = sub,
     aud = aud,
     iss = iss,
-    jti = null,
+    jti = null
 )
 
 private fun ApplicationRequest.bearerHeaderValue(): String? =
@@ -134,7 +140,9 @@ private fun ApplicationRequest.bearerHeaderValue(): String? =
         is HttpAuthHeader.Single -> {
             if (header.authScheme.startsWith("Bearer", ignoreCase = true)) {
                 header.blob
-            } else null
+            } else {
+                null
+            }
         }
         else -> null
     }

@@ -6,7 +6,9 @@ import sh.ory.hydra.api.AdminApi
 
 internal fun hydraClient(
     config: AppConfig.HydraClient
-): AdminApi = AdminApi(ApiClient().apply {
-    basePath = config.adminUrl
-    addDefaultHeader("Host", config.defaultHost)
-})
+): AdminApi = AdminApi(
+    ApiClient().apply {
+        basePath = config.adminUrl
+        addDefaultHeader("Host", config.defaultHost)
+    }
+)

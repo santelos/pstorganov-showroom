@@ -1,12 +1,13 @@
 package ru.stroganov.account.userauthservicek.common
 
-sealed class BaseException(msg: String, cause: Throwable? = null): RuntimeException(msg, cause) {
-    sealed class RepoException(msg: String, cause: Throwable? = null): BaseException(msg, cause) {
+sealed class BaseException(msg: String, cause: Throwable? = null) : RuntimeException(msg, cause) {
+    sealed class RepoException(msg: String, cause: Throwable? = null) : BaseException(msg, cause) {
         data class Oauth2TokenException(
             val clientId: String,
             val pubicUrl: String,
-            val c: Throwable,
-        ): RepoException("Could not obtain Oauth2 token from Oauth2 server. " +
+            val c: Throwable
+        ) : RepoException(
+            "Could not obtain Oauth2 token from Oauth2 server. " +
                 "ClientId: [$clientId], " +
                 "PublicUrl: [$pubicUrl]",
             c
@@ -14,16 +15,18 @@ sealed class BaseException(msg: String, cause: Throwable? = null): RuntimeExcept
 
         data class CreateUserException(
             val login: String,
-            val c: Throwable,
-        ): RepoException("Could not create user. " +
+            val c: Throwable
+        ) : RepoException(
+            "Could not create user. " +
                 "Login: [$login]",
             c
         )
 
         data class GetUserInfoException(
             val login: String,
-            val c: Throwable,
-        ): RepoException("Could not retrieve user info. " +
+            val c: Throwable
+        ) : RepoException(
+            "Could not retrieve user info. " +
                 "Login: [$login]",
             c
         )
@@ -31,7 +34,8 @@ sealed class BaseException(msg: String, cause: Throwable? = null): RuntimeExcept
         data class GetLoginRequestException(
             val loginRequestId: String,
             val c: Throwable
-        ): RepoException("Could not retrieve login request. " +
+        ) : RepoException(
+            "Could not retrieve login request. " +
                 "LoginRequestId: [$loginRequestId]",
             c
         )
@@ -40,7 +44,8 @@ sealed class BaseException(msg: String, cause: Throwable? = null): RuntimeExcept
             val loginRequestId: String,
             val subject: String,
             val c: Throwable
-        ): RepoException("Could not accept login request. " +
+        ) : RepoException(
+            "Could not accept login request. " +
                 "LoginRequestId: [$loginRequestId], " +
                 "Subject: [$subject]",
             c
@@ -49,7 +54,8 @@ sealed class BaseException(msg: String, cause: Throwable? = null): RuntimeExcept
         data class GetConsentException(
             val consentChallenge: String,
             val c: Throwable
-        ): RepoException("Could not retrieve consent challenge. " +
+        ) : RepoException(
+            "Could not retrieve consent challenge. " +
                 "ConsentChallenge: [$consentChallenge]",
             c
         )
@@ -58,7 +64,8 @@ sealed class BaseException(msg: String, cause: Throwable? = null): RuntimeExcept
             val consentChallenge: String,
             val scopes: List<String>,
             val c: Throwable
-        ): RepoException("Could not accept consent challenge. " +
+        ) : RepoException(
+            "Could not accept consent challenge. " +
                 "ConsentChallenge: [$consentChallenge], " +
                 "Scopes: [$scopes]",
             c

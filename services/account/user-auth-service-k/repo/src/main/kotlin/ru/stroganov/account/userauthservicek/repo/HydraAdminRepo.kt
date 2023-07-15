@@ -15,21 +15,21 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 data class AcceptConsentRepoResponse(
-    val redirectTo: String,
+    val redirectTo: String
 )
 
 data class GetConsentRepoResponse(
     val requestedAccessTokenAudience: List<String>?,
     val requestedScope: List<String>?,
-    val subject: String?,
+    val subject: String?
 )
 
 data class LoginRequestResponse(
-    val challenge: String,
+    val challenge: String
 )
 
 data class AcceptLoginRepoResponse(
-    val redirectTo: String,
+    val redirectTo: String
 )
 
 interface HydraAdminRepo {
@@ -45,13 +45,18 @@ val hydraAdminRepoImpl: HydraAdminRepo by lazy {
 internal class HydraAdminRepoImpl(
     private val hydraAdminClient: AdminApi
 ) : HydraAdminRepo {
-    private val log = KotlinLogging.logger {  }
+    private val log = KotlinLogging.logger { }
 
     override suspend fun getLoginRequest(loginRequestId: String): LoginRequestResponse = runCatching {
         suspendCoroutine { cont ->
-            hydraAdminClient.getLoginRequestAsync(loginRequestId, cont.hydraCallback { LoginRequestResponse(
-                it.challenge,
-            ) })
+            hydraAdminClient.getLoginRequestAsync(
+                loginRequestId,
+                cont.hydraCallback {
+                    LoginRequestResponse(
+                        it.challenge
+                    )
+                }
+            )
         }
     }.getOrElse { throw GetLoginRequestException(loginRequestId, it) }
 
@@ -60,41 +65,52 @@ internal class HydraAdminRepoImpl(
             val acceptLoginRequest = AcceptLoginRequest().apply {
                 subject(subject)
             }
-            hydraAdminClient.acceptLoginRequestAsync(loginRequestId, acceptLoginRequest, cont.hydraCallback {
-                AcceptLoginRepoResponse(it.redirectTo)
-            })
+            hydraAdminClient.acceptLoginRequestAsync(
+                loginRequestId,
+                acceptLoginRequest,
+                cont.hydraCallback {
+                    AcceptLoginRepoResponse(it.redirectTo)
+                }
+            )
         }
     }.getOrElse { throw AcceptLoginException(loginRequestId, subject, it) }
 
     override suspend fun getConsent(consentChallenge: String): GetConsentRepoResponse = runCatching {
         suspendCoroutine { cont ->
-            hydraAdminClient.getConsentRequestAsync(consentChallenge, cont.hydraCallback {
-                GetConsentRepoResponse(
-                    requestedAccessTokenAudience = it.requestedAccessTokenAudience,
-                    requestedScope = it.requestedScope,
-                    subject = it.subject,
-                )
-            })
+            hydraAdminClient.getConsentRequestAsync(
+                consentChallenge,
+                cont.hydraCallback {
+                    GetConsentRepoResponse(
+                        requestedAccessTokenAudience = it.requestedAccessTokenAudience,
+                        requestedScope = it.requestedScope,
+                        subject = it.subject
+                    )
+                }
+            )
         }
     }.getOrElse { throw GetConsentException(consentChallenge, it) }
 
     override suspend fun acceptConsent(
         consentChallenge: String,
         scopes: List<String>
-    ): AcceptConsentRepoResponse =  runCatching {
+    ): AcceptConsentRepoResponse = runCatching {
         suspendCoroutine { cont ->
             val request = AcceptConsentRequest().apply {
                 grantScope = scopes
             }
-            hydraAdminClient.acceptConsentRequestAsync(consentChallenge, request, cont.hydraCallback {
-                AcceptConsentRepoResponse(it.redirectTo)
-            })
+            hydraAdminClient.acceptConsentRequestAsync(
+                consentChallenge,
+                request,
+                cont.hydraCallback {
+                    AcceptConsentRepoResponse(it.redirectTo)
+                }
+            )
         }
     }.getOrElse { throw AcceptConsentException(consentChallenge, scopes, it) }
 }
 
 private fun <T, R> Continuation<R>.hydraCallback(map: (T) -> R): ApiCallback<T> = object : ApiCallback<T> {
-    private val log = KotlinLogging.logger {  }
+    private val log = KotlinLogging.logger { }
 
     override fun onFailure(
         e: ApiException,

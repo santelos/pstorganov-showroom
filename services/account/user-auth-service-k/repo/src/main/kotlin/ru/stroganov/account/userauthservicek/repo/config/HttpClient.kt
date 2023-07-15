@@ -11,7 +11,6 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ru.stroganov.account.userauthservicek.common.BaseException
 import ru.stroganov.account.userauthservicek.common.BaseException.RepoException.Oauth2TokenException
 import ru.stroganov.account.userauthservicek.config.AppConfig
 import ru.stroganov.account.userauthservicek.config.appConfig
@@ -21,25 +20,32 @@ internal data class TokenInfo(
     @SerialName("access_token") val accessToken: String,
     @SerialName("expires_in") val expiresIn: Int,
     @SerialName("scope") val scope: String,
-    @SerialName("token_type") val tokenType: String,
+    @SerialName("token_type") val tokenType: String
 )
 
 internal fun BearerAuthConfig.install(config: AppConfig.Oauth2Client) {
     val bearerTokens = mutableListOf<BearerTokens>()
     loadTokens { bearerTokens.lastOrNull() }
     refreshTokens {
-        val tokenInfo: TokenInfo = runCatching { client.submitForm("${config.publicUrl}/oauth2/token", parameters {
-            append("grant_type", "client_credentials")
-            append("client_id", config.clientId)
-            append("client_secret", config.clientSecret)
-            append("scope", config.scopes.joinToString(" "))
-        }) {
-            markAsRefreshTokenRequest()
-        } }.getOrElse { throw Oauth2TokenException(
-            config.clientId,
-            config.publicUrl,
-            it
-        ) }.body()
+        val tokenInfo: TokenInfo = runCatching {
+            client.submitForm(
+                "${config.publicUrl}/oauth2/token",
+                parameters {
+                    append("grant_type", "client_credentials")
+                    append("client_id", config.clientId)
+                    append("client_secret", config.clientSecret)
+                    append("scope", config.scopes.joinToString(" "))
+                }
+            ) {
+                markAsRefreshTokenRequest()
+            }
+        }.getOrElse {
+            throw Oauth2TokenException(
+                config.clientId,
+                config.publicUrl,
+                it
+            )
+        }.body()
         bearerTokens.add(BearerTokens(tokenInfo.accessToken, ""))
         bearerTokens.last()
     }

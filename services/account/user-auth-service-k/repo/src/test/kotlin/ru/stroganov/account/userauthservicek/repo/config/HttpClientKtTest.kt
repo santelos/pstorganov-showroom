@@ -15,35 +15,30 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.*
-import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.JsonBody.json
 import org.mockserver.model.Parameter.param
 import org.mockserver.model.ParameterBody.params
-import org.mockserver.verify.VerificationTimes
-import org.mockserver.verify.VerificationTimes.exactly
 import org.mockserver.verify.VerificationTimes.once
 import org.testcontainers.containers.MockServerContainer
 import org.testcontainers.junit.jupiter.Container
-import kotlin.test.*
-
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import ru.stroganov.account.userauthservicek.common.BaseException
-import ru.stroganov.account.userauthservicek.common.BaseException.RepoException.Oauth2TokenException
 import ru.stroganov.account.userauthservicek.config.AppConfig
-import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepoCreateUserRequest
-import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepoCreateUserResponse
+import kotlin.test.*
 
 @Testcontainers
 class HttpClientKtTest {
 
-    @Container
-    val mockServer = MockServerContainer(
-        DockerImageName
-            .parse("mockserver/mockserver")
-            .withTag("mockserver-" + MockServerClient::class.java.`package`.implementationVersion))
+    companion object {
+        @Container
+        val mockServer = MockServerContainer(
+            DockerImageName
+                .parse("mockserver/mockserver")
+                .withTag("mockserver-" + MockServerClient::class.java.`package`.implementationVersion)
+        )
+    }
 
     private val mockClient: MockServerClient by lazy {
         MockServerClient(mockServer.host, mockServer.serverPort)
@@ -67,12 +62,16 @@ class HttpClientKtTest {
     fun `POSITIVE ~~ httpClient ~~ just success`() {
         val client = httpClient(config)
 
-        val successExpectations = mockClient.`when`(request("/test").apply {
-            withMethod("GET")
-        }).respond(response().apply {
-            withStatusCode(200)
-            withBody("test-success")
-        })
+        val successExpectations = mockClient.`when`(
+            request("/test").apply {
+                withMethod("GET")
+            }
+        ).respond(
+            response().apply {
+                withStatusCode(200)
+                withBody("test-success")
+            }
+        )
 
         val expected = "test-success"
         val actual = runBlocking { client.get("${config.publicUrl}/test").bodyAsText() }
@@ -84,38 +83,52 @@ class HttpClientKtTest {
     fun `POSITIVE ~~ httpClient ~~ oauth2token requested`() {
         val client = httpClient(config)
 
-        val successExpectations = mockClient.`when`(request("/test").apply {
-            withMethod("GET")
-            withHeader("Authorization", "Bearer test-token")
-        }).respond(response().apply {
-            withStatusCode(200)
-            withBody("test-success")
-        })
-        val deniedExpectations = mockClient.`when`(request("/test").apply {
-            withMethod("GET")
-        }).respond(response().apply {
-            withStatusCode(401)
-        })
+        val successExpectations = mockClient.`when`(
+            request("/test").apply {
+                withMethod("GET")
+                withHeader("Authorization", "Bearer test-token")
+            }
+        ).respond(
+            response().apply {
+                withStatusCode(200)
+                withBody("test-success")
+            }
+        )
+        val deniedExpectations = mockClient.`when`(
+            request("/test").apply {
+                withMethod("GET")
+            }
+        ).respond(
+            response().apply {
+                withStatusCode(401)
+            }
+        )
 
         val tokenInfo = TokenInfo(
             accessToken = "test-token",
             expiresIn = 1,
             scope = config.scopes.joinToString(" "),
-            tokenType = "accessToken",
+            tokenType = "accessToken"
         )
-        val oauthExpectations = mockClient.`when`(request("/oauth2/token").apply {
-            withMethod("POST")
-            withContentType(MediaType.APPLICATION_FORM_URLENCODED.withCharset(Charsets.UTF_8))
-            withBody(params(
-                param("grant_type", "client_credentials"),
-                param("client_id", config.clientId),
-                param("client_secret", config.clientSecret),
-                param("scope", config.scopes)
-            ))
-        }).respond(response().apply {
-            withStatusCode(200)
-            withBody(json(Json.encodeToString(tokenInfo)))
-        })
+        val oauthExpectations = mockClient.`when`(
+            request("/oauth2/token").apply {
+                withMethod("POST")
+                withContentType(MediaType.APPLICATION_FORM_URLENCODED.withCharset(Charsets.UTF_8))
+                withBody(
+                    params(
+                        param("grant_type", "client_credentials"),
+                        param("client_id", config.clientId),
+                        param("client_secret", config.clientSecret),
+                        param("scope", config.scopes)
+                    )
+                )
+            }
+        ).respond(
+            response().apply {
+                withStatusCode(200)
+                withBody(json(Json.encodeToString(tokenInfo)))
+            }
+        )
 
         val expected = "test-success"
         val actual = runBlocking { client.get("${config.publicUrl}/test").bodyAsText() }
@@ -129,38 +142,52 @@ class HttpClientKtTest {
     fun `NEGATIVE ~~ httpClient ~~ oauth2token requested ~~ still 401`() {
         val client = httpClient(config)
 
-        val successExpectations = mockClient.`when`(request("/test").apply {
-            withMethod("GET")
-            withHeader("Authorization", "Bearer test-token")
-        }).respond(response().apply {
-            withStatusCode(401)
-            withBody("test-success")
-        })
-        val deniedExpectations = mockClient.`when`(request("/test").apply {
-            withMethod("GET")
-        }).respond(response().apply {
-            withStatusCode(401)
-        })
+        val successExpectations = mockClient.`when`(
+            request("/test").apply {
+                withMethod("GET")
+                withHeader("Authorization", "Bearer test-token")
+            }
+        ).respond(
+            response().apply {
+                withStatusCode(401)
+                withBody("test-success")
+            }
+        )
+        val deniedExpectations = mockClient.`when`(
+            request("/test").apply {
+                withMethod("GET")
+            }
+        ).respond(
+            response().apply {
+                withStatusCode(401)
+            }
+        )
 
         val tokenInfo = TokenInfo(
             accessToken = "test-token",
             expiresIn = 1,
             scope = config.scopes.joinToString(" "),
-            tokenType = "accessToken",
+            tokenType = "accessToken"
         )
-        val oauthExpectations = mockClient.`when`(request("/oauth2/token").apply {
-            withMethod("POST")
-            withContentType(MediaType.APPLICATION_FORM_URLENCODED.withCharset(Charsets.UTF_8))
-            withBody(params(
-                param("grant_type", "client_credentials"),
-                param("client_id", config.clientId),
-                param("client_secret", config.clientSecret),
-                param("scope", config.scopes)
-            ))
-        }).respond(response().apply {
-            withStatusCode(200)
-            withBody(json(Json.encodeToString(tokenInfo)))
-        })
+        val oauthExpectations = mockClient.`when`(
+            request("/oauth2/token").apply {
+                withMethod("POST")
+                withContentType(MediaType.APPLICATION_FORM_URLENCODED.withCharset(Charsets.UTF_8))
+                withBody(
+                    params(
+                        param("grant_type", "client_credentials"),
+                        param("client_id", config.clientId),
+                        param("client_secret", config.clientSecret),
+                        param("scope", config.scopes)
+                    )
+                )
+            }
+        ).respond(
+            response().apply {
+                withStatusCode(200)
+                withBody(json(Json.encodeToString(tokenInfo)))
+            }
+        )
 
         val expected = 401
         val actual = assertThrows<ClientRequestException> {
@@ -177,11 +204,15 @@ class HttpClientKtTest {
     fun `NEGATIVE ~~ httpClient ~~ 3xx return`(code: Int) {
         val client = httpClient(config)
 
-        val successExpectations = mockClient.`when`(request("/test").apply {
-            withMethod("GET")
-        }).respond(response().apply {
-            withStatusCode(code)
-        })
+        val successExpectations = mockClient.`when`(
+            request("/test").apply {
+                withMethod("GET")
+            }
+        ).respond(
+            response().apply {
+                withStatusCode(code)
+            }
+        )
 
         val actual = assertThrows<RedirectResponseException> {
             runBlocking { client.get("${config.publicUrl}/test").bodyAsText() }
@@ -198,11 +229,15 @@ class HttpClientKtTest {
     fun `NEGATIVE ~~ httpClient ~~ 4xx return`(code: Int) {
         val client = httpClient(config)
 
-        val successExpectations = mockClient.`when`(request("/test").apply {
-            withMethod("GET")
-        }).respond(response().apply {
-            withStatusCode(code)
-        })
+        val successExpectations = mockClient.`when`(
+            request("/test").apply {
+                withMethod("GET")
+            }
+        ).respond(
+            response().apply {
+                withStatusCode(code)
+            }
+        )
 
         val actual = assertThrows<ClientRequestException> {
             runBlocking { client.get("${config.publicUrl}/test").bodyAsText() }
@@ -216,11 +251,15 @@ class HttpClientKtTest {
     fun `NEGATIVE ~~ httpClient ~~ 5xx return`(code: Int) {
         val client = httpClient(config)
 
-        val successExpectations = mockClient.`when`(request("/test").apply {
-            withMethod("GET")
-        }).respond(response().apply {
-            withStatusCode(code)
-        })
+        val successExpectations = mockClient.`when`(
+            request("/test").apply {
+                withMethod("GET")
+            }
+        ).respond(
+            response().apply {
+                withStatusCode(code)
+            }
+        )
 
         val actual = assertThrows<ServerResponseException> {
             runBlocking { client.get("${config.publicUrl}/test").bodyAsText() }

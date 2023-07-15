@@ -31,7 +31,7 @@ internal fun Application.authConfig(
             tokenEndpoint = "${config.adminUrl}/oauth2/introspect"
         }
         basic(BASIC_AUTH) {
-            validate {cred ->
+            validate { cred ->
                 when (val authInfo = remoteAuthentication.getUserAuthInfo(cred.name, cred.password)) {
                     is UserAuthInfo.Success -> UserIdPrincipal(authInfo.userId.id.toString())
                     is UserAuthInfo.AuthFailed -> null
