@@ -19,7 +19,7 @@ fun startServer() {
     }.start(wait = true)
 }
 
-fun Application.serverConfig() {
+internal fun Application.serverConfig() {
     install(CallLogging)
     install(ContentNegotiation) {
         json()

@@ -13,11 +13,11 @@ import mu.KotlinLogging
 
 private val log = KotlinLogging.logger { }
 
-class AuthorizationInterceptorsConfig {
+private class AuthorizationInterceptorsConfig {
     var interceptors: List<AuthorizationInterceptor> = emptyList()
 }
 
-val AuthorizationInterceptors = createRouteScopedPlugin(
+private val AuthorizationInterceptors = createRouteScopedPlugin(
     name = "AuthorizationInterceptors",
     createConfiguration = ::AuthorizationInterceptorsConfig
 ) {
@@ -57,7 +57,7 @@ private fun ApplicationCall.authorized(auth: AuthorizationInterceptor, principal
     return true
 }
 
-fun Route.roleAuthorize(
+internal fun Route.roleAuthorize(
     rule: RoleRule,
     mapToRoles: (Principal) -> Set<String>?,
     build: Route.() -> Unit
@@ -76,7 +76,7 @@ fun Route.roleAuthorize(
     )
 }
 
-sealed interface RoleRule {
+internal sealed interface RoleRule {
     object DenyAll : RoleRule
     data class HasRoles(val roles: Set<String>) : RoleRule
 }
@@ -86,7 +86,7 @@ private fun RoleRule.authorized(verifiable: Set<String>): Boolean = when (this) 
     is RoleRule.HasRoles -> roles.intersect(verifiable).isNotEmpty()
 }
 
-fun Route.pathAuthorize(
+internal fun Route.pathAuthorize(
     pathVariable: String,
     mapTo: (Principal) -> String?,
     build: Route.() -> Unit
@@ -120,7 +120,7 @@ fun Route.pathAuthorize(
     )
 }
 
-fun Route.authorize(authReg: AuthorizationInterceptor, build: Route.() -> Unit): Route {
+internal fun Route.authorize(authReg: AuthorizationInterceptor, build: Route.() -> Unit): Route {
     attributes.put(authorizationInterceptorAttributeKey, authReg)
     val allAuthorizations = generateSequence(this) { it.parent }
         .mapNotNull { it.attributes.getOrNull(authorizationInterceptorAttributeKey) }
@@ -137,7 +137,7 @@ private class RoleBasedAuthorizationRouteSelector : RouteSelector() {
         RouteSelectorEvaluation.Transparent
 }
 
-data class AuthorizationInterceptor(
+internal data class AuthorizationInterceptor(
     val name: String,
     val principalToVerifiable: (Principal) -> Set<String>?,
     val isVerified: ApplicationCall.(Set<String>) -> Boolean,

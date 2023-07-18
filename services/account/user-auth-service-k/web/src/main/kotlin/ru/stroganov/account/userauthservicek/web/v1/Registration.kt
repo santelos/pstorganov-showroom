@@ -10,18 +10,18 @@ import ru.stroganov.account.userauthservicek.service.RegistrationService
 import ru.stroganov.account.userauthservicek.service.registrationServiceImpl
 
 @Serializable
-data class RegistrationNewRequest(
+internal data class RegistrationNewRequest(
     val login: String,
     val password: String,
     val name: String
 )
 
 @Serializable
-data class RegistrationNewResponse(
+internal data class RegistrationNewResponse(
     val id: Int
 )
 
-fun Application.registration(
+internal fun Application.registration(
     registrationService: RegistrationService = registrationServiceImpl
 ) {
     routing {

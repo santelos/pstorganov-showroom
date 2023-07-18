@@ -11,7 +11,7 @@ import io.ktor.server.request.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-data class OAuth2Principal(
+internal data class OAuth2Principal(
     val token: String,
     val active: Boolean,
     val scope: String?,
@@ -27,7 +27,7 @@ data class OAuth2Principal(
     val jti: String?
 ) : Principal
 
-fun AuthenticationConfig.oauth2ResourceServer(
+internal fun AuthenticationConfig.oauth2ResourceServer(
     name: String? = null,
     configure: OAuth2ResourceServerProvider.Config.() -> Unit
 ) {
@@ -35,7 +35,7 @@ fun AuthenticationConfig.oauth2ResourceServer(
     register(provider)
 }
 
-class OAuth2ResourceServerProvider(val config: Config) : AuthenticationProvider(config) {
+internal class OAuth2ResourceServerProvider(val config: Config) : AuthenticationProvider(config) {
 
     override suspend fun onAuthenticate(context: AuthenticationContext) {
         val authHeaderValue = context.call.request.bearerHeaderValue()
@@ -58,7 +58,7 @@ class OAuth2ResourceServerProvider(val config: Config) : AuthenticationProvider(
     }
 }
 
-sealed interface TokenIntrospectionResponse {
+private sealed interface TokenIntrospectionResponse {
 
     /**
      * https://www.rfc-editor.org/rfc/rfc7662#section-2.2

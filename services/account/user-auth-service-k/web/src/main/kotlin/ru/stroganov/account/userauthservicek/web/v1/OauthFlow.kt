@@ -15,22 +15,22 @@ import ru.stroganov.account.userauthservicek.service.loginServiceImpl
 import ru.stroganov.account.userauthservicek.web.config.BASIC_AUTH
 
 @Serializable
-data class AcceptLoginWebResponse(
+internal data class AcceptLoginWebResponse(
     val redirectTo: String
 )
 
 @Serializable
-data class AcceptConsentPostWebRequest(
+internal data class AcceptConsentPostWebRequest(
     val scope: List<String>
 )
 
 @Serializable
-data class AcceptConsentWebResponse(
+internal data class AcceptConsentWebResponse(
     val redirectTo: String
 )
 
 @Serializable
-data class GetConsentWebResponse(
+internal data class GetConsentWebResponse(
     val requestedAccessTokenAudience: List<String>?,
     val requestedScope: List<String>?,
     val subject: String?

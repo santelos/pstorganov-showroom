@@ -11,8 +11,10 @@ pluginManagement {
         id("org.jlleitschuh.gradle.ktlint") version ktlintGradlePluginVersion
     }
 }
+
 include("common")
 include("config")
 include("repo")
 include("service")
 include("web")
+include("app")
