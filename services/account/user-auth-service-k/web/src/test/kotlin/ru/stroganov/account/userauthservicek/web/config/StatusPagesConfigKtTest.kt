@@ -8,7 +8,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import ru.stroganov.account.userauthservicek.web.v1.createClient
 import java.lang.RuntimeException
