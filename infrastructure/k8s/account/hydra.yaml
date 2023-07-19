@@ -23,6 +23,7 @@ data:
   URLS_LOGIN: https://id.santelos.com/login
   URLS_CONSENT: https://id.santelos.com/consent
   URLS_SELF_ISSUER: https://id.santelos.com/o
+  LOG_LEVEL: debug
 ---
 apiVersion: apps/v1
 kind: Deployment

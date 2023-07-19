@@ -2,7 +2,7 @@ package ru.stroganov.showroom.account.userinfoservice.repo
 
 import io.kotest.core.extensions.install
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.extensions.testcontainers.TestContainerExtension
+import io.kotest.extensions.testcontainers.ContainerExtension
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.reactive.awaitFirst
 import org.testcontainers.containers.PostgreSQLContainer
@@ -13,12 +13,11 @@ import ru.stroganov.showroom.account.userinfoservice.service.UserLogin
 @Testcontainers
 internal class UsersRepoImplTest : FunSpec({
 
-    val postgresContainer = PostgreSQLContainer("postgres:15")
-        .withUsername("postgres")
-        .withPassword("postgres")
-        .withDatabaseName("postgres")
-
-    val ds = install(TestContainerExtension(postgresContainer))
+    val ds = install(ContainerExtension(PostgreSQLContainer("postgres:15"))) {
+        withUsername("postgres")
+        withPassword("postgres")
+        withDatabaseName("postgres")
+    }
     val (usersRepo, connectionFactory) = createTestable(ds)
 
     beforeSpec { migration(ds) }

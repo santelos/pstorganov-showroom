@@ -1,10 +1,12 @@
 package ru.stroganov.showroom.account.userinfoservice.service
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import ru.stroganov.showroom.account.userinfoservice.common.ServiceException
 import ru.stroganov.showroom.account.userinfoservice.repo.*
 
 internal class UserServiceImplTest : FunSpec({
@@ -46,46 +48,71 @@ internal class UserServiceImplTest : FunSpec({
         expected shouldBe actual
     }
 
-    test("validateCredentials | Valid") {
+    test("getUserAuthInfo | Valid") {
         val input = UserCredentials(
-            login = "test--login",
+            login = UserLogin("test--login"),
             password = "test--password",
         )
-        val expected = UserAuthInfo.Valid
+
         val passwordHash = "test--password--hash"
-        val dbResponse = GetPasswordHashResponse.Success(
-            passwordHash = passwordHash,
-        )
-        coEvery { usersRepoMock.getPasswordHash(UserLogin(input.login)) } returns dbResponse
+        val passwordHashResponse = GetPasswordHashResponse.Success(passwordHash)
+        coEvery { usersRepoMock.getPasswordHash(input.login) } returns passwordHashResponse
         every { hashingMock.isEqual(input.password, passwordHash) } returns true
+        val userIdResponse = UserIdRepoResponse.Success(1)
+        coEvery { usersRepoMock.getUserId(input.login) } returns userIdResponse
+
+        val expected = UserAuthInfo.Success(UserId(1))
         val actual = userService.getUserAuthInfo(input)
         actual shouldBe expected
     }
 
-    test("validateCredentials | Invalid | User not found") {
+    test("validateCredentials | [PasswordHash] User not found") {
         val input = UserCredentials(
-            login = "test--login",
+            login = UserLogin("test--login"),
             password = "test--password",
         )
-        val expected = UserAuthInfo.Invalid(listOf("User not found"))
+
         val dbResponse = GetPasswordHashResponse.UserNotFound
-        coEvery { usersRepoMock.getPasswordHash(UserLogin(input.login)) } returns dbResponse
-        every { hashingMock.isEqual(input.password, any()) } returns true
+        coEvery { usersRepoMock.getPasswordHash(input.login) } returns dbResponse
+
+        val expected = UserAuthInfo.Invalid(listOf("User not found"))
         val actual = userService.getUserAuthInfo(input)
         actual shouldBe expected
     }
 
-    test("validateCredentials | Invalid | Password doesn't match") {
+    test("validateCredentials | Password doesn't match") {
         val input = UserCredentials(
-            login = "test--login",
+            login = UserLogin("test--login"),
             password = "test--password",
         )
-        val expected = UserAuthInfo.Invalid(listOf("Password doesn't match"))
+
         val passwordHash = "test--password--hash"
         val dbResponse = GetPasswordHashResponse.Success(passwordHash)
-        coEvery { usersRepoMock.getPasswordHash(UserLogin(input.login)) } returns dbResponse
+        coEvery { usersRepoMock.getPasswordHash(input.login) } returns dbResponse
         every { hashingMock.isEqual(input.password, passwordHash) } returns false
+
+        val expected = UserAuthInfo.Invalid(listOf("Password doesn't match"))
         val actual = userService.getUserAuthInfo(input)
+        actual shouldBe expected
+    }
+
+    test("validateCredentials | [UserId] User Not Found") {
+        val input = UserCredentials(
+            login = UserLogin("test--login"),
+            password = "test--password",
+        )
+
+        val passwordHash = "test--password--hash"
+        val dbResponse = GetPasswordHashResponse.Success(passwordHash)
+        coEvery { usersRepoMock.getPasswordHash(input.login) } returns dbResponse
+        every { hashingMock.isEqual(input.password, passwordHash) } returns true
+        val userIdResponse = UserIdRepoResponse.UserNotFound
+        coEvery { usersRepoMock.getUserId(input.login) } returns userIdResponse
+
+        val expected = UserAuthInfo.Invalid(listOf("Password doesn't match"))
+        val actual = shouldThrow<ServiceException.UserLoginNotFound> {
+            userService.getUserAuthInfo(input)
+        }
         actual shouldBe expected
     }
 })

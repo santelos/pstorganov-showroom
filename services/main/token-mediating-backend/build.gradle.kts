@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
@@ -9,7 +7,6 @@ plugins {
 
 group = "ru.stroganov.oauth2.tokenmediatingbackend"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
@@ -40,6 +37,10 @@ dependencies {
     implementation("ch.qos.logback", "logback-classic", logbackVersion)
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 application {
     mainClass.set("ru.stroganov.oauth2.tokenmediatingbackend.AppKt")
 }
@@ -47,17 +48,6 @@ application {
 ktor {
     fatJar {
         archiveFileName.set("app.jar")
-    }
-}
-
-ktlint {
-    disabledRules.set(setOf("no-wildcard-imports"))
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "11"
     }
 }
 

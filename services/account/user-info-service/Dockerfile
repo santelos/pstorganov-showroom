@@ -5,7 +5,7 @@ RUN microdnf install findutils
 COPY gradlew /build/graldew
 COPY gradle /build/gradle
 COPY *gradle* /build/
-RUN ./gradlew --no-daemon
+RUN ./gradlew dependencies --no-daemon
 
 COPY src /build/src
 RUN ./gradlew buildFatJar --no-daemon
