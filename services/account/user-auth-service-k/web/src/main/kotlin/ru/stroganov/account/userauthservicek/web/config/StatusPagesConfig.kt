@@ -8,7 +8,7 @@ import io.ktor.util.logging.*
 import mu.KotlinLogging
 
 internal fun Application.statusPagesConfig() {
-    val log = KotlinLogging.logger {  }
+    val log = KotlinLogging.logger { }
 
     install(StatusPages) {
         exception<Throwable> { call: ApplicationCall, cause: Throwable ->
