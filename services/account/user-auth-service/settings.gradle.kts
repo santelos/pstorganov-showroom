@@ -2,12 +2,19 @@ rootProject.name = "user-auth-service"
 
 pluginManagement {
     val kotlinVersion: String by settings
-    val springBootVersion: String by settings
-    val springDependencyManagement: String by settings
+    val ktorVersion: String by settings
+    val ktlintGradlePluginVersion: String by settings
     plugins {
-        id("org.springframework.boot") version springBootVersion
-        id("io.spring.dependency-management") version springDependencyManagement
         id("org.jetbrains.kotlin.jvm") version kotlinVersion
-        id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
+        id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion
+        id("io.ktor.plugin") version ktorVersion
+        id("org.jlleitschuh.gradle.ktlint") version ktlintGradlePluginVersion
     }
 }
+
+include("common")
+include("config")
+include("repo")
+include("service")
+include("web")
+include("app")
