@@ -2,13 +2,6 @@ package ru.stroganov.account.userauthservicek.config
 
 val appConfig : AppConfig by lazy {
     AppConfig(
-        database = AppConfig.Database(
-            host = System.getenv("DATABASE__HOST"),
-            port = System.getenv("DATABASE__PORT") ?: "5432",
-            database = System.getenv("DATABASE__DATABASE_NAME"),
-            user = System.getenv("DATABASE__USERNAME"),
-            password = System.getenv("DATABASE__PASSWORD"),
-        ),
         userInfoService = AppConfig.UserInfoService(
             host = System.getenv("USER_INFO_SERVICE__URL")
         ),

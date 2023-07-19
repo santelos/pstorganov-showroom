@@ -15,11 +15,11 @@ RUN ./gradlew dependencies
 COPY . .
 RUN ./gradlew buildFatJar
 
-FROM openjdk:17-slim
+FROM --platform=linux/amd64 openjdk:17-slim
 WORKDIR /app
 COPY --from=build /build/app/build/libs/app.jar /app/app.jar
 
 EXPOSE 80
 EXPOSE 5005
 
-ENTRYPOINT ["java", "-jar", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "/app/app.jar"]
+CMD ["java", "-jar", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "/app/app.jar"]
