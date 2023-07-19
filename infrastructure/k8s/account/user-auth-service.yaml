@@ -44,7 +44,7 @@ spec:
     spec:
       containers:
       - name: user-auth-service
-        image: docker.santelos.com/user-auth-service-k
+        image: docker.santelos.com/user-auth-service
         ports:
         - containerPort: 80
         - containerPort: 5005
