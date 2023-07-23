@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: grafana-db
+  namespace: monitoring
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: local-storage
+  local:
+    path: /mnt/md0/grafana-db
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - pstroganov
+# ---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: grafana-db
+#   namespace: monitoring
+#   labels:
+#     app: grafana-db
+# type: Opaque
+# data:
+#   POSTGRES_PASSWORD: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-db
+  namespace: monitoring
+  labels:
+    app: grafana-db
+data:
+  POSTGRES_USER: grafana
+  POSTGRES_DB: grafana
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: grafana-db
+  namespace: monitoring
+spec:
+  replicas: 1
+  serviceName: grafana-db
+  selector:
+    matchLabels:
+      app: grafana-db
+  template:
+    metadata:
+      labels:
+        app: grafana-db
+    spec:
+      containers:
+        - name: grafana-db
+          image: postgres:14
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: grafana-db
+            - secretRef:
+                name: grafana-db
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: grafana-db-volume-claim
+              subPath: postgres-data
+  volumeClaimTemplates:
+    - metadata:
+        name: grafana-db-volume-claim
+        labels:
+          app: grafana-db
+      spec:
+        storageClassName: local-storage
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-db
+  namespace: monitoring
+  labels:
+    app: grafana-db
+spec:
+  selector:
+    app: grafana-db
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
