@@ -21,8 +21,13 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 80
-      imagePullSecrets:
-        - name: regcred
+        resources:
+          limits:
+            memory: 6Mi
+            cpu: 50m
+          requests:
+            memory: 6Mi
+            cpu: 50m
 ---
 apiVersion: v1
 kind: Service

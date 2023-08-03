@@ -1,0 +1,41 @@
+receivers:
+  # https://opentelemetry.io/docs/kubernetes/collector/components/#kubeletstats-receiver
+  kubeletstats:
+    collection_interval: 10s
+    auth_type: 'serviceAccount'
+    endpoint: '${env:K8S_NODE_NAME}:10250'
+    insecure_skip_verify: true
+    extra_metadata_labels:
+      - k8s.volume.type
+    metric_groups:
+      - node
+      - pod
+      - container
+      - volume
+  # https://opentelemetry.io/docs/kubernetes/collector/components/#kubernetes-cluster-receiver
+  k8s_cluster:
+    auth_type: serviceAccount
+    node_conditions_to_report:
+      - Ready
+      - MemoryPressure
+    allocatable_types_to_report:
+      - cpu
+      - memory
+      - storage
+      - ephemeral-storage
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: ${env:OPENTELEMETRY_COLLECTOR__HOST}
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [kubeletstats, k8s_cluster]
+      processors: [batch]
+      exporters: [otlp]
