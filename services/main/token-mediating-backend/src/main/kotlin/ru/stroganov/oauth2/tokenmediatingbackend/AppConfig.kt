@@ -8,12 +8,16 @@ val appConfig = AppConfig(
         providerInternalUrl = System.getenv("OAUTH2__PROVIDER_INTERNAL_URL"),
         clientId = System.getenv("OAUTH2__CLIENT_ID"),
         clientSecret = System.getenv("OAUTH2__CLIENT_SECRET")
+    ),
+    monitoringConfig = AppConfig.MonitoringConfig(
+        applicationName = "token-mediating-backend"
     )
 )
 
 data class AppConfig(
     val successRedirect: String,
-    val oauth2Config: Oauth2Config
+    val oauth2Config: Oauth2Config,
+    val monitoringConfig: MonitoringConfig
 ) {
     data class Oauth2Config(
         val callbackUrl: String,
@@ -21,5 +25,8 @@ data class AppConfig(
         val providerInternalUrl: String,
         val clientId: String,
         val clientSecret: String
+    )
+    data class MonitoringConfig(
+        val applicationName: String
     )
 }
