@@ -6,4 +6,4 @@ metadata:
   labels:
     app: opentelemetry-sidecar
 data:
-  OPENTELEMETRY_HOST: "http://opentelemetry-collector:4317"
+  OPENTELEMETRY_HOST: "http://opentelemetry-collector.monitoring.svc.cluster.local:4317"

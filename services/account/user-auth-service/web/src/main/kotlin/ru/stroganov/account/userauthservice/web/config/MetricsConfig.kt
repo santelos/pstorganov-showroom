@@ -7,9 +7,15 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import ru.stroganov.account.userauthservice.config.AppConfig
+import ru.stroganov.account.userauthservice.config.appConfig
 
-fun Application.metricsConfig() {
-    val appMicrometerRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+fun Application.metricsConfig(
+    config: AppConfig.MonitoringConfig = appConfig.monitoring
+) {
+    val appMicrometerRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT).apply {
+        config().commonTags("application", config.applicationName)
+    }
     install(MicrometerMetrics) {
         registry = appMicrometerRegistry
     }
