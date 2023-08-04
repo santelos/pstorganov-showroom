@@ -17,15 +17,6 @@ fun Application.monitoringRoutingModule() {
     val appMicrometerRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     install(MicrometerMetrics) {
         registry = appMicrometerRegistry
-
-        meterBinders = listOf(
-            JvmMemoryMetrics(),
-            JvmGcMetrics(),
-            ProcessorMetrics(),
-            JvmThreadMetrics(),
-            FileDescriptorMetrics(),
-            UptimeMetrics()
-        )
     }
     routing {
         get("/metrics") {

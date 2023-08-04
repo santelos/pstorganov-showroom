@@ -55,8 +55,12 @@ spec:
               name: token-mediating-backend
           - secretRef:
               name: token-mediating-backend
-      imagePullSecrets:
-        - name: regcred
+      - name: opentelemetry-sidecar
+        image: docker.santelos.com/opentelemetry-collector-sidecar
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: opentelemetry-sidecar
 ---
 apiVersion: v1
 kind: Service

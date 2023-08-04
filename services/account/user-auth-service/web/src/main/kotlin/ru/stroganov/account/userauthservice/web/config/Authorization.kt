@@ -77,7 +77,7 @@ internal fun Route.roleAuthorize(
 }
 
 internal sealed interface RoleRule {
-    object DenyAll : RoleRule
+    data object DenyAll : RoleRule
     data class HasRoles(val roles: Set<String>) : RoleRule
 }
 
