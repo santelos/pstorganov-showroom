@@ -55,8 +55,13 @@ spec:
               name: token-mediating-backend
           - secretRef:
               name: token-mediating-backend
-      imagePullSecrets:
-        - name: regcred
+        resources:
+          limits:
+            memory: 300Mi
+            cpu: 128m
+          requests:
+            memory: 300Mi
+            cpu: 128m
 ---
 apiVersion: v1
 kind: Service

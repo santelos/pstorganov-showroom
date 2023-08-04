@@ -92,6 +92,13 @@ spec:
                 name: docker-registry
             - secretRef:
                 name: http-secret
+          resources:
+            limits:
+              memory: 500Mi
+              cpu: 128m
+            requests:
+              memory: 500Mi
+              cpu: 128m
       volumes:
         - name: basic-auth
           secret:
