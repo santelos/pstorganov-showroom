@@ -17,6 +17,10 @@ receivers:
 
 processors:
   batch:
+  k8sattributes:
+    auth_type: "serviceAccount"
+    passthrough: false
+
 
 exporters:
   logging:
@@ -30,21 +34,21 @@ exporters:
 
 extensions:
   health_check:
-  pprof:
-  zpages:
+    endpoint: "0.0.0.0:13133"
+    path: "/health/status"
 
 service:
-  extensions: [health_check, pprof, zpages]
+  extensions: [health_check]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [k8sattributes, batch]
       exporters: [logging]
     metrics:
       receivers: [otlp, prometheus]
-      processors: [batch]
+      processors: [k8sattributes, batch]
       exporters: [prometheusremotewrite]
     logs:
       receivers: [otlp]
-      processors: [batch]
+      processors: [k8sattributes, batch]
       exporters: [logging]

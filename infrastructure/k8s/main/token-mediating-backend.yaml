@@ -39,9 +39,6 @@ spec:
     metadata:
       labels:
         app: token-mediating-backend
-      annotations:
-        prometheus.io/scrape: "true"
-        metrics_auth_type: "none"
     spec:
       containers:
       - name: token-mediating-backend
@@ -55,12 +52,45 @@ spec:
               name: token-mediating-backend
           - secretRef:
               name: token-mediating-backend
+        env: 
+          - name: OTEL_SERVICE_NAME
+            valueFrom: 
+              fieldRef: 
+                fieldPath: metadata.labels['app']
       - name: opentelemetry-sidecar
         image: docker.santelos.com/opentelemetry-collector-sidecar
         imagePullPolicy: Always
+        ports:
+        - containerPort: 4317
+        - containerPort: 13133
+        env:
+          - name: SERVICE_NAMESPACE
+            valueFrom: 
+              fieldRef: 
+                fieldPath: metadata.namespace
+          - name: SERVICE_INSTANCE_ID
+            valueFrom: 
+              fieldRef: 
+                fieldPath: metadata.name
+          - name: SERVICE_VERSION
+            valueFrom: 
+              fieldRef: 
+                fieldPath: metadata.name
         envFrom:
           - configMapRef:
               name: opentelemetry-sidecar
+        livenessProbe:
+          httpGet:
+            path: "/health/status"
+            port: 13133
+          initialDelaySeconds: 5
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: "/health/status"
+            port: 13133
+          initialDelaySeconds: 5
+          failureThreshold: 1
 ---
 apiVersion: v1
 kind: Service

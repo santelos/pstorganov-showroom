@@ -2,17 +2,7 @@ receivers:
   otlp:
     protocols:
       grpc:
-      http:
-  prometheus:
-    config:
-      scrape_configs:
-        - job_name: 'otel-collector'
-          scrape_interval: 5s
-          static_configs:
-            - targets: ['0.0.0.0:8888']
-        - job_name: service
-          static_configs:
-            - targets: ['0.0.0.0:80']
+        endpoint: localhost:4317
 
 processors:
   batch:
@@ -25,6 +15,8 @@ exporters:
 
 extensions:
   health_check:
+    endpoint: "0.0.0.0:13133"
+    path: "/health/status"
 
 service:
   extensions: [health_check]
@@ -34,7 +26,7 @@ service:
       processors: [batch]
       exporters: [otlp]
     metrics:
-      receivers: [otlp, prometheus]
+      receivers: [otlp]
       processors: [batch]
       exporters: [otlp]
     logs:
