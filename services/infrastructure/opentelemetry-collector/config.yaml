@@ -10,10 +10,14 @@ receivers:
           scrape_interval: 5s
           static_configs:
             - targets: ['0.0.0.0:8888']
-        - job_name: node-exporter
-          scrape_interval: 5s
-          static_configs:
-            - targets: ['${env:NODE_EXPORTER__HOST}']
+        # - job_name: node-exporter
+        #   scrape_interval: 5s
+        #   static_configs:
+        #     - targets: ['${env:NODE_EXPORTER__HOST}']
+        # - job_name: prometheus-k8s
+        #   scrape_interval: 5s
+        #   static_configs:
+        #     - targets: ['${env:PROMETHEUS_K8S__HOST}']
 
 processors:
   batch:

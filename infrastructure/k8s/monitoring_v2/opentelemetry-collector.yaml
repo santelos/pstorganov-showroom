@@ -7,7 +7,6 @@ metadata:
     app: opentelemetry-collector
 data:
   PROMETHEUS__HOST: "http://prometheus:9090"
-  NODE_EXPORTER__HOST: "node-exporter:9100"
 ---
 apiVersion: apps/v1
 kind: DaemonSet
