@@ -28,9 +28,9 @@ dependencies {
     implementation("io.ktor", "ktor-client-logging", ktorVersion)
 
     // Monitoring
-    val micrometerPrometheusVersion: String by project
     implementation("io.ktor", "ktor-server-metrics-micrometer", ktorVersion)
-    implementation("io.micrometer", "micrometer-registry-prometheus", micrometerPrometheusVersion)
+    val micrometerOtlpVersion: String by project
+    implementation("io.micrometer", "micrometer-registry-otlp", micrometerOtlpVersion)
 
     // Logger
     val logbackVersion: String by project

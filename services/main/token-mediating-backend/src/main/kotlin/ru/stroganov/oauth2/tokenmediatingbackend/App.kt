@@ -7,7 +7,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import ru.stroganov.oauth2.tokenmediatingbackend.config.authConfigModule
-import ru.stroganov.oauth2.tokenmediatingbackend.routing.monitoringRoutingModule
+import ru.stroganov.oauth2.tokenmediatingbackend.config.monitoringConfigModule
 import ru.stroganov.oauth2.tokenmediatingbackend.routing.oauthFlowRoutingModule
 import ru.stroganov.oauth2.tokenmediatingbackend.routing.tokenMediation
 
@@ -17,7 +17,7 @@ fun main() {
         authConfigModule()
         oauthFlowRoutingModule()
         tokenMediation()
-        monitoringRoutingModule()
+        monitoringConfigModule()
     }.start(wait = true)
 }
 
