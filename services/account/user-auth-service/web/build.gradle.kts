@@ -38,6 +38,11 @@ dependencies {
     val kotlinLoggingVersion: String by project
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
 
+    // Metrics
+    implementation("io.ktor", "ktor-server-metrics-micrometer", ktorVersion)
+    val micrometerPrometheusVersion: String by project
+    implementation("io.micrometer", "micrometer-registry-prometheus", micrometerPrometheusVersion)
+
     // Test
     testImplementation(kotlin("test"))
     testImplementation("io.ktor", "ktor-server-test-host", ktorVersion)

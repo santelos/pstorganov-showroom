@@ -3,7 +3,8 @@ package ru.stroganov.account.userauthservice.config
 data class AppConfig(
     val userInfoService: UserInfoService,
     val oauth2Client: Oauth2Client,
-    val hydra: HydraClient
+    val hydra: HydraClient,
+    val monitoring: MonitoringConfig
 ) {
     data class UserInfoService(
         val host: String
@@ -17,5 +18,8 @@ data class AppConfig(
     data class HydraClient(
         val adminUrl: String,
         val defaultHost: String
+    )
+    data class MonitoringConfig(
+        val applicationName: String
     )
 }

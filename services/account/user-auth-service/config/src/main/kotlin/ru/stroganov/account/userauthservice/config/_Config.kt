@@ -14,6 +14,9 @@ val appConfig : AppConfig by lazy {
         hydra = AppConfig.HydraClient(
             adminUrl = System.getenv("OAUTH2__ADMIN_URL"),
             defaultHost = "santelos.com"
+        ),
+        monitoring = AppConfig.MonitoringConfig(
+            applicationName = "user-auth-service"
         )
     )
 }

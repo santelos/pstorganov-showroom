@@ -14,6 +14,7 @@ fun startServer() {
         serverConfig()
         statusPagesConfig()
         authConfig()
+        metricsConfig()
         registration()
         oauthFlow()
     }.start(wait = true)
