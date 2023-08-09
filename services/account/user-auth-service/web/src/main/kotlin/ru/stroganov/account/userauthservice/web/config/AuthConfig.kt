@@ -40,3 +40,6 @@ internal fun Application.authConfig(
         }
     }
 }
+
+fun principalToRolesMapping(principal: Principal): Set<String>? = (principal as OAuth2Principal)
+    .scope?.split(Regex("\\s"))?.toSet()

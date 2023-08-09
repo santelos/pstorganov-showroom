@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opentelemetry-sidecar
+  namespace: main
+  labels:
+    app: opentelemetry-sidecar
+data:
+  OPENTELEMETRY_HOST: "http://opentelemetry-collector.monitoring.svc.cluster.local:4317"
