@@ -80,6 +80,13 @@ spec:
         envFrom:
           - configMapRef:
               name: opentelemetry-sidecar
+        resources:
+          limits:
+            memory: 300Mi
+            cpu: 128m
+          requests:
+            memory: 300Mi
+            cpu: 128m
         livenessProbe:
           httpGet:
             path: "/health/status"
