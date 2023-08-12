@@ -28,81 +28,81 @@ subjects:
     name: opentelemetry-collector-k8s
     namespace: monitoring
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: opentelemetry-collector-k8s-cluster
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - events
-      - namespaces
-      - namespaces/status
-      - nodes
-      - nodes/spec
-      - pods
-      - pods/status
-      - replicationcontrollers
-      - replicationcontrollers/status
-      - resourcequotas
-      - services
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - apps
-    resources:
-      - daemonsets
-      - deployments
-      - replicasets
-      - statefulsets
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - extensions
-    resources:
-      - daemonsets
-      - deployments
-      - replicasets
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - batch
-    resources:
-      - jobs
-      - cronjobs
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - autoscaling
-    resources:
-      - horizontalpodautoscalers
-    verbs:
-      - get
-      - list
-      - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: opentelemetry-collector-k8s-cluster
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: opentelemetry-collector-k8s-cluster
-subjects:
-  - kind: ServiceAccount
-    name: opentelemetry-collector-k8s
-    namespace: monitoring
----
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRole
+# metadata:
+#   name: opentelemetry-collector-k8s-cluster
+# rules:
+#   - apiGroups:
+#       - ""
+#     resources:
+#       - events
+#       - namespaces
+#       - namespaces/status
+#       - nodes
+#       - nodes/spec
+#       - pods
+#       - pods/status
+#       - replicationcontrollers
+#       - replicationcontrollers/status
+#       - resourcequotas
+#       - services
+#     verbs:
+#       - get
+#       - list
+#       - watch
+#   - apiGroups:
+#       - apps
+#     resources:
+#       - daemonsets
+#       - deployments
+#       - replicasets
+#       - statefulsets
+#     verbs:
+#       - get
+#       - list
+#       - watch
+#   - apiGroups:
+#       - extensions
+#     resources:
+#       - daemonsets
+#       - deployments
+#       - replicasets
+#     verbs:
+#       - get
+#       - list
+#       - watch
+#   - apiGroups:
+#       - batch
+#     resources:
+#       - jobs
+#       - cronjobs
+#     verbs:
+#       - get
+#       - list
+#       - watch
+#   - apiGroups:
+#       - autoscaling
+#     resources:
+#       - horizontalpodautoscalers
+#     verbs:
+#       - get
+#       - list
+#       - watch
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRoleBinding
+# metadata:
+#   name: opentelemetry-collector-k8s-cluster
+# roleRef:
+#   apiGroup: rbac.authorization.k8s.io
+#   kind: ClusterRole
+#   name: opentelemetry-collector-k8s-cluster
+# subjects:
+#   - kind: ServiceAccount
+#     name: opentelemetry-collector-k8s
+#     namespace: monitoring
+# ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -111,8 +111,9 @@ metadata:
   labels:
     app: opentelemetry-collector-k8s
 data:
-  NODE_EXPORTER__HOST: "node-exporter:9100"
   OPENTELEMETRY_COLLECTOR__HOST: "opentelemetry-collector:4317"
+  K8S_STATE_METRICS_HOST: "kube-state-metrics:8080"
+  NODE_EXPORTER__HOST: "node-exporter:9100"
 ---
 apiVersion: apps/v1
 kind: Deployment
