@@ -49,8 +49,13 @@ spec:
               name: user-info-service
           - secretRef:
               name: user-info-service
-      imagePullSecrets:
-        - name: regcred
+        resources:
+          limits:
+            memory: 150Mi
+            cpu: 100m
+          requests:
+            memory: 150Mi
+            cpu: 100m
 ---
 apiVersion: v1
 kind: Service
