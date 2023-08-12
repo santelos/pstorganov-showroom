@@ -34,10 +34,15 @@ spec:
         - containerPort: 4317
         - containerPort: 55679
         env:
-          - name: K8S_NODE_NAME
+          - name: K8S_NODE_IP
             valueFrom:
               fieldRef:
                 fieldPath: status.hostIP
+          - name: K8S_NODE_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: spec.nodeName
         envFrom:
           - configMapRef:
               name: opentelemetry-collector

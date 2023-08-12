@@ -7,7 +7,7 @@ receivers:
   kubeletstats:
     collection_interval: 60s
     auth_type: 'serviceAccount'
-    endpoint: '${env:K8S_NODE_NAME}:10250'
+    endpoint: '${env:K8S_NODE_IP}:10250'
     insecure_skip_verify: true
     extra_metadata_labels:
       - k8s.volume.type
@@ -23,14 +23,6 @@ receivers:
           scrape_interval: 5s
           static_configs:
             - targets: ['0.0.0.0:8888']
-        # - job_name: node-exporter
-        #   scrape_interval: 5s
-        #   static_configs:
-        #     - targets: ['${env:NODE_EXPORTER__HOST}']
-        # - job_name: prometheus-k8s
-        #   scrape_interval: 5s
-        #   static_configs:
-        #     - targets: ['${env:PROMETHEUS_K8S__HOST}']
         - job_name: k8s-state-metrics
           scrape_interval: 60s
           static_configs:
@@ -44,7 +36,9 @@ processors:
   batch:
   k8sattributes:
     auth_type: "serviceAccount"
-  attributes/prom:
+  attributes/k8s-state-metrics:
+    include:
+      services: [k8s-state-metrics]
     actions:
       - key: k8s.node.name
         from_attribute: node
@@ -71,6 +65,13 @@ processors:
         action: upsert
       - key: container
         action: delete
+  attributes/node-exporter:
+    include:
+      services: [node-exporter]
+    actions:
+      - key: k8s.node.name
+        value: ${env:K8S_NODE_NAME}
+        action: upsert
 
 exporters:
   logging:
@@ -88,6 +89,9 @@ extensions:
     path: "/health/status"
 
 service:
+  # telemetry:
+  #   logs:
+  #     level: "debug"
   extensions: [health_check]
   pipelines:
     traces:
@@ -96,7 +100,11 @@ service:
       exporters: [logging]
     metrics:
       receivers: [otlp, prometheus, kubeletstats]
-      processors: [k8sattributes, attributes/prom, batch]
+      processors:
+        - k8sattributes
+        - attributes/k8s-state-metrics
+        - attributes/node-exporter
+        - batch
       exporters: [prometheusremotewrite]
     logs:
       receivers: [otlp]
