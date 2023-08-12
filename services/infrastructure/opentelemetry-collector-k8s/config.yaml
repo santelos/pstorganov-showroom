@@ -1,31 +1,70 @@
 receivers:
   # https://opentelemetry.io/docs/kubernetes/collector/components/#kubeletstats-receiver
-  kubeletstats:
-    collection_interval: 10s
-    auth_type: 'serviceAccount'
-    endpoint: '${env:K8S_NODE_NAME}:10250'
-    insecure_skip_verify: true
-    extra_metadata_labels:
-      - k8s.volume.type
-    metric_groups:
-      - node
-      - pod
-      - container
-      - volume
-  # https://opentelemetry.io/docs/kubernetes/collector/components/#kubernetes-cluster-receiver
-  k8s_cluster:
-    auth_type: serviceAccount
-    node_conditions_to_report:
-      - Ready
-      - MemoryPressure
-    allocatable_types_to_report:
-      - cpu
-      - memory
-      - storage
-      - ephemeral-storage
+  # kubeletstats:
+  #   collection_interval: 10s
+  #   auth_type: 'serviceAccount'
+  #   endpoint: '${env:K8S_NODE_NAME}:10250'
+  #   insecure_skip_verify: true
+  #   extra_metadata_labels:
+  #     - k8s.volume.type
+  #   metric_groups:
+  #     - node
+  #     - pod
+  #     - container
+  #     - volume
+  # # https://opentelemetry.io/docs/kubernetes/collector/components/#kubernetes-cluster-receiver
+  # k8s_cluster:
+  #   auth_type: serviceAccount
+  #   node_conditions_to_report:
+  #     - Ready
+  #     - MemoryPressure
+  #   allocatable_types_to_report:
+  #     - cpu
+  #     - memory
+  #     - storage
+  #     - ephemeral-storage
+  prometheus:
+    config:
+      scrape_configs:
+        # - job_name: otel-collector
+        #   scrape_interval: 60s
+        #   static_configs:
+        #     - targets: ['0.0.0.0:8888']
+        - job_name: k8s-state-metrics
+          scrape_interval: 60s
+          static_configs:
+            - targets: ['${env:K8S_STATE_METRICS_HOST}']
+        - job_name: node-exporter
+          scrape_interval: 60s
+          static_configs:
+            - targets: ['${env:NODE_EXPORTER__HOST}']
 
 processors:
   batch:
+  k8sattributes:
+    passthrough: true
+  # metricstransform/kube:
+  #   transforms:
+  #     - include: ^kube+.
+  #       match_type: regexp
+  #       action: update
+  #       operations:
+  #         - action: update_label
+  #           label: node
+  #           new_label: k8s.node.name
+  #         - action: update_label
+  #           label: namespace
+  #           new_label: k8s.namespace.name
+  #         - action: update_label
+  #           label: pod
+  #           new_label: k8s.pod.name
+  #         - action: update_label
+  #           label: uid
+  #           new_label: k8s.pod.uid
+  #         - action: update_label
+  #           label: container
+  #           new_label: k8s.container.name
+
 
 exporters:
   otlp:
@@ -34,8 +73,11 @@ exporters:
       insecure: true
 
 service:
+  telemetry:
+    logs:
+      level: "debug"
   pipelines:
     metrics:
-      receivers: [kubeletstats, k8s_cluster]
-      processors: [batch]
+      receivers: [prometheus]
+      processors: [k8sattributes, batch]
       exporters: [otlp]
