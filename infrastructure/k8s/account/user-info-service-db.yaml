@@ -74,6 +74,13 @@ spec:
             - mountPath: /var/lib/postgresql/data
               name: user-info-service-db-volume-claim
               subPath: postgres-data
+          resources:
+            limits:
+              memory: 100Mi
+              cpu: 50m
+            requests:
+              memory: 100Mi
+              cpu: 50m
   volumeClaimTemplates:
     - metadata:
         name: user-info-service-db-volume-claim

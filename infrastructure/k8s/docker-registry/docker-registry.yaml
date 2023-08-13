@@ -94,11 +94,23 @@ spec:
                 name: http-secret
           resources:
             limits:
-              memory: 500Mi
+              memory: 50Mi
               cpu: 128m
             requests:
-              memory: 500Mi
+              memory: 50Mi
               cpu: 128m
+          livenessProbe:
+            httpGet:
+              path: "/"
+              port: 5000
+            initialDelaySeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: "/"
+              port: 5000
+            initialDelaySeconds: 5
+            failureThreshold: 1
       volumes:
         - name: basic-auth
           secret:

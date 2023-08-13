@@ -20,7 +20,7 @@ spec:
         image: docker.santelos.com/frontend
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
+          - containerPort: 80
         resources:
           limits:
             memory: 6Mi

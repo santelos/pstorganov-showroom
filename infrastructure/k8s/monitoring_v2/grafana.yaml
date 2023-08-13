@@ -49,12 +49,19 @@ spec:
       - name: grafana
         image: docker.santelos.com/grafana
         ports:
-        - containerPort: 3000
+          - containerPort: 3000
         envFrom:
           - configMapRef:
               name: grafana
           - secretRef:
               name: grafana
+        resources:
+          limits:
+            memory: 200Mi
+            cpu: 50m
+          requests:
+            memory: 200Mi
+            cpu: 50m
 ---
 apiVersion: v1
 kind: Service

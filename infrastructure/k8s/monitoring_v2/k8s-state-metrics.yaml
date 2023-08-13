@@ -187,10 +187,17 @@ spec:
           timeoutSeconds: 5
         name: kube-state-metrics
         ports:
-        - containerPort: 8080
-          name: http-metrics
-        - containerPort: 8081
-          name: telemetry
+          - containerPort: 8080
+            name: http-metrics
+          - containerPort: 8081
+            name: telemetry
+        resources:
+          limits:
+            memory: 50Mi
+            cpu: 25m
+          requests:
+            memory: 50Mi
+            cpu: 25m
         readinessProbe:
           httpGet:
             path: /
