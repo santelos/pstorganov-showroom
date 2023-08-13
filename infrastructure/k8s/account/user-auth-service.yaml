@@ -53,8 +53,13 @@ spec:
               name: user-auth-service
           - secretRef:
               name: user-auth-service
-      imagePullSecrets:
-        - name: regcred
+        resources:
+          limits:
+            memory: 200Mi
+            cpu: 150m
+          requests:
+            memory: 200Mi
+            cpu: 150m
 ---
 apiVersion: v1
 kind: Service

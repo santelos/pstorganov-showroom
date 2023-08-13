@@ -46,6 +46,13 @@ spec:
         envFrom:
           - configMapRef:
               name: opentelemetry-collector
+        resources:
+          limits:
+            memory: 150Mi
+            cpu: 25m
+          requests:
+            memory: 150Mi
+            cpu: 25m
         livenessProbe:
           httpGet:
             path: "/health/status"

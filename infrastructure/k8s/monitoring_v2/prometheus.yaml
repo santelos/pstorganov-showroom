@@ -50,6 +50,25 @@ spec:
             - mountPath: /prometheus
               name: prometheus-volume-claim
               subPath: postgres-data
+          resources:
+            limits:
+              memory: 150Mi
+              cpu: 25m
+            requests:
+              memory: 150Mi
+              cpu: 25m
+          livenessProbe:
+            httpGet:
+              path: "/"
+              port: 9090
+            initialDelaySeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: "/"
+              port: 9090
+            initialDelaySeconds: 5
+            failureThreshold: 1
   volumeClaimTemplates:
     - metadata:
         name: prometheus-volume-claim

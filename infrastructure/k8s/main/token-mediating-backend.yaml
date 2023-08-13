@@ -45,8 +45,8 @@ spec:
         image: docker.santelos.com/token-mediating-backend
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
-        - containerPort: 5005
+          - containerPort: 80
+          - containerPort: 5005
         envFrom:
           - configMapRef:
               name: token-mediating-backend
@@ -57,13 +57,20 @@ spec:
             valueFrom: 
               fieldRef: 
                 fieldPath: metadata.labels['app']
+        resources:
+          limits:
+            memory: 300Mi
+            cpu: 50m
+          requests:
+            memory: 300Mi
+            cpu: 50m
       - name: opentelemetry-sidecar
         image: docker.santelos.com/opentelemetry-collector-sidecar
         imagePullPolicy: Always
         ports:
-        - containerPort: 4317
-        - containerPort: 4318
-        - containerPort: 13133
+          - containerPort: 4317
+          - containerPort: 4318
+          - containerPort: 13133
         env:
           - name: SERVICE_NAMESPACE
             valueFrom: 
@@ -82,11 +89,11 @@ spec:
               name: opentelemetry-sidecar
         resources:
           limits:
-            memory: 300Mi
-            cpu: 128m
+            memory: 50Mi
+            cpu: 50m
           requests:
-            memory: 300Mi
-            cpu: 128m
+            memory: 50Mi
+            cpu: 50m
         livenessProbe:
           httpGet:
             path: "/health/status"

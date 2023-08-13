@@ -74,6 +74,13 @@ spec:
             - mountPath: /var/lib/postgresql/data
               name: grafana-db-volume-claim
               subPath: postgres-data
+          resources:
+            limits:
+              memory: 150Mi
+              cpu: 75m
+            requests:
+              memory: 150Mi
+              cpu: 75m
   volumeClaimTemplates:
     - metadata:
         name: grafana-db-volume-claim
