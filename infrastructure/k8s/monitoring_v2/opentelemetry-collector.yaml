@@ -10,6 +10,17 @@
 #   CLICKHOUSE__PASSWORD: ""
 # ---
 apiVersion: v1
+kind: Secret
+metadata:
+  name: opentelemetry-collector
+  namespace: monitoring
+  labels:
+    app: opentelemetry-collector
+type: Opaque
+data:
+  CLICKHOUSE__PASSWORD: ""
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: opentelemetry-collector
