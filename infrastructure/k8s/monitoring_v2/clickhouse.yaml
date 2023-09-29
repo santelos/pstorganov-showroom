@@ -30,7 +30,7 @@ metadata:
     app: clickhouse
 type: Opaque
 data:
-  CLICKHOUSE_PASSWORD: "UGh3aVhoY0NSUlB5aFZvKjlZWkc4eEBVKllYRmtYSnlSVGgycF95WjdMZ0tXeEZfQng="
+  CLICKHOUSE_PASSWORD: ""
 ---
 apiVersion: v1
 kind: ConfigMap
