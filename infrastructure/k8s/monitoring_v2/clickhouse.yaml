@@ -20,17 +20,17 @@ spec:
           operator: In
           values:
           - pstroganov
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: clickhouse
-  namespace: monitoring
-  labels:
-    app: clickhouse
-type: Opaque
-data:
-  CLICKHOUSE_PASSWORD: ""
+# ---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: clickhouse
+#   namespace: monitoring
+#   labels:
+#     app: clickhouse
+# type: Opaque
+# data:
+#   CLICKHOUSE_PASSWORD: ""
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -10,7 +10,7 @@ RUN ./gradlew dependencies --no-daemon
 COPY src /build/src
 RUN ./gradlew buildFatJar --no-daemon
 
-FROM openjdk:17-slim
+FROM --platform=linux/amd64 openjdk:17-slim
 WORKDIR /app
 COPY --from=build /build/build/libs/app.jar /app/app.jar
 
