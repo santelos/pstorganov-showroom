@@ -1,0 +1,321 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 32,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "bfe9a082-1147-4ce7-a205-dcb88551312b"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TraceId"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 69
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SpanId"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 71
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SeverityText"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 104
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 173
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 18,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "builderOptions": {
+            "database": "otel",
+            "fields": [
+              "TraceId",
+              "SpanId",
+              "SeverityText",
+              "Body"
+            ],
+            "filters": [
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "key": "Timestamp",
+                "operator": "WITH IN DASHBOARD TIME RANGE",
+                "type": "DateTime64(9)",
+                "value": "TODAY"
+              },
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "key": "ServiceName",
+                "operator": "=",
+                "type": "LowCardinality(String)",
+                "value": "grafana"
+              }
+            ],
+            "limit": 100,
+            "mode": "list",
+            "table": "otel_logs"
+          },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "bfe9a082-1147-4ce7-a205-dcb88551312b"
+          },
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "database": "otel",
+              "fields": [
+                "TraceId",
+                "SpanId",
+                "SeverityText",
+                "Body"
+              ],
+              "filters": [
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "key": "Timestamp",
+                  "operator": "WITH IN DASHBOARD TIME RANGE",
+                  "type": "DateTime64(9)",
+                  "value": "TODAY"
+                },
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "key": "ServiceName",
+                  "operator": "=",
+                  "type": "LowCardinality(String)",
+                  "value": "grafana"
+                }
+              ],
+              "limit": 100,
+              "mode": "list",
+              "table": "otel_logs"
+            }
+          },
+          "queryType": "sql",
+          "rawSql": "SELECT \"Timestamp\", \"Body\" \nFROM \"otel\".\"otel_logs\" \nWHERE \n  ( Timestamp  >= $__fromTime AND Timestamp <= $__toTime ) AND \n  ( ServiceName = '${service_name}' ) AND \n  \"Body\" LIKE '${body_like}' \nORDER BY \"Timestamp\" ${order} \nLIMIT ${limit}",
+          "refId": "A",
+          "selectedFormat": 4
+        }
+      ],
+      "title": "Panel Title",
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "ClickHouse",
+    "Logs"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "hydra",
+          "value": "hydra"
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "bfe9a082-1147-4ce7-a205-dcb88551312b"
+        },
+        "definition": "SELECT DISTINCT ON (ServiceName) ServiceName FROM \"otel\".\"otel_logs\" WHERE   ( Timestamp  >= $__fromTime AND Timestamp <= $__toTime ) LIMIT 100",
+        "hide": 0,
+        "includeAll": false,
+        "label": "ServiceName",
+        "multi": false,
+        "name": "service_name",
+        "options": [],
+        "query": "SELECT DISTINCT ON (ServiceName) ServiceName FROM \"otel\".\"otel_logs\" WHERE   ( Timestamp  >= $__fromTime AND Timestamp <= $__toTime ) LIMIT 100",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "DESC",
+          "value": "DESC"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Order",
+        "multi": false,
+        "name": "order",
+        "options": [
+          {
+            "selected": true,
+            "text": "DESC",
+            "value": "DESC"
+          },
+          {
+            "selected": false,
+            "text": "ASC",
+            "value": "ASC"
+          }
+        ],
+        "query": "DESC, ASC",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "100",
+          "value": "100"
+        },
+        "hide": 0,
+        "label": "Limit",
+        "name": "limit",
+        "options": [
+          {
+            "selected": true,
+            "text": "100",
+            "value": "100"
+          }
+        ],
+        "query": "100",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "%",
+          "value": "%"
+        },
+        "hide": 0,
+        "label": "Body Like",
+        "name": "body_like",
+        "options": [
+          {
+            "selected": true,
+            "text": "%",
+            "value": "%"
+          }
+        ],
+        "query": "%",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "ClickHouse - Logs",
+  "uid": "d07c90ff-abb3-42e8-9193-fbe404d74830",
+  "version": 8,
+  "weekStart": ""
+}

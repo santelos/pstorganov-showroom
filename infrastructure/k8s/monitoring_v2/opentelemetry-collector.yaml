@@ -1,3 +1,14 @@
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: opentelemetry-collector
+#   namespace: monitoring
+#   labels:
+#     app: opentelemetry-collector
+# type: Opaque
+# data:
+#   CLICKHOUSE__PASSWORD: ""
+# ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,6 +20,9 @@ data:
   K8S_STATE_METRICS_HOST: "kube-state-metrics:8080"
   NODE_EXPORTER__HOST: "node-exporter:9100"
   PROMETHEUS__HOST: "http://prometheus:9090"
+  CLICKHOUSE__HOST: "tcp://clickhouse:9000?dial_timeout=10s&compress=lz4"
+  CLICKHOUSE__DATABASE: "otel"
+  CLICKHOUSE__USERNAME: "opentelemetry_collector"
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -30,6 +44,7 @@ spec:
       containers:
       - name: opentelemetry-collector
         image: docker.santelos.com/opentelemetry-collector
+        imagePullPolicy: Always
         ports:
         - containerPort: 4317
         - containerPort: 55679
@@ -46,25 +61,41 @@ spec:
         envFrom:
           - configMapRef:
               name: opentelemetry-collector
-        resources:
-          limits:
-            memory: 150Mi
-            cpu: 25m
-          requests:
-            memory: 150Mi
-            cpu: 25m
-        livenessProbe:
-          httpGet:
-            path: "/health/status"
-            port: 13133
-          initialDelaySeconds: 5
-          failureThreshold: 5
-        readinessProbe:
-          httpGet:
-            path: "/health/status"
-            port: 13133
-          initialDelaySeconds: 5
-          failureThreshold: 1
+          - secretRef:
+              name: opentelemetry-collector
+        # resources:
+        #   limits:
+        #     memory: 150Mi
+        #     cpu: 25m
+        #   requests:
+        #     memory: 150Mi
+        #     cpu: 25m
+        # livenessProbe:
+        #   httpGet:
+        #     path: "/health/status"
+        #     port: 13133
+        #   initialDelaySeconds: 5
+        #   failureThreshold: 5
+        # readinessProbe:
+        #   httpGet:
+        #     path: "/health/status"
+        #     port: 13133
+        #   initialDelaySeconds: 5
+        #   failureThreshold: 1
+        volumeMounts:
+          - name: varlogpods
+            mountPath: /var/log/pods
+            readOnly: true
+          - name: varlogcontainers
+            mountPath: /var/log/containers
+            readOnly: true
+      volumes:
+        - name: varlogpods
+          hostPath:
+            path: /var/log/pods
+        - name: varlogcontainers
+          hostPath:
+            path: /var/log/containers
 ---
 apiVersion: v1
 kind: Service
