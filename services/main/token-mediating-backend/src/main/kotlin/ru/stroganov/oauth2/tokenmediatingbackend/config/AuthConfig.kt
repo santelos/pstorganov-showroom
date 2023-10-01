@@ -37,7 +37,6 @@ fun Application.authConfigModule(
                     clientId = oauth2Conf.clientId,
                     clientSecret = oauth2Conf.clientSecret,
                     defaultScopes = listOf("asd:test")
-
                 )
             }
             client = oauth2HttpClient

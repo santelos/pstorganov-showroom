@@ -9,10 +9,10 @@ class ValidationException(
 ) : RuntimeException(errors.toJson())
 
 sealed class DatabaseException(msg: String, cause: Throwable? = null) : RuntimeException(msg, cause) {
-    class DriverException(ex: Throwable) : DatabaseException("Internal DB error [${ex.message}]", ex)
+    data class DriverException(val ex: Throwable) : DatabaseException("Internal DB error [${ex.message}]", ex)
 }
 
 sealed class ServiceException(msg: String, cause: Throwable? = null) : RuntimeException(msg, cause) {
-    class UserIdNotFoundException(userId: UserId) : ServiceException("User not found with ID=[${userId.id}]")
-    class UserLoginNotFound(userLogin: UserLogin) : ServiceException("User not found with LOGIN=[${userLogin.login}]")
+    data class UserIdNotFoundException(val userId: UserId) : ServiceException("User not found with ID=[${userId.id}]")
+    data class UserLoginNotFound(val userLogin: UserLogin) : ServiceException("User not found with LOGIN=[${userLogin.login}]")
 }

@@ -16,6 +16,7 @@ data class NewUser(
     val login: String,
     val password: String,
     val name: String,
+    val roles: Set<String>,
 )
 
 data class UserInfo(
@@ -52,7 +53,8 @@ internal class UserServiceImpl(
         val createUserRepoRequest = CreateUserRepoRequest(
             login = newUser.login,
             passwordHash = passwordHash,
-            name = newUser.name
+            name = newUser.name,
+            roles = newUser.roles
         )
         return usersRepo.createUser(createUserRepoRequest)
     }

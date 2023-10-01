@@ -1,91 +1,115 @@
 package ru.stroganov.showroom.account.userinfoservice.repo
 
-import io.kotest.core.extensions.install
-import io.kotest.core.spec.style.FunSpec
-import io.kotest.extensions.testcontainers.ContainerExtension
-import io.kotest.matchers.shouldBe
+import kotlin.test.*
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.BeforeAll
 import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import ru.stroganov.showroom.account.userinfoservice.service.UserId
 import ru.stroganov.showroom.account.userinfoservice.service.UserLogin
 
 @Testcontainers
-internal class UsersRepoImplTest : FunSpec({
+internal class UsersRepoImplTest {
 
-    val ds = install(ContainerExtension(PostgreSQLContainer("postgres:15"))) {
-        withUsername("postgres")
-        withPassword("postgres")
-        withDatabaseName("postgres")
+    companion object {
+        @Container
+        val mockServer = PostgreSQLContainer("postgres:15").apply {
+            withUsername("postgres")
+            withPassword("postgres")
+            withDatabaseName("postgres")
+        }
+
+        @JvmStatic
+        @BeforeAll
+        fun beforeTest() {
+            migration(mockServer)
+        }
     }
-    val (usersRepo, connectionFactory) = createTestable(ds)
+    private val cr: ConnectionAndRepo by lazy {
+        createTestable(mockServer)
+    }
 
-    beforeSpec { migration(ds) }
-    afterTest { connectionFactory.truncate("users") }
+    @AfterTest
+    fun afterTest() = runBlocking {
+        cr.connectionFactory.truncate("users")
+    }
 
-    test("getUserInfo | Success") {
+    @Test
+    fun `getUserInfo ~~ Success`() = runBlocking {
         val name = "test--name"
-        val userId = connectionFactory.createUser(login = name)
-        val expected = UserInfoRepoResponse.Success(userId, name)
-        val actual = usersRepo.getUserInfo(UserId(userId))
-        actual shouldBe expected
+        val userId = cr.connectionFactory.createUser(login = name)
+        val roles = setOf("test:role")
+        val expected = UserInfoRepoResponse.Success(userId, name, roles)
+        val actual = cr.repo.getUserInfo(UserId(userId))
+        assertEquals(expected, actual)
     }
 
-    test("getUserInfo | UserNotFound") {
-        val userId = connectionFactory.createUser()
+    @Test
+    fun `getUserInfo ~~ UserNotFound`() = runBlocking {
+        val userId = cr.connectionFactory.createUser()
         val expected = UserInfoRepoResponse.UserNotFound
-        val actual = usersRepo.getUserInfo(UserId(userId + 1))
-        actual shouldBe expected
+        val actual = cr.repo.getUserInfo(UserId(userId + 1))
+        assertEquals(expected, actual)
     }
 
-    test("getUserId | Success") {
+    @Test
+    fun `getUserId ~~ Success`() = runBlocking {
         val name = "test--name"
-        val userId = connectionFactory.createUser(login = name)
+        val userId = cr.connectionFactory.createUser(login = name)
         val expected = UserIdRepoResponse.Success(userId)
-        val actual = usersRepo.getUserId(UserLogin(name))
-        actual shouldBe expected
+        val actual = cr.repo.getUserId(UserLogin(name))
+        assertEquals(expected, actual)
     }
 
-    test("getUserId | UserNotFound") {
+    @Test
+    fun `getUserId ~~ UserNotFound`() = runBlocking {
         val name = "test--name"
-        connectionFactory.createUser(login = name)
+        cr.connectionFactory.createUser(login = name)
         val expected = UserIdRepoResponse.UserNotFound
-        val actual = usersRepo.getUserId(UserLogin(name + "broken"))
-        actual shouldBe expected
+        val actual = cr.repo.getUserId(UserLogin(name + "broken"))
+        assertEquals(expected, actual)
     }
 
-    test("getPasswordHash | Success") {
+    @Test
+    fun `getPasswordHash ~~ Success`() = runBlocking {
         val login = "test--login"
         val passwordHash = "test--password-hash"
         val expected = GetPasswordHashResponse.Success(passwordHash)
-        connectionFactory.createUser(login = login, passwordHash = passwordHash)
-        val actual = usersRepo.getPasswordHash(UserLogin(login))
-        actual shouldBe expected
+        cr.connectionFactory.createUser(login = login, passwordHash = passwordHash)
+        val actual = cr.repo.getPasswordHash(UserLogin(login))
+        assertEquals(expected, actual)
     }
 
-    test("getPasswordHash | UserNotFound") {
+    @Test
+    fun `getPasswordHash ~~ UserNotFound`() = runBlocking {
         val login = "test--login"
         val passwordHash = "test--password-hash"
         val expected = GetPasswordHashResponse.UserNotFound
-        connectionFactory.createUser(login = "$login-broken", passwordHash = passwordHash)
-        val actual = usersRepo.getPasswordHash(UserLogin(login))
-        actual shouldBe expected
+        cr.connectionFactory.createUser(login = "$login-broken", passwordHash = passwordHash)
+        val actual = cr.repo.getPasswordHash(UserLogin(login))
+        assertEquals(expected, actual)
     }
 
-    test("createUser") {
+    @Test
+    fun createUser() = runBlocking {
         val createUserRepoRequest = CreateUserRepoRequest(
             login = "test--login",
             passwordHash = "test--password-hash",
             name = "test--name",
+            roles = setOf("test:role")
         )
-        val userId = usersRepo.createUser(createUserRepoRequest)
-        connectionFactory.create().awaitFirst()
-            .createStatement("SELECT login, password_hash, name FROM users WHERE id=$1")
+        val userId = cr.repo.createUser(createUserRepoRequest)
+        cr.connectionFactory.create().awaitFirst()
+            .createStatement("SELECT login, password_hash, name, roles FROM users WHERE id=$1")
             .bind("$1", userId.id).execute().awaitFirst()
             .map { t, _ ->
-                t.get("login", String::class.java) shouldBe createUserRepoRequest.login
-                t.get("password_hash", String::class.java) shouldBe createUserRepoRequest.passwordHash
-                t.get("name", String::class.java) shouldBe createUserRepoRequest.name
+                assertEquals(createUserRepoRequest.login, t.get("login", String::class.java))
+                assertEquals(createUserRepoRequest.passwordHash, t.get("password_hash", String::class.java))
+                assertEquals(createUserRepoRequest.name, t.get("name", String::class.java))
+                assertEquals(createUserRepoRequest.roles, t.get("roles", Array<String>::class.java)!!.toSet())
             }.awaitFirst()
     }
-})
+
+}

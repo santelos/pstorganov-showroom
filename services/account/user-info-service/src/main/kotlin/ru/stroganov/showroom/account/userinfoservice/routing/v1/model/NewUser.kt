@@ -13,5 +13,6 @@ data class NewUserRequest(
 fun NewUserRequest.toService(): NewUser = NewUser(
     login = login,
     password = password,
-    name = name
+    name = name,
+    roles = emptySet(),
 )

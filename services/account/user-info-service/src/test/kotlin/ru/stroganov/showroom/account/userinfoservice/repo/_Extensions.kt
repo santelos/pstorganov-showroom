@@ -45,11 +45,12 @@ internal fun migration(ds: PostgreSQLContainer<*>) {
 internal suspend fun ConnectionFactory.createUser(
     login: String = "test--login",
     passwordHash: String = "test--password-hash",
-    name: String = "test--name"
+    name: String = "test--name",
+    roles: Set<String> = setOf("test:role")
 ): Int {
     val query = """
-            INSERT INTO users(login, password_hash, name)
-            VALUES ($1, $2, $3)
+            INSERT INTO users(login, password_hash, name, roles)
+            VALUES ($1, $2, $3, $4)
             RETURNING id
     """.trimIndent()
     val result = create().awaitFirst()
@@ -57,6 +58,7 @@ internal suspend fun ConnectionFactory.createUser(
         .bind("$1", login)
         .bind("$2", passwordHash)
         .bind("$3", name)
+        .bind("$4", roles.toTypedArray())
         .execute().awaitFirst()
     return result
         .map { t, _ -> t.get("id", Integer::class.java)!!.toInt() }

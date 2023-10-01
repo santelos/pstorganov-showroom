@@ -55,13 +55,7 @@ dependencies {
     implementation("at.favre.lib", "bcrypt", bcryptVersion)
 
     // Test
-    val kotestVersion: String by project
-    testImplementation("io.kotest", "kotest-runner-junit5", kotestVersion)
-    testImplementation("io.kotest", "kotest-assertions-core", kotestVersion)
-    val kotestKtorVersion: String by project
-    testImplementation("io.kotest", "kotest-assertions-ktor", kotestKtorVersion)
-    val kotestTestcontainersVersion: String by project
-    testImplementation("io.kotest.extensions", "kotest-extensions-testcontainers", kotestTestcontainersVersion)
+    testImplementation(kotlin("test"))
     val testContainersVersion: String by project
     testImplementation("org.testcontainers", "testcontainers", testContainersVersion)
     testImplementation("org.testcontainers", "junit-jupiter", testContainersVersion)

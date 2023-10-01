@@ -6,9 +6,14 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import ru.stroganov.showroom.account.userinfoservice.common.DatabaseException
 import ru.stroganov.showroom.account.userinfoservice.service.UserId
 import ru.stroganov.showroom.account.userinfoservice.service.UserLogin
+import java.sql.Array
 
 sealed interface UserInfoRepoResponse {
-    data class Success(val id: Int, val name: String) : UserInfoRepoResponse
+    data class Success(
+        val id: Int,
+        val name: String,
+        val roles: Set<String>,
+    ) : UserInfoRepoResponse
     object UserNotFound : UserInfoRepoResponse
 }
 
@@ -26,11 +31,7 @@ data class CreateUserRepoRequest(
     val login: String,
     val passwordHash: String,
     val name: String,
-)
-
-data class ValidatePasswordRequest(
-    val login: String,
-    val passwordHash: String,
+    val roles: Set<String>,
 )
 
 interface UsersRepo {
@@ -48,7 +49,7 @@ internal class UsersRepoImpl(
 ) : UsersRepo {
 
     private val getUserInfoQuery = """
-        SELECT id, name 
+        SELECT id, name, roles 
         FROM users 
         WHERE id=$1
     """.trimIndent()
@@ -61,7 +62,8 @@ internal class UsersRepoImpl(
         .map { t, _ ->
             UserInfoRepoResponse.Success(
                 id = t.get("id", Integer::class.java)!!.toInt(),
-                name = t.get("name", String::class.java)!!
+                name = t.get("name", String::class.java)!!,
+                roles = t.get("roles", kotlin.Array<String>::class.java)!!.toSet()
             )
         }.awaitFirstOrNull() ?: UserInfoRepoResponse.UserNotFound
 
@@ -101,8 +103,8 @@ internal class UsersRepoImpl(
 
 
     private val createUserQuery = """
-        INSERT INTO users(login, password_hash, name)
-        VALUES ($1, $2, $3)
+        INSERT INTO users(login, password_hash, name, roles)
+        VALUES ($1, $2, $3, $4)
         RETURNING id
     """.trimIndent()
     override suspend fun createUser(newUser: CreateUserRepoRequest): UserId = runCatching {
@@ -111,6 +113,7 @@ internal class UsersRepoImpl(
             .bind("$1", newUser.login)
             .bind("$2", newUser.passwordHash)
             .bind("$3", newUser.name)
+            .bind("$4", newUser.roles.toTypedArray())
             .execute().awaitFirst()
     }.getOrElse { throw DatabaseException.DriverException(it) }
         .map { t, _ ->
