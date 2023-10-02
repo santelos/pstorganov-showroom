@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import ru.stroganov.showroom.account.userinfoservice.routing.v1.model.UserIdResponse
 import ru.stroganov.showroom.account.userinfoservice.service.UserId
 import ru.stroganov.showroom.account.userinfoservice.service.UserLogin
 
@@ -37,63 +38,60 @@ internal class UsersRepoImplTest {
     }
 
     @Test
-    fun `getUserInfo ~~ Success`() = runBlocking {
-        val name = "test--name"
-        val userId = cr.connectionFactory.createUser(login = name)
-        val roles = setOf("test:role")
-        val expected = UserInfoRepoResponse.Success(userId, name, roles)
-        val actual = cr.repo.getUserInfo(UserId(userId))
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `getUserInfo ~~ UserNotFound`() = runBlocking {
-        val userId = cr.connectionFactory.createUser()
-        val expected = UserInfoRepoResponse.UserNotFound
-        val actual = cr.repo.getUserInfo(UserId(userId + 1))
-        assertEquals(expected, actual)
-    }
-
-    @Test
     fun `getUserId ~~ Success`() = runBlocking {
-        val name = "test--name"
-        val userId = cr.connectionFactory.createUser(login = name)
-        val expected = UserIdRepoResponse.Success(userId)
-        val actual = cr.repo.getUserId(UserLogin(name))
+        val login = "test--login"
+        val userId = cr.connectionFactory.createUser(login = login)
+        val expected = UserIdRepoResponse.Success(UserId(userId))
+        val actual = cr.repo.getUserId(UserLogin(login))
         assertEquals(expected, actual)
     }
 
     @Test
     fun `getUserId ~~ UserNotFound`() = runBlocking {
-        val name = "test--name"
-        cr.connectionFactory.createUser(login = name)
+        val login = "test--login"
+        cr.connectionFactory.createUser(login = login)
         val expected = UserIdRepoResponse.UserNotFound
-        val actual = cr.repo.getUserId(UserLogin(name + "broken"))
+        val actual = cr.repo.getUserId(UserLogin("$login--broken"))
         assertEquals(expected, actual)
     }
 
     @Test
-    fun `getPasswordHash ~~ Success`() = runBlocking {
-        val login = "test--login"
+    fun `getUserAuthInfo ~~ Success`() = runBlocking {
         val passwordHash = "test--password-hash"
-        val expected = GetPasswordHashResponse.Success(passwordHash)
-        cr.connectionFactory.createUser(login = login, passwordHash = passwordHash)
-        val actual = cr.repo.getPasswordHash(UserLogin(login))
+        val roles = setOf("test:role")
+        val userId = cr.connectionFactory.createUser(passwordHash = passwordHash, roles = roles)
+        val expected = UserAuthInfoRepoResponse.Success(passwordHash, roles)
+        val actual = cr.repo.getUserAuthInfo(UserId(userId))
         assertEquals(expected, actual)
     }
 
     @Test
-    fun `getPasswordHash ~~ UserNotFound`() = runBlocking {
-        val login = "test--login"
-        val passwordHash = "test--password-hash"
-        val expected = GetPasswordHashResponse.UserNotFound
-        cr.connectionFactory.createUser(login = "$login-broken", passwordHash = passwordHash)
-        val actual = cr.repo.getPasswordHash(UserLogin(login))
+    fun `getUserAuthInfo ~~ UserNotFound`() = runBlocking {
+        val userId = cr.connectionFactory.createUser()
+        val expected = UserAuthInfoRepoResponse.UserNotFound
+        val actual = cr.repo.getUserAuthInfo(UserId(userId + 1))
         assertEquals(expected, actual)
     }
 
     @Test
-    fun createUser() = runBlocking {
+    fun `getUserPublicInfo ~~ Success`() = runBlocking {
+        val name = "test--name"
+        val userId = cr.connectionFactory.createUser(name = name)
+        val expected = UserPublicInfoRepoResponse.Success(name)
+        val actual = cr.repo.getUserPublicInfo(UserId(userId))
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `getUserPublicInfo ~~ UserNotFound`() = runBlocking {
+        val userId = cr.connectionFactory.createUser()
+        val expected = UserPublicInfoRepoResponse.UserNotFound
+        val actual = cr.repo.getUserPublicInfo(UserId(userId + 1))
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `createUser ~~ Success`() = runBlocking {
         val createUserRepoRequest = CreateUserRepoRequest(
             login = "test--login",
             passwordHash = "test--password-hash",
@@ -109,7 +107,7 @@ internal class UsersRepoImplTest {
                 assertEquals(createUserRepoRequest.passwordHash, t.get("password_hash", String::class.java))
                 assertEquals(createUserRepoRequest.name, t.get("name", String::class.java))
                 assertEquals(createUserRepoRequest.roles, t.get("roles", Array<String>::class.java)!!.toSet())
-            }.awaitFirst()
+            }.awaitFirst() as Unit
     }
 
 }

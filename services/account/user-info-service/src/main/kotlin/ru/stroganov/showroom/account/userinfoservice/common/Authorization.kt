@@ -27,6 +27,9 @@ val AuthorizationInterceptors = createRouteScopedPlugin(
         if (principal == null) {
             log.warn { "Authorization is requested, but no principal found in application. Returning Unauthorized" }
             call.respond(HttpStatusCode.Unauthorized)
+        } else if (!principal.isActive()) {
+            log.warn { "Authorization is requested, but principal is not active. Returning Unauthorized" }
+            call.respond(HttpStatusCode.Unauthorized)
         } else if (authorizations.any { !call.authorized(it, principal) }) {
             log.trace { "One of the authorization interceptors is FALSE. Returning Forbidden" }
             call.respond(HttpStatusCode.Forbidden)
@@ -42,6 +45,8 @@ private object AuthorizationHook : Hook<suspend (ApplicationCall) -> Unit> {
         pipeline.intercept(RoleBasedAuthorizationPhase) { handler(call) }
     }
 }
+
+private fun Principal.isActive(): Boolean = (this as OAuth2Principal).active
 
 private fun ApplicationCall.authorized(auth: AuthorizationInterceptor, principal: Principal): Boolean {
     val verifiable = auth.principalToVerifiable(principal)
