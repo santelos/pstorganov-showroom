@@ -3,6 +3,7 @@ package ru.stroganov.showroom.account.userinfoservice.service
 import ru.stroganov.showroom.account.userinfoservice.common.ServiceException
 import ru.stroganov.showroom.account.userinfoservice.repo.*
 import ru.stroganov.showroom.account.userinfoservice.repo.UsersRepoObject
+import ru.stroganov.showroom.account.userinfoservice.routing.v1.model.GetUserAuthInfoResponse
 
 data class UserId(
     val id: Int
@@ -19,8 +20,7 @@ data class NewUser(
     val roles: Set<String>,
 )
 
-data class UserInfo(
-    val id: Int,
+data class UserPublicInfo(
     val name: String,
 )
 
@@ -29,15 +29,16 @@ data class UserCredentials(
     val password: String,
 )
 
-sealed interface UserAuthInfo {
-    data class Invalid(val errors: List<String>) : UserAuthInfo
-    data class Success(val userId: UserId) : UserAuthInfo
-}
+data class UserAuthInfo(
+    val passwordHash: String,
+    val roles: Set<String>,
+)
 
 interface UserService {
+    suspend fun getUserId(userLogin: UserLogin): UserId
+    suspend fun getUserAuthInfo(userId: UserId): UserAuthInfo
+    suspend fun getUserPublicInfo(userId: UserId): UserPublicInfo
     suspend fun createUser(newUser: NewUser): UserId
-    suspend fun getUserInfo(userId: UserId): UserInfo
-    suspend fun getUserAuthInfo(credentials: UserCredentials): UserAuthInfo
 }
 
 internal object UserServiceObject : UserService by UserServiceImpl(
@@ -48,6 +49,30 @@ internal class UserServiceImpl(
     private val usersRepo: UsersRepo,
     private val hashing: Hashing,
 ) : UserService {
+
+    override suspend fun getUserId(userLogin: UserLogin): UserId =
+        when(val result = usersRepo.getUserId(userLogin)) {
+            is UserIdRepoResponse.Success -> result.id
+            UserIdRepoResponse.UserNotFound -> throw ServiceException.UserLoginNotFound(userLogin)
+        }
+
+    override suspend fun getUserAuthInfo(userId: UserId): UserAuthInfo =
+        when(val userAuthInfo = usersRepo.getUserAuthInfo(userId)) {
+            is UserAuthInfoRepoResponse.Success -> UserAuthInfo(
+                passwordHash = userAuthInfo.passwordHash,
+                roles = userAuthInfo.roles
+            )
+            UserAuthInfoRepoResponse.UserNotFound -> throw ServiceException.UserIdNotFoundException(userId)
+        }
+
+    override suspend fun getUserPublicInfo(userId: UserId): UserPublicInfo =
+        when(val result = usersRepo.getUserPublicInfo(userId)) {
+            is UserPublicInfoRepoResponse.Success -> UserPublicInfo(
+                name = result.name
+            )
+            UserPublicInfoRepoResponse.UserNotFound -> throw ServiceException.UserIdNotFoundException(userId)
+        }
+
     override suspend fun createUser(newUser: NewUser): UserId {
         val passwordHash = hashing.hash(newUser.password)
         val createUserRepoRequest = CreateUserRepoRequest(
@@ -58,28 +83,4 @@ internal class UserServiceImpl(
         )
         return usersRepo.createUser(createUserRepoRequest)
     }
-
-    override suspend fun getUserInfo(userId: UserId): UserInfo =
-        when(val result = usersRepo.getUserInfo(userId)) {
-            is UserInfoRepoResponse.Success -> UserInfo(
-                id = result.id,
-                name = result.name
-            )
-            UserInfoRepoResponse.UserNotFound -> throw ServiceException.UserIdNotFoundException(userId)
-        }
-
-    override suspend fun getUserAuthInfo(credentials: UserCredentials): UserAuthInfo =
-        when(val dbPasswordHash = usersRepo.getPasswordHash(credentials.login)) {
-            is GetPasswordHashResponse.Success -> {
-                if (hashing.isEqual(credentials.password, dbPasswordHash.passwordHash)) {
-                    when(val userId = usersRepo.getUserId(credentials.login)) {
-                        is UserIdRepoResponse.Success -> UserAuthInfo.Success(UserId(userId.id))
-                        UserIdRepoResponse.UserNotFound -> throw ServiceException.UserLoginNotFound(credentials.login)
-                    }
-                } else {
-                    UserAuthInfo.Invalid(listOf("Password doesn't match"))
-                }
-            }
-            GetPasswordHashResponse.UserNotFound -> UserAuthInfo.Invalid(listOf("User not found"))
-        }
 }

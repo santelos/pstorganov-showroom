@@ -6,25 +6,20 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import ru.stroganov.showroom.account.userinfoservice.common.DatabaseException
 import ru.stroganov.showroom.account.userinfoservice.service.UserId
 import ru.stroganov.showroom.account.userinfoservice.service.UserLogin
-import java.sql.Array
-
-sealed interface UserInfoRepoResponse {
-    data class Success(
-        val id: Int,
-        val name: String,
-        val roles: Set<String>,
-    ) : UserInfoRepoResponse
-    object UserNotFound : UserInfoRepoResponse
-}
 
 sealed interface UserIdRepoResponse {
-    data class Success(val id: Int) : UserIdRepoResponse
+    data class Success(val id: UserId) : UserIdRepoResponse
     object UserNotFound : UserIdRepoResponse
 }
 
-sealed interface GetPasswordHashResponse {
-    data class Success(val passwordHash: String) : GetPasswordHashResponse
-    object UserNotFound : GetPasswordHashResponse
+sealed interface UserAuthInfoRepoResponse {
+    data class Success(val passwordHash: String, val roles: Set<String>) : UserAuthInfoRepoResponse
+    object UserNotFound : UserAuthInfoRepoResponse
+}
+
+sealed interface UserPublicInfoRepoResponse {
+    data class Success(val name: String) : UserPublicInfoRepoResponse
+    object UserNotFound : UserPublicInfoRepoResponse
 }
 
 data class CreateUserRepoRequest(
@@ -35,9 +30,9 @@ data class CreateUserRepoRequest(
 )
 
 interface UsersRepo {
-    suspend fun getUserInfo(userId: UserId): UserInfoRepoResponse
-    suspend fun getUserId(login: UserLogin): UserIdRepoResponse
-    suspend fun getPasswordHash(login: UserLogin): GetPasswordHashResponse
+    suspend fun getUserId(userLogin: UserLogin): UserIdRepoResponse
+    suspend fun getUserAuthInfo(userId: UserId): UserAuthInfoRepoResponse
+    suspend fun getUserPublicInfo(userId: UserId): UserPublicInfoRepoResponse
     suspend fun createUser(newUser: CreateUserRepoRequest): UserId
 }
 
@@ -48,59 +43,55 @@ internal class UsersRepoImpl(
     private val connectionFactory: ConnectionFactory
 ) : UsersRepo {
 
-    private val getUserInfoQuery = """
-        SELECT id, name, roles 
+    private val getUserIdQuery = """
+        SELECT id 
+        FROM users 
+        WHERE login=$1
+    """.trimIndent()
+    override suspend fun getUserId(userLogin: UserLogin): UserIdRepoResponse = runCatching {
+        connectionFactory.create().awaitFirst()
+            .createStatement(getUserIdQuery)
+            .bind("$1", userLogin.login)
+            .execute().awaitFirst()
+    }.getOrElse { throw DatabaseException.DriverException(it) }
+        .map { t, _ -> UserIdRepoResponse.Success(UserId(
+            t.get("id", Integer::class.java)!!.toInt()
+        )) }.awaitFirstOrNull() ?: UserIdRepoResponse.UserNotFound
+
+    private val getUserAuthQuery = """
+        SELECT password_hash, roles
         FROM users 
         WHERE id=$1
     """.trimIndent()
-    override suspend fun getUserInfo(userId: UserId): UserInfoRepoResponse = runCatching {
+    override suspend fun getUserAuthInfo(userId: UserId): UserAuthInfoRepoResponse = runCatching {
         connectionFactory.create().awaitFirst()
-            .createStatement(getUserInfoQuery)
+            .createStatement(getUserAuthQuery)
             .bind("$1", userId.id)
             .execute().awaitFirst()
     }.getOrElse { throw DatabaseException.DriverException(it) }
         .map { t, _ ->
-            UserInfoRepoResponse.Success(
-                id = t.get("id", Integer::class.java)!!.toInt(),
+            UserAuthInfoRepoResponse.Success(
+                passwordHash = t.get("password_hash", String::class.java)!!,
+                roles = t.get("roles", Array<String>::class.java)!!.toSet()
+            )
+        }.awaitFirstOrNull() ?: UserAuthInfoRepoResponse.UserNotFound
+
+    private val getUserPublicInfoQuery = """
+        SELECT id, name, roles 
+        FROM users 
+        WHERE id=$1
+    """.trimIndent()
+    override suspend fun getUserPublicInfo(userId: UserId): UserPublicInfoRepoResponse = runCatching {
+        connectionFactory.create().awaitFirst()
+            .createStatement(getUserPublicInfoQuery)
+            .bind("$1", userId.id)
+            .execute().awaitFirst()
+    }.getOrElse { throw DatabaseException.DriverException(it) }
+        .map { t, _ ->
+            UserPublicInfoRepoResponse.Success(
                 name = t.get("name", String::class.java)!!,
-                roles = t.get("roles", kotlin.Array<String>::class.java)!!.toSet()
             )
-        }.awaitFirstOrNull() ?: UserInfoRepoResponse.UserNotFound
-
-    private val getUserIdQuery = """
-        SELECT id
-        FROM users 
-        WHERE login=$1
-    """.trimIndent()
-    override suspend fun getUserId(login: UserLogin): UserIdRepoResponse = runCatching {
-        connectionFactory.create().awaitFirst()
-            .createStatement(getUserIdQuery)
-            .bind("$1", login.login)
-            .execute().awaitFirst()
-    }.getOrElse { throw DatabaseException.DriverException(it) }
-        .map { t, _ ->
-            UserIdRepoResponse.Success(
-                id = t.get("id", Integer::class.java)!!.toInt()
-            )
-        }.awaitFirstOrNull() ?: UserIdRepoResponse.UserNotFound
-
-
-    private val validatePasswordQuery = """
-        SELECT password_hash 
-        FROM users 
-        WHERE login=$1
-    """.trimIndent()
-    override suspend fun getPasswordHash(login: UserLogin): GetPasswordHashResponse = runCatching {
-        connectionFactory.create().awaitFirst()
-            .createStatement(validatePasswordQuery)
-            .bind("$1", login.login)
-            .execute().awaitFirst()
-    }.getOrElse { throw DatabaseException.DriverException(it) }
-        .map { t, _ ->
-            GetPasswordHashResponse.Success(t.get("password_hash", String::class.java)!!)
-        }
-        .awaitFirstOrNull() ?: GetPasswordHashResponse.UserNotFound
-
+        }.awaitFirstOrNull() ?: UserPublicInfoRepoResponse.UserNotFound
 
     private val createUserQuery = """
         INSERT INTO users(login, password_hash, name, roles)
