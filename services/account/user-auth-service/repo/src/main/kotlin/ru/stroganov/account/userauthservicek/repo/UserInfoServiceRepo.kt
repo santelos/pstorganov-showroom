@@ -1,90 +1,80 @@
-package ru.stroganov.account.userauthservice.repo
+package ru.stroganov.account.userauthservicek.repo
 
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
-import ru.stroganov.account.userauthservice.common.BaseException.RepoException.CreateUserException
-import ru.stroganov.account.userauthservice.common.BaseException.RepoException.GetUserInfoException
-import ru.stroganov.account.userauthservice.config.AppConfig
+import ru.stroganov.account.userauthservice.common.BaseException.RepoException.*
 import ru.stroganov.account.userauthservice.config.appConfig
-import ru.stroganov.account.userauthservice.repo.config.httpClient
+import ru.stroganov.account.userauthservicek.repo.config.httpClient
 
 @Serializable
-data class UserInfoServiceRepoCreateUserRequest(
+data class CreateUserRepoRequest(
     val login: String,
     val password: String,
     val name: String
 )
 
 @Serializable
-data class UserInfoServiceRepoCreateUserResponse(
+data class CreateUserRepoResponse(
     val userId: Int
 )
 
 @Serializable
-data class UserInfoServiceRepoGetUserAuthInfoRequest(
-    val login: String,
-    val password: String
+data class GetUserIdRepoRequest(
+    val login: String
 )
 
 @Serializable
-data class UserInfoServiceRepoUserAuthInfoResponseInternal(
-    val isValid: Boolean,
-    val errors: List<String>,
+data class GetUserIdRepoResponse(
     val userId: Int
 )
-sealed interface UserInfoServiceRepoUserAuthInfoResponse {
-    data class Success(val userId: Int) : UserInfoServiceRepoUserAuthInfoResponse
-    data class Invalid(val errors: List<String>) : UserInfoServiceRepoUserAuthInfoResponse
-}
+
+@Serializable
+data class GetUserAuthInfoRepoRequest(
+    val userId: Int
+)
+
+@Serializable
+data class GetUserAuthInfoRepoResponse(
+    val passwordHash: String,
+    val roles: Set<String>,
+)
 
 interface UserInfoServiceRepo {
-    suspend fun createUser(
-        request: UserInfoServiceRepoCreateUserRequest
-    ): UserInfoServiceRepoCreateUserResponse
-    suspend fun getUserAuthInfo(
-        request: UserInfoServiceRepoGetUserAuthInfoRequest
-    ): UserInfoServiceRepoUserAuthInfoResponse
+    suspend fun getUserId(request: GetUserIdRepoRequest): GetUserIdRepoResponse
+    suspend fun getUserAuthInfo(request: GetUserAuthInfoRepoRequest): GetUserAuthInfoRepoResponse
+    suspend fun createUser(request: CreateUserRepoRequest): CreateUserRepoResponse
 }
 
 val userInfoServiceRepoImpl: UserInfoServiceRepo by lazy {
     UserInfoServiceRepoImpl(
-        httpClient,
-        appConfig.userInfoService
+        httpClient(appConfig.oauth2Client, appConfig.userInfoService.url)
     )
 }
 internal class UserInfoServiceRepoImpl(
-    private val client: HttpClient,
-    private val config: AppConfig.UserInfoService
+    private val client: HttpClient
 ) : UserInfoServiceRepo {
 
-    override suspend fun createUser(
-        request: UserInfoServiceRepoCreateUserRequest
-    ): UserInfoServiceRepoCreateUserResponse = runCatching {
-        client
-            .post("${config.host}/v1/user") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body<UserInfoServiceRepoCreateUserResponse>()
-    }.getOrElse { throw CreateUserException(request.login, it) }
+    override suspend fun getUserId(request: GetUserIdRepoRequest): GetUserIdRepoResponse = runCatching {
+        client.post("/v1/user/id") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body<GetUserIdRepoResponse>()
+    }.getOrElse { throw HttpClientException(it) }
 
-    override suspend fun getUserAuthInfo(
-        request: UserInfoServiceRepoGetUserAuthInfoRequest
-    ): UserInfoServiceRepoUserAuthInfoResponse = runCatching {
-        client
-            .post("${config.host}/v1/user/auth-info") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }
-            .body<UserInfoServiceRepoUserAuthInfoResponseInternal>()
-            .let {
-                if (it.isValid) {
-                    UserInfoServiceRepoUserAuthInfoResponse.Success(it.userId)
-                } else {
-                    UserInfoServiceRepoUserAuthInfoResponse.Invalid(it.errors)
-                }
-            }
-    }.getOrElse { throw GetUserInfoException(request.login, it) }
+    override suspend fun getUserAuthInfo(request: GetUserAuthInfoRepoRequest): GetUserAuthInfoRepoResponse = runCatching {
+        client.post("/v1/user/auth-info") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body<GetUserAuthInfoRepoResponse>()
+    }.getOrElse { throw HttpClientException(it) }
+
+    override suspend fun createUser(request: CreateUserRepoRequest): CreateUserRepoResponse = runCatching {
+        client.post("/v1/user") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body<CreateUserRepoResponse>()
+    }.getOrElse { throw HttpClientException(it) }
 }

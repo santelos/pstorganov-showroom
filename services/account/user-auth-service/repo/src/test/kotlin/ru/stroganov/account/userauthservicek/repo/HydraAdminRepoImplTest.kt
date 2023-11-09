@@ -1,4 +1,4 @@
-package ru.stroganov.account.userauthservice.repo
+package ru.stroganov.account.userauthservicek.repo
 
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.assertThrows
@@ -14,7 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import ru.stroganov.account.userauthservice.common.BaseException.RepoException.*
 import ru.stroganov.account.userauthservice.config.AppConfig
-import ru.stroganov.account.userauthservice.repo.config.hydraClient
+import ru.stroganov.account.userauthservicek.repo.config.hydraClient
 import sh.ory.hydra.model.AcceptLoginRequest
 import sh.ory.hydra.model.LoginRequest
 import kotlin.test.BeforeTest

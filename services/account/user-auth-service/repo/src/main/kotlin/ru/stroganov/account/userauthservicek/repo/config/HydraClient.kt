@@ -1,4 +1,4 @@
-package ru.stroganov.account.userauthservice.repo.config
+package ru.stroganov.account.userauthservicek.repo.config
 
 import ru.stroganov.account.userauthservice.config.AppConfig
 import sh.ory.hydra.ApiClient

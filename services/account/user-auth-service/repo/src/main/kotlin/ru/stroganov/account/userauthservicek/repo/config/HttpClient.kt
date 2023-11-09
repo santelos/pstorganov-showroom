@@ -1,8 +1,9 @@
-package ru.stroganov.account.userauthservice.repo.config
+package ru.stroganov.account.userauthservicek.repo.config
 
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -51,12 +52,11 @@ internal fun BearerAuthConfig.install(config: AppConfig.Oauth2Client) {
     }
 }
 
-internal fun httpClient(config: AppConfig.Oauth2Client): HttpClient = HttpClient(CIO) {
+internal fun httpClient(config: AppConfig.Oauth2Client, url: String): HttpClient = HttpClient(CIO) {
     install(ContentNegotiation) { json() }
     install(Auth) { bearer { install(config) } }
+    install(DefaultRequest) {
+        url(url)
+    }
     expectSuccess = true
-}
-
-internal val httpClient: HttpClient by lazy {
-    httpClient(appConfig.oauth2Client)
 }

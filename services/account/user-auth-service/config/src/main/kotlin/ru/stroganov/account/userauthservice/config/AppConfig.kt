@@ -7,7 +7,7 @@ data class AppConfig(
     val monitoring: MonitoringConfig
 ) {
     data class UserInfoService(
-        val host: String
+        val url: String
     )
     data class Oauth2Client(
         val clientId: String,

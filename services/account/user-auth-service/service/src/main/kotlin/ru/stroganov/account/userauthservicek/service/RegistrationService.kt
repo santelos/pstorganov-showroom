@@ -2,9 +2,9 @@ package ru.stroganov.account.userauthservice.service
 
 import mu.KotlinLogging
 import ru.stroganov.account.userauthservice.common.UserId
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepo
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepoCreateUserRequest
-import ru.stroganov.account.userauthservice.repo.userInfoServiceRepoImpl
+import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepo
+import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepoCreateUserRequest
+import ru.stroganov.account.userauthservicek.repo.userInfoServiceRepoImpl
 
 data class RegistrationNewServiceRequest(
     val login: String,

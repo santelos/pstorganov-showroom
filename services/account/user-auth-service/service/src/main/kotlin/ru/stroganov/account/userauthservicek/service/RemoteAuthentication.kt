@@ -2,11 +2,11 @@ package ru.stroganov.account.userauthservice.service
 
 import mu.KotlinLogging
 import ru.stroganov.account.userauthservice.common.UserId
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepo
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepoGetUserAuthInfoRequest
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepoUserAuthInfoResponse.Invalid
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepoUserAuthInfoResponse.Success
-import ru.stroganov.account.userauthservice.repo.userInfoServiceRepoImpl
+import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepo
+import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepoGetUserAuthInfoRequest
+import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepoUserAuthInfoResponse.Invalid
+import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepoUserAuthInfoResponse.Success
+import ru.stroganov.account.userauthservicek.repo.userInfoServiceRepoImpl
 
 sealed interface UserAuthInfo {
     data class AuthFailed(val errors: List<String>) : UserAuthInfo

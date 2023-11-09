@@ -1,7 +1,8 @@
-package ru.stroganov.account.userauthservice.repo
+package ru.stroganov.account.userauthservicek.repo
 
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.runBlocking
@@ -17,8 +18,7 @@ import org.testcontainers.containers.MockServerContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import ru.stroganov.account.userauthservice.common.BaseException.RepoException.CreateUserException
-import ru.stroganov.account.userauthservice.common.BaseException.RepoException.GetUserInfoException
+import ru.stroganov.account.userauthservice.common.BaseException.RepoException.*
 import ru.stroganov.account.userauthservice.config.AppConfig
 import kotlin.test.*
 
@@ -35,14 +35,16 @@ internal class UserInfoServiceRepoImplTest {
     }
 
     private val httpClient: HttpClient by lazy {
-        HttpClient(CIO) { install(ContentNegotiation) { json() } }
+        HttpClient(CIO) {
+            install(ContentNegotiation) { json() }
+            install(DefaultRequest) {
+                url("http://${mockServer.host}:${mockServer.serverPort}")
+            }
+        }
     }
 
     private val userInfoServiceRepo: UserInfoServiceRepo by lazy {
-        UserInfoServiceRepoImpl(
-            httpClient,
-            AppConfig.UserInfoService("http://${mockServer.host}:${mockServer.serverPort}")
-        )
+        UserInfoServiceRepoImpl(httpClient)
     }
     private val mockClient: MockServerClient by lazy {
         MockServerClient(mockServer.host, mockServer.serverPort)
@@ -55,13 +57,13 @@ internal class UserInfoServiceRepoImplTest {
 
     @Test
     fun `POSITIVE ~~ createUser`() {
-        val request = UserInfoServiceRepoCreateUserRequest(
+        val request = CreateUserRepoRequest(
             "test-login",
             "test-password",
             "test-name"
         )
 
-        val mockResponse = UserInfoServiceRepoCreateUserResponse(1)
+        val mockResponse = CreateUserRepoResponse(1)
         mockClient.`when`(
             HttpRequest.request("/v1/user").apply {
                 withMethod("POST")
@@ -73,14 +75,14 @@ internal class UserInfoServiceRepoImplTest {
             }
         )
 
-        val expected = UserInfoServiceRepoCreateUserResponse(1)
+        val expected = CreateUserRepoResponse(1)
         val actual = runBlocking { userInfoServiceRepo.createUser(request) }
         assertEquals(expected, actual)
     }
 
     @Test
-    fun `Negative ~~ createUser ~~ request is not successful`() {
-        val request = UserInfoServiceRepoCreateUserRequest(
+    fun `NEGATIVE ~~ createUser ~~ request is not successful`() {
+        val request = CreateUserRepoRequest(
             "test-login",
             "test-password",
             "test-name"
@@ -97,26 +99,63 @@ internal class UserInfoServiceRepoImplTest {
             }
         )
 
-        val actual = assertThrows<CreateUserException> {
+        assertThrows<HttpClientException> {
             runBlocking { userInfoServiceRepo.createUser(request) }
         }
-        assertEquals(request.login, actual.login)
+        mockClient.verify(expectations.first().id, once())
+    }
+
+    @Test
+    fun `POSITIVE ~~ getUserIdInfo`() {
+        val request = GetUserIdRepoRequest("test--login")
+
+        val mockResponse = GetUserIdRepoResponse(1)
+        val expectations = mockClient.`when`(
+            HttpRequest.request("/v1/user/id").apply {
+                withMethod("POST")
+                withBody(json(Json.encodeToString(request)))
+            }
+        ).respond(
+            HttpResponse.response().apply {
+                withBody(json(Json.encodeToString(mockResponse)))
+            }
+        )
+
+        val expected = GetUserIdRepoResponse(1)
+        val actual = runBlocking { userInfoServiceRepo.getUserId(request) }
+        assertEquals(expected, actual)
+        mockClient.verify(expectations.first().id, once())
+    }
+
+    @Test
+    fun `NEGATIVE ~~ getUserIdInfo`() {
+        val request = GetUserIdRepoRequest("test--login")
+
+        val expectations = mockClient.`when`(
+            HttpRequest.request("/v1/user/id").apply {
+                withMethod("POST")
+                withBody(json(Json.encodeToString(request)))
+            }
+        ).respond(
+            HttpResponse.response().apply {
+                withStatusCode(500)
+            }
+        )
+
+        assertThrows<HttpClientException> {
+            runBlocking { userInfoServiceRepo.getUserId(request) }
+        }
         mockClient.verify(expectations.first().id, once())
     }
 
     @Test
     fun `POSITIVE ~~ getUserAuthInfo`() {
-        val request = UserInfoServiceRepoGetUserAuthInfoRequest(
-            "test-login",
-            "test-password"
-        )
+        val request = GetUserAuthInfoRepoRequest(1)
+        val passwordHash = "test--password-hash"
+        val roles = setOf("test:role")
 
-        val mockResponse = UserInfoServiceRepoUserAuthInfoResponseInternal(
-            true,
-            emptyList(),
-            1
-        )
-        mockClient.`when`(
+        val mockResponse = GetUserAuthInfoRepoResponse(passwordHash, roles)
+        val expectations = mockClient.`when`(
             HttpRequest.request("/v1/user/auth-info").apply {
                 withMethod("POST")
                 withBody(json(Json.encodeToString(request)))
@@ -127,45 +166,15 @@ internal class UserInfoServiceRepoImplTest {
             }
         )
 
-        val expected = UserInfoServiceRepoUserAuthInfoResponse.Success(1)
+        val expected = GetUserAuthInfoRepoResponse(passwordHash, roles)
         val actual = runBlocking { userInfoServiceRepo.getUserAuthInfo(request) }
         assertEquals(expected, actual)
+        mockClient.verify(expectations.first().id, once())
     }
 
     @Test
-    fun `NEGATIVE ~~ getUserAuthInfo ~~ business downstream error`() {
-        val request = UserInfoServiceRepoGetUserAuthInfoRequest(
-            "test-login",
-            "test-password"
-        )
-
-        val mockResponse = UserInfoServiceRepoUserAuthInfoResponseInternal(
-            false,
-            listOf("test-error"),
-            0
-        )
-        mockClient.`when`(
-            HttpRequest.request("/v1/user/auth-info").apply {
-                withMethod("POST")
-                withBody(json(Json.encodeToString(request)))
-            }
-        ).respond(
-            HttpResponse.response().apply {
-                withBody(json(Json.encodeToString(mockResponse)))
-            }
-        )
-
-        val expected = UserInfoServiceRepoUserAuthInfoResponse.Invalid(listOf("test-error"))
-        val actual = runBlocking { userInfoServiceRepo.getUserAuthInfo(request) }
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `NEGATIVE ~~ getUserAuthInfo ~~ request is not successful`() {
-        val request = UserInfoServiceRepoGetUserAuthInfoRequest(
-            "test-login",
-            "test-password"
-        )
+    fun `NEGATIVE ~~ getUserAuthInfo`() {
+        val request = GetUserAuthInfoRepoRequest(1)
 
         val expectations = mockClient.`when`(
             HttpRequest.request("/v1/user/auth-info").apply {
@@ -178,10 +187,9 @@ internal class UserInfoServiceRepoImplTest {
             }
         )
 
-        val actual = assertThrows<GetUserInfoException> {
+        assertThrows<HttpClientException> {
             runBlocking { userInfoServiceRepo.getUserAuthInfo(request) }
         }
-        assertEquals(request.login, actual.login)
         mockClient.verify(expectations.first().id, once())
     }
 }

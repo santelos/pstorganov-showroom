@@ -1,0 +1,9 @@
+modules:
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      follow_redirects: true
+  icmp:
+    prober: icmp
+    timeout: 5s

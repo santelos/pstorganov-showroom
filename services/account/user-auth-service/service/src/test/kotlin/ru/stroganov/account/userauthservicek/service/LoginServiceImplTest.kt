@@ -9,9 +9,9 @@ import org.junit.jupiter.api.assertThrows
 import ru.stroganov.account.userauthservice.common.BaseException.RepoException.AcceptLoginException
 import ru.stroganov.account.userauthservice.common.BaseException.RepoException.GetLoginRequestException
 import ru.stroganov.account.userauthservice.common.UserId
-import ru.stroganov.account.userauthservice.repo.AcceptLoginRepoResponse
-import ru.stroganov.account.userauthservice.repo.HydraAdminRepo
-import ru.stroganov.account.userauthservice.repo.LoginRequestResponse
+import ru.stroganov.account.userauthservicek.repo.AcceptLoginRepoResponse
+import ru.stroganov.account.userauthservicek.repo.HydraAdminRepo
+import ru.stroganov.account.userauthservicek.repo.LoginRequestResponse
 import kotlin.test.*
 
 class LoginServiceImplTest {

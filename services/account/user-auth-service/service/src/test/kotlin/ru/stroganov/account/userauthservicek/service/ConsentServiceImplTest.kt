@@ -8,9 +8,11 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.assertThrows
 import ru.stroganov.account.userauthservice.common.BaseException.RepoException.AcceptConsentException
 import ru.stroganov.account.userauthservice.common.BaseException.RepoException.GetConsentException
-import ru.stroganov.account.userauthservice.repo.AcceptConsentRepoResponse
-import ru.stroganov.account.userauthservice.repo.GetConsentRepoResponse
-import ru.stroganov.account.userauthservice.repo.HydraAdminRepo
+import ru.stroganov.account.userauthservicek.repo.AcceptConsentRepoResponse
+import ru.stroganov.account.userauthservicek.repo.GetConsentRepoResponse
+import ru.stroganov.account.userauthservicek.repo.HydraAdminRepo
+import ru.stroganov.account.userauthservicek.service.ConsentServiceImpl
+import ru.stroganov.account.userauthservicek.service.GetConsentResponse
 import kotlin.test.*
 
 internal class ConsentServiceImplTest {
