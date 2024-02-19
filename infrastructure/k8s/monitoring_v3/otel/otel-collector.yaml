@@ -1,0 +1,248 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: otel-collector-k8s-metrics-reader
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/metrics
+      - services
+      - endpoints
+      - pods
+    verbs: ["get", "list", "watch"]
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: otel-collector-k8sattributesprocessor
+rules:
+- apiGroups: [""]
+  resources: ["pods", "namespaces", "nodes"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["apps"]
+  resources: ["replicasets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["extensions"]
+  resources: ["replicasets"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-collector
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-collector-k8s-metrics-reader-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: otel-collector-k8s-metrics-reader
+subjects:
+- kind: ServiceAccount
+  name: otel-collector
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-collector-k8sattributesprocessor-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: otel-collector-k8sattributesprocessor
+subjects:
+- kind: ServiceAccount
+  name: otel-collector
+  namespace: monitoring
+---
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+  namespace: monitoring
+spec:
+  mode: statefulset
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.93.0
+  serviceAccount: otel-collector
+  env:
+    - name: KUBE_NODE_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: spec.nodeName
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+      prometheus/otel:
+        config:
+          scrape_configs:
+            - job_name: otel-collector
+              scrape_interval: 15s
+              static_configs:
+                - targets: [localhost:8888]
+      prometheus/k8s:
+        config:
+          scrape_configs:
+            - job_name: node-exporter
+              scrape_interval: 15s
+              static_configs:
+                - targets: [node-exporter:9100]
+            - job_name: kube-state-metrics
+              scrape_interval: 15s
+              static_configs:
+                - targets: [kube-state-metrics:8080]
+            - job_name: kube-state-metrics-telemetry
+              scrape_interval: 15s
+              static_configs:
+                - targets: [kube-state-metrics:8081]
+            - job_name: kube-cadvisor
+              scrape_interval: 15s
+              scheme: https
+              metrics_path: /metrics/cadvisor
+              kubernetes_sd_configs:
+                - role: node
+              tls_config:
+                insecure_skip_verify: true
+              authorization:
+                credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+            - job_name: kube-kubelet
+              scrape_interval: 15s
+              scheme: https
+              metrics_path: /metrics
+              kubernetes_sd_configs:
+                - role: node
+              tls_config:
+                insecure_skip_verify: true
+              authorization:
+                credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              relabel_configs:
+                - action: labelmap
+                  regex: __meta_kubernetes_node_label_(.+)
+            - job_name: kube-coredns
+              scrape_interval: 15s
+              static_configs:
+                - targets: [kube-dns.kube-system:9153]
+      prometheus/external:
+        config:
+          scrape_configs:
+            - job_name: yace-exporter
+              scrape_interval: 5m
+              static_configs:
+                - targets: [yace-exporter:5000]
+      fluentforward:
+        endpoint: 0.0.0.0:8006
+
+    processors:
+      batch:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 50
+        spike_limit_percentage: 30
+      k8sattributes:
+        auth_type: "serviceAccount"
+        filter:
+          node_from_env_var: KUBE_NODE_NAME
+        extract:
+          metadata:
+            - k8s.pod.name
+            - k8s.deployment.name
+            - k8s.namespace.name
+            - k8s.node.name
+      transform/fluentbit/pre:
+        log_statements:
+          - context: log
+            statements:
+              - set(resource.attributes["k8s.pod.uid"], attributes["fluent.kubernetes_pod_id"])
+              - delete_key(attributes, "fluent.kubernetes_pod_id")
+              - set(resource.attributes["fluent.tag"], attributes["fluent.tag"])
+              - delete_key(attributes, "fluent.tag")
+              - set(resource.attributes["service.name"], attributes["otel.service_name"])
+              - delete_key(attributes, "otel.service_name")
+      k8sattributes/fluentbit:
+        auth_type: "serviceAccount"
+        filter:
+          node_from_env_var: KUBE_NODE_NAME
+        extract:
+          metadata:
+            - k8s.deployment.name
+            - k8s.namespace.name
+            - k8s.pod.name
+            - k8s.node.name
+        pod_association:
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.uid
+      attributes/loki:
+        actions:
+          - action: insert
+            key: loki.attribute.labels
+            value: level, ts
+      resource/loki:
+        attributes:
+          - action: insert
+            key: loki.resource.labels
+            value: service.name, k8s.deployment.name, k8s.namespace.name, k8s.pod.name, k8s.pod.uid, k8s.node.name
+    
+    exporters: 
+      debug:
+        verbosity: detailed
+      prometheusremotewrite:
+        endpoint: http://prometheus:9090/api/v1/write
+        tls:
+          insecure: true
+        resource_to_telemetry_conversion:
+          enabled: true
+      loki:
+        endpoint: http://loki:3100/loki/api/v1/push
+
+    service:
+      telemetry:
+        # logs:
+        #   level: "debug"
+        metrics:
+          address: localhost:8888
+          level: detailed
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [debug]
+        metrics:
+          receivers: [otlp, prometheus/otel, prometheus/k8s, prometheus/external]
+          processors: [memory_limiter, k8sattributes, batch]
+          exporters: [prometheusremotewrite]
+        logs/apps:
+          receivers: [otlp]
+          processors: 
+            - memory_limiter
+            - k8sattributes
+            - batch
+          exporters: [loki]
+        logs/fluentbit:
+          receivers: [fluentforward]
+          processors: 
+            - memory_limiter
+            - transform/fluentbit/pre
+            - k8sattributes/fluentbit
+            - attributes/loki
+            - resource/loki
+            - batch
+          exporters: [loki]

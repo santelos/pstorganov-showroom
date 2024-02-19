@@ -72,6 +72,9 @@ spec:
           - mountPath: /downloads
             name: deluge-volume-claim
             subPath: downloads
+          - mountPath: /config
+            name: deluge-volume-claim
+            subPath: config
   volumeClaimTemplates:
     - metadata:
         name: deluge-volume-claim

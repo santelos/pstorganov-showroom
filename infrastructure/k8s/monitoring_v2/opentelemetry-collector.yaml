@@ -7,7 +7,7 @@ metadata:
     app: opentelemetry-collector
 type: Opaque
 data:
-  CLICKHOUSE__PASSWORD: "Q2huSFRWeTlEOGI3V2FLSkpmVGJyVXhjRnRMaXh2ejNtZnp3RldwaXdEWnVCTmtpQTI="
+  CLICKHOUSE__PASSWORD: ""
 ---
 apiVersion: v1
 kind: ConfigMap

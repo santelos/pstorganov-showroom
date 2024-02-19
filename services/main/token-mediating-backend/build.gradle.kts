@@ -35,10 +35,17 @@ dependencies {
     // Logger
     val logbackVersion: String by project
     implementation("ch.qos.logback", "logback-classic", logbackVersion)
+    val ecsLoggingVersion: String by project
+    implementation("co.elastic.logging", "logback-ecs-encoder", ecsLoggingVersion)
+
 }
 
 kotlin {
     jvmToolchain(17)
+}
+
+dependencyLocking {
+    lockAllConfigurations()
 }
 
 application {

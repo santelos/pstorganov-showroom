@@ -8,7 +8,6 @@
 # type: Opaque
 # data:
 #   DATABASE__PASSWORD: ""
-#   ADMIN__EMAIL: ""
 #   SECRET_KEY: ""
 ---
 apiVersion: v1
@@ -47,23 +46,30 @@ spec:
         supplementalGroups:
           - 0  
       containers:
-      - name: grafana
-        image: docker.santelos.com/grafana
-        imagePullPolicy: Always
-        ports:
-          - containerPort: 3000
-        envFrom:
-          - configMapRef:
-              name: grafana
-          - secretRef:
-              name: grafana
-        resources:
-          limits:
-            memory: 200Mi
-            cpu: 50m
-          requests:
-            memory: 200Mi
-            cpu: 50m
+        - name: grafana
+          image: grafana/grafana-oss:10.3.1
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: grafana-config
+              mountPath: /etc/grafana
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: grafana
+            - secretRef:
+                name: grafana
+          resources:
+            requests:
+              memory: 200Mi
+              cpu: 150m
+            limits:
+              memory: 200Mi
+              cpu: 200m
+      volumes:
+        - name: grafana-config
+          configMap:
+            name: grafana-config
 ---
 apiVersion: v1
 kind: Service

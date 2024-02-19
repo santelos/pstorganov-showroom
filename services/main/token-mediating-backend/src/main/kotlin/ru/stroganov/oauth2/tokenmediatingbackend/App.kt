@@ -22,7 +22,6 @@ fun main() {
 }
 
 private fun Application.serverConfig() {
-    install(CallLogging)
     install(ContentNegotiation) {
         json()
     }

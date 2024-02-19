@@ -1,16 +1,8 @@
 apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    app.kubernetes.io/instance: lishan-learn
-    app.kubernetes.io/name: lishan-learn
-  name: lishan-learn
----
-apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: lishan-learn-db
-  namespace: lishan-learn
+  name: grafana-db
+  namespace: monitoring
 spec:
   capacity:
     storage: 10Gi
@@ -19,7 +11,7 @@ spec:
   - ReadWriteOnce
   storageClassName: local-storage
   local:
-    path: /mnt/md0/lishan-learn-db
+    path: /mnt/md0/grafana-db
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -32,10 +24,10 @@ spec:
 # apiVersion: v1
 # kind: Secret
 # metadata:
-#   name: lishan-learn-db
-#   namespace: lishan-learn
+#   name: grafana-db
+#   namespace: monitoring
 #   labels:
-#     app: lishan-learn-db
+#     app: grafana-db
 # type: Opaque
 # data:
 #   POSTGRES_PASSWORD: ""
@@ -43,50 +35,57 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: lishan-learn-db
-  namespace: lishan-learn
+  name: grafana-db
+  namespace: monitoring
   labels:
-    app: lishan-learn-db
+    app: grafana-db
 data:
-  POSTGRES_USER: postgres
-  POSTGRES_DB: postgres
+  POSTGRES_USER: grafana
+  POSTGRES_DB: grafana
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: lishan-learn-db
-  namespace: lishan-learn
+  name: grafana-db
+  namespace: monitoring
 spec:
   replicas: 1
-  serviceName: lishan-learn-db
+  serviceName: grafana-db
   selector:
     matchLabels:
-      app: lishan-learn-db
+      app: grafana-db
   template:
     metadata:
       labels:
-        app: lishan-learn-db
+        app: grafana-db
     spec:
       containers:
-        - name: lishan-learn-db
+        - name: grafana-db
           image: postgres:14
           imagePullPolicy: "IfNotPresent"
           ports:
             - containerPort: 5432
           envFrom:
             - configMapRef:
-                name: lishan-learn-db
+                name: grafana-db
             - secretRef:
-                name: lishan-learn-db
+                name: grafana-db
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
-              name: lishan-learn-db-volume-claim
+              name: grafana-db-volume-claim
               subPath: postgres-data
+          resources:
+            limits:
+              memory: 150Mi
+              cpu: 75m
+            requests:
+              memory: 150Mi
+              cpu: 75m
   volumeClaimTemplates:
     - metadata:
-        name: lishan-learn-db-volume-claim
+        name: grafana-db-volume-claim
         labels:
-          app: lishan-learn-db
+          app: grafana-db
       spec:
         storageClassName: local-storage
         accessModes:
@@ -98,14 +97,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: lishan-learn-db
-  namespace: lishan-learn
+  name: grafana-db
+  namespace: monitoring
   labels:
-    app: lishan-learn-db
+    app: grafana-db
 spec:
-  type: NodePort
   selector:
-    app: lishan-learn-db
+    app: grafana-db
   ports:
   - protocol: TCP
     port: 5432
