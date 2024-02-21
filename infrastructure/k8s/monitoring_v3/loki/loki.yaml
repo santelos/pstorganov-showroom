@@ -19,15 +19,22 @@ spec:
         - name: loki
           image: grafana/loki:2.9.4
           imagePullPolicy: Always
-          # volumeMounts:
-          #   - name: loki-config
-          #     mountPath: /etc/loki
+          volumeMounts:
+            - name: loki-config
+              mountPath: /etc/loki
           ports:
             - containerPort: 3100
-      # volumes:
-      #   - name: loki-config
-      #     configMap:
-      #       name: loki-config
+          resources:
+            requests:
+              memory: 500Mi
+              cpu: 250m
+            limits:
+              memory: 500Mi
+              cpu: 250m
+      volumes:
+        - name: loki-config
+          configMap:
+            name: loki-config
 ---
 apiVersion: v1
 kind: Service

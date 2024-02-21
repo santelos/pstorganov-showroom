@@ -8,4 +8,4 @@ configMapGenerator:
     options:
       disableNameSuffixHash: true
     files:
-      - loki.ini=loki-config.ini
+      - local-config.yaml=loki-config.yaml

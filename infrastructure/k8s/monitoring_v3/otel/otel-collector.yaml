@@ -147,8 +147,21 @@ spec:
               scrape_interval: 5m
               static_configs:
                 - targets: [yace-exporter:5000]
+            - job_name: fluentbit
+              scrape_interval: 15s
+              metrics_path: /api/v2/metrics/prometheus
+              static_configs:
+                - targets: [fluentbit:2020]
+            - job_name: prometheus
+              scrape_interval: 15s
+              static_configs:
+                - targets: [prometheus:9090]
+            - job_name: loki
+              scrape_interval: 15s
+              static_configs:
+                - targets: [loki:3100]
       fluentforward:
-        endpoint: 0.0.0.0:8006
+        endpoint: localhost:8006
 
     processors:
       batch:
