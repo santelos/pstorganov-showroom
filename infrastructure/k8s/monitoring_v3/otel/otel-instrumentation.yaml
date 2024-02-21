@@ -1,0 +1,31 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: auto
+  namespace: monitoring
+spec:
+  exporter:
+    endpoint: http://otel-collector-collector.monitoring:4317
+  env:
+    - name: OTEL_TRACES_EXPORTER
+      value: otlp
+    - name: OTEL_METRICS_EXPORTER
+      value: otlp
+    - name: OTEL_LOGS_EXPORTER
+      value: otlp
+  propagators:
+    - tracecontext
+    - baggage
+  sampler:
+    type: parentbased_traceidratio
+    argument: "0.85"
+  java:
+    env:
+    - name: OTEL_JAVAAGENT_DEBUG
+      value: "false"
+    - name: OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED
+      value: "false"
+    - name: OTEL_INSTRUMENTATION_MICROMETER_ENABLED
+      value: "true"
+    # - name: OTEL_INSTRUMENTATION_LOGBACK_ENABLED
+    #   value: "true"

@@ -1,0 +1,15 @@
+services:
+  tmb:
+    build: .
+    environment:
+      OAUTH2__PROVIDER_URL: "https://id.santelos.com/o"
+      OAUTH2__PROVIDER_INTERNAL_URL: "http://hydra.account.svc.cluster.local:4444"
+      OAUTH2__CALLBACK_URL: "https://santelos.com/o"
+      SUCCESS_REDIRECT: "https://santelos.com"
+      OAUTH2__CLIENT_ID: ""
+      OAUTH2__CLIENT_SECRET: ""
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel:4317"
+      OTEL_LOGS_EXPORTER: "otlp"
+  otel:
+    image: docker.santelos.com/opentelemetry-collector-sidecar
+

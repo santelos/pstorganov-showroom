@@ -23,6 +23,7 @@ data:
   DATABASE__USER: "grafana"
   DATABASE__NAME: "grafana"
   SERVER__ROOT_URL: "https://grafana.santelos.com"
+  GF_INSTALL_PLUGINS: "grafana-clickhouse-datasource"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -48,6 +49,7 @@ spec:
       containers:
       - name: grafana
         image: docker.santelos.com/grafana
+        imagePullPolicy: Always
         ports:
           - containerPort: 3000
         envFrom:

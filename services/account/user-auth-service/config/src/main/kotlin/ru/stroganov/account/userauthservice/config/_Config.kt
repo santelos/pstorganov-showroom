@@ -3,7 +3,7 @@ package ru.stroganov.account.userauthservice.config
 val appConfig : AppConfig by lazy {
     AppConfig(
         userInfoService = AppConfig.UserInfoService(
-            host = System.getenv("USER_INFO_SERVICE__URL")
+            url = System.getenv("USER_INFO_SERVICE__URL")
         ),
         oauth2Client = AppConfig.Oauth2Client(
             clientId = System.getenv("OAUTH2__MAIN__CLIENT_ID"),

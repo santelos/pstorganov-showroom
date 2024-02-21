@@ -5,7 +5,7 @@ metadata:
     app.kubernetes.io/instance: docker-registry
     app.kubernetes.io/name: docker-registry
   name: docker-registry
-# ---
+---
 # apiVersion: v1
 # kind: Secret
 # metadata:
@@ -15,15 +15,6 @@ metadata:
 # data:
 #   htpasswd: ""
 # ---
-# apiVersion: v1
-# kind: Secret
-# metadata:
-#   name: http-secret
-#   namespace: docker-registry
-# type: Opaque
-# data:
-#   REGISTRY_HTTP_SECRET: ""
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -90,8 +81,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: docker-registry
-            - secretRef:
-                name: http-secret
           resources:
             limits:
               memory: 50Mi

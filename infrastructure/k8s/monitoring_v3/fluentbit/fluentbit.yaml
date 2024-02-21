@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app.kubernetes.io/name: fluentbit
+  name: fluentbit
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentbit
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: fluentbit
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      serviceAccountName: fluentbit
+      automountServiceAccountToken: true
+      containers:
+        - name: fluentbit
+          image: cr.fluentbit.io/fluent/fluent-bit:2.2.2
+          volumeMounts:
+            - name: fluentbit-config
+              mountPath: /fluent-bit/etc
+            - mountPath: /var/log
+              name: var-log
+              readOnly: true
+      volumes:
+        - name: fluentbit-config
+          configMap:
+            name: fluentbit-config
+        - hostPath:
+            path: /var/log
+          name: var-log

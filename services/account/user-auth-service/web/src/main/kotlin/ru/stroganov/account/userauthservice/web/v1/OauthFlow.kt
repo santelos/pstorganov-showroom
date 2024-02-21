@@ -8,9 +8,9 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 import kotlinx.serialization.Serializable
 import ru.stroganov.account.userauthservice.common.UserId
-import ru.stroganov.account.userauthservice.service.ConsentService
+import ru.stroganov.account.userauthservicek.service.ConsentService
 import ru.stroganov.account.userauthservice.service.LoginService
-import ru.stroganov.account.userauthservice.service.consentServiceImpl
+import ru.stroganov.account.userauthservicek.service.consentServiceImpl
 import ru.stroganov.account.userauthservice.service.loginServiceImpl
 import ru.stroganov.account.userauthservice.web.config.BASIC_AUTH
 

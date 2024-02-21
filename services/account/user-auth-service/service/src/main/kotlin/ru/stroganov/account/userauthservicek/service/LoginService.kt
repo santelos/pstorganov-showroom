@@ -2,8 +2,8 @@ package ru.stroganov.account.userauthservice.service
 
 import mu.KotlinLogging
 import ru.stroganov.account.userauthservice.common.UserId
-import ru.stroganov.account.userauthservice.repo.HydraAdminRepo
-import ru.stroganov.account.userauthservice.repo.hydraAdminRepoImpl
+import ru.stroganov.account.userauthservicek.repo.HydraAdminRepo
+import ru.stroganov.account.userauthservicek.repo.hydraAdminRepoImpl
 
 interface LoginService {
     suspend fun acceptLogin(user: UserId, loginRequest: String): String

@@ -1,15 +1,15 @@
-# apiVersion: v1
-# kind: Secret
-# metadata:
-#   name: token-mediating-backend
-#   namespace: main
-#   labels:
-#     app: token-mediating-backend
-# type: Opaque
-# data:
-#   OAUTH2__CLIENT_ID: ""
-#   OAUTH2__CLIENT_SECRET: ""
-# ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: token-mediating-backend
+  namespace: main
+  labels:
+    app: token-mediating-backend
+type: Opaque
+data:
+  OAUTH2__CLIENT_ID: ""
+  OAUTH2__CLIENT_SECRET: ""
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -39,6 +39,9 @@ spec:
     metadata:
       labels:
         app: token-mediating-backend
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "monitoring/auto"
+        fluentbit.io/exclude: "true"
     spec:
       containers:
       - name: token-mediating-backend
@@ -52,60 +55,13 @@ spec:
               name: token-mediating-backend
           - secretRef:
               name: token-mediating-backend
-        env: 
-          - name: OTEL_SERVICE_NAME
-            valueFrom: 
-              fieldRef: 
-                fieldPath: metadata.labels['app']
         resources:
           limits:
-            memory: 300Mi
-            cpu: 50m
+            memory: 500Mi
+            cpu: 200m
           requests:
-            memory: 300Mi
-            cpu: 50m
-      - name: opentelemetry-sidecar
-        image: docker.santelos.com/opentelemetry-collector-sidecar
-        imagePullPolicy: Always
-        ports:
-          - containerPort: 4317
-          - containerPort: 4318
-          - containerPort: 13133
-        env:
-          - name: SERVICE_NAMESPACE
-            valueFrom: 
-              fieldRef: 
-                fieldPath: metadata.namespace
-          - name: SERVICE_INSTANCE_ID
-            valueFrom: 
-              fieldRef: 
-                fieldPath: metadata.name
-          - name: SERVICE_VERSION
-            valueFrom: 
-              fieldRef: 
-                fieldPath: metadata.name
-        envFrom:
-          - configMapRef:
-              name: opentelemetry-sidecar
-        resources:
-          limits:
-            memory: 50Mi
-            cpu: 50m
-          requests:
-            memory: 50Mi
-            cpu: 50m
-        livenessProbe:
-          httpGet:
-            path: "/health/status"
-            port: 13133
-          initialDelaySeconds: 5
-          failureThreshold: 5
-        readinessProbe:
-          httpGet:
-            path: "/health/status"
-            port: 13133
-          initialDelaySeconds: 5
-          failureThreshold: 1
+            memory: 500Mi
+            cpu: 200m
 ---
 apiVersion: v1
 kind: Service

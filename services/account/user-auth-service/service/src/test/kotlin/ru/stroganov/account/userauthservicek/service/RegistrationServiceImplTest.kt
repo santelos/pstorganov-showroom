@@ -8,9 +8,9 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.assertThrows
 import ru.stroganov.account.userauthservice.common.BaseException.RepoException.CreateUserException
 import ru.stroganov.account.userauthservice.common.UserId
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepo
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepoCreateUserRequest
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepoCreateUserResponse
+import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepo
+import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepoCreateUserRequest
+import ru.stroganov.account.userauthservicek.repo.CreateUserRepoResponse
 import kotlin.test.*
 
 class RegistrationServiceImplTest {
@@ -26,7 +26,7 @@ class RegistrationServiceImplTest {
             "test-name"
         )
 
-        val response = UserInfoServiceRepoCreateUserResponse(1)
+        val response = CreateUserRepoResponse(1)
         coEvery { userServiceRepo.createUser(any()) } returns response
 
         val expected = UserId(1)

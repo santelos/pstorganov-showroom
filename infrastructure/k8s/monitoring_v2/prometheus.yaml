@@ -62,12 +62,14 @@ spec:
               path: "/"
               port: 9090
             initialDelaySeconds: 5
+            timeoutSeconds: 10
             failureThreshold: 5
           readinessProbe:
             httpGet:
               path: "/"
               port: 9090
             initialDelaySeconds: 5
+            timeoutSeconds: 10
             failureThreshold: 1
   volumeClaimTemplates:
     - metadata:

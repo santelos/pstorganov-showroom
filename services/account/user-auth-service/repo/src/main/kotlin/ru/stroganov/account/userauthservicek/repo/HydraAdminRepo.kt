@@ -1,9 +1,9 @@
-package ru.stroganov.account.userauthservice.repo
+package ru.stroganov.account.userauthservicek.repo
 
 import mu.KotlinLogging
 import ru.stroganov.account.userauthservice.common.BaseException.RepoException.*
 import ru.stroganov.account.userauthservice.config.appConfig
-import ru.stroganov.account.userauthservice.repo.config.hydraClient
+import ru.stroganov.account.userauthservicek.repo.config.hydraClient
 import sh.ory.hydra.ApiCallback
 import sh.ory.hydra.ApiException
 import sh.ory.hydra.api.AdminApi
@@ -19,9 +19,9 @@ data class AcceptConsentRepoResponse(
 )
 
 data class GetConsentRepoResponse(
-    val requestedAccessTokenAudience: List<String>?,
-    val requestedScope: List<String>?,
-    val subject: String?
+    val requestedAccessTokenAudience: List<String>,
+    val requestedScope: List<String>,
+    val subject: String
 )
 
 data class LoginRequestResponse(
@@ -36,7 +36,7 @@ interface HydraAdminRepo {
     suspend fun getLoginRequest(loginRequestId: String): LoginRequestResponse
     suspend fun acceptLogin(loginRequestId: String, subject: String): AcceptLoginRepoResponse
     suspend fun getConsent(consentChallenge: String): GetConsentRepoResponse
-    suspend fun acceptConsent(consentChallenge: String, scopes: List<String>): AcceptConsentRepoResponse
+    suspend fun acceptConsent(consentChallenge: String, scopes: Set<String>): AcceptConsentRepoResponse
 }
 
 val hydraAdminRepoImpl: HydraAdminRepo by lazy {
@@ -81,9 +81,9 @@ internal class HydraAdminRepoImpl(
                 consentChallenge,
                 cont.hydraCallback {
                     GetConsentRepoResponse(
-                        requestedAccessTokenAudience = it.requestedAccessTokenAudience,
-                        requestedScope = it.requestedScope,
-                        subject = it.subject
+                        requestedAccessTokenAudience = it.requestedAccessTokenAudience!!,
+                        requestedScope = it.requestedScope!!,
+                        subject = it.subject!!
                     )
                 }
             )
@@ -92,11 +92,11 @@ internal class HydraAdminRepoImpl(
 
     override suspend fun acceptConsent(
         consentChallenge: String,
-        scopes: List<String>
+        scopes: Set<String>
     ): AcceptConsentRepoResponse = runCatching {
         suspendCoroutine { cont ->
             val request = AcceptConsentRequest().apply {
-                grantScope = scopes
+                grantScope = scopes.toList()
             }
             hydraAdminClient.acceptConsentRequestAsync(
                 consentChallenge,

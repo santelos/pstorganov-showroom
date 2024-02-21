@@ -1,12 +1,8 @@
-package ru.stroganov.account.userauthservice.repo.config
+package ru.stroganov.account.userauthservicek.repo.config
 
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -44,11 +40,14 @@ class HttpClientKtTest {
         MockServerClient(mockServer.host, mockServer.serverPort)
     }
 
+    private val defaultUrl: String by lazy {
+        "http://${mockServer.host}:${mockServer.serverPort}"
+    }
     private val config: AppConfig.Oauth2Client by lazy {
         AppConfig.Oauth2Client(
             "clientId",
             "clientSecret",
-            "http://${mockServer.host}:${mockServer.serverPort}",
+            defaultUrl,
             listOf("test:scope")
         )
     }
@@ -60,7 +59,7 @@ class HttpClientKtTest {
 
     @Test
     fun `POSITIVE ~~ httpClient ~~ just success`() {
-        val client = httpClient(config)
+        val client = httpClient(config, defaultUrl)
 
         val successExpectations = mockClient.`when`(
             request("/test").apply {
@@ -74,14 +73,14 @@ class HttpClientKtTest {
         )
 
         val expected = "test-success"
-        val actual = runBlocking { client.get("${config.publicUrl}/test").bodyAsText() }
+        val actual = runBlocking { client.get("/test").bodyAsText() }
         assertEquals(expected, actual)
         mockClient.verify(successExpectations.first().id, once())
     }
 
     @Test
     fun `POSITIVE ~~ httpClient ~~ oauth2token requested`() {
-        val client = httpClient(config)
+        val client = httpClient(config, defaultUrl)
 
         val successExpectations = mockClient.`when`(
             request("/test").apply {
@@ -131,7 +130,7 @@ class HttpClientKtTest {
         )
 
         val expected = "test-success"
-        val actual = runBlocking { client.get("${config.publicUrl}/test").bodyAsText() }
+        val actual = runBlocking { client.get("/test").bodyAsText() }
         assertEquals(expected, actual)
         mockClient.verify(deniedExpectations.first().id, once())
         mockClient.verify(oauthExpectations.first().id, once())
@@ -140,7 +139,7 @@ class HttpClientKtTest {
 
     @Test
     fun `NEGATIVE ~~ httpClient ~~ oauth2token requested ~~ still 401`() {
-        val client = httpClient(config)
+        val client = httpClient(config, defaultUrl)
 
         val successExpectations = mockClient.`when`(
             request("/test").apply {
@@ -191,7 +190,7 @@ class HttpClientKtTest {
 
         val expected = 401
         val actual = assertThrows<ClientRequestException> {
-            runBlocking { client.get("${config.publicUrl}/test").bodyAsText() }
+            runBlocking { client.get("/test").bodyAsText() }
         }
         assertEquals(expected, actual.response.status.value)
         mockClient.verify(deniedExpectations.first().id, once())
@@ -202,7 +201,7 @@ class HttpClientKtTest {
     @ParameterizedTest
     @ValueSource(ints = [300, 350, 399])
     fun `NEGATIVE ~~ httpClient ~~ 3xx return`(code: Int) {
-        val client = httpClient(config)
+        val client = httpClient(config, defaultUrl)
 
         val successExpectations = mockClient.`when`(
             request("/test").apply {
@@ -215,7 +214,7 @@ class HttpClientKtTest {
         )
 
         val actual = assertThrows<RedirectResponseException> {
-            runBlocking { client.get("${config.publicUrl}/test").bodyAsText() }
+            runBlocking { client.get("/test").bodyAsText() }
         }
         assertEquals(code, actual.response.status.value)
         mockClient.verify(successExpectations.first().id, once())
@@ -227,7 +226,7 @@ class HttpClientKtTest {
     @ParameterizedTest
     @ValueSource(ints = [400, 403, 404, 450, 499])
     fun `NEGATIVE ~~ httpClient ~~ 4xx return`(code: Int) {
-        val client = httpClient(config)
+        val client = httpClient(config, defaultUrl)
 
         val successExpectations = mockClient.`when`(
             request("/test").apply {
@@ -240,7 +239,7 @@ class HttpClientKtTest {
         )
 
         val actual = assertThrows<ClientRequestException> {
-            runBlocking { client.get("${config.publicUrl}/test").bodyAsText() }
+            runBlocking { client.get("/test").bodyAsText() }
         }
         assertEquals(code, actual.response.status.value)
         mockClient.verify(successExpectations.first().id, once())
@@ -249,7 +248,7 @@ class HttpClientKtTest {
     @ParameterizedTest
     @ValueSource(ints = [500, 503, 550])
     fun `NEGATIVE ~~ httpClient ~~ 5xx return`(code: Int) {
-        val client = httpClient(config)
+        val client = httpClient(config, defaultUrl)
 
         val successExpectations = mockClient.`when`(
             request("/test").apply {
@@ -262,7 +261,7 @@ class HttpClientKtTest {
         )
 
         val actual = assertThrows<ServerResponseException> {
-            runBlocking { client.get("${config.publicUrl}/test").bodyAsText() }
+            runBlocking { client.get("/test").bodyAsText() }
         }
         assertEquals(code, actual.response.status.value)
         mockClient.verify(successExpectations.first().id, once())

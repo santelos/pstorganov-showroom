@@ -6,11 +6,11 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.assertThrows
-import ru.stroganov.account.userauthservice.common.BaseException.RepoException.GetUserInfoException
+import ru.stroganov.account.userauthservice.common.BaseException.RepoException.GetUserIdException
 import ru.stroganov.account.userauthservice.common.UserId
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepo
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepoGetUserAuthInfoRequest
-import ru.stroganov.account.userauthservice.repo.UserInfoServiceRepoUserAuthInfoResponse
+import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepo
+import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepoGetUserAuthInfoRequest
+import ru.stroganov.account.userauthservicek.repo.UserInfoServiceRepoUserAuthInfoResponse
 import kotlin.test.*
 
 class RemoteAuthenticationImplTest {
@@ -59,10 +59,10 @@ class RemoteAuthenticationImplTest {
         val login = "test-login"
         val password = "test-password"
 
-        val repoResponse = GetUserInfoException(login, RuntimeException())
+        val repoResponse = GetUserIdException(login, RuntimeException())
         coEvery { userInfoServiceRepo.getUserAuthInfo(any()) } throws repoResponse
 
-        val actual = assertThrows<GetUserInfoException> {
+        val actual = assertThrows<GetUserIdException> {
             runBlocking { remoteAuthentication.getUserAuthInfo(login, password) }
         }
         assertEquals(repoResponse, actual)
