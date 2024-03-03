@@ -30,6 +30,20 @@ spec:
             - mountPath: /var/log
               name: var-log
               readOnly: true
+          livenessProbe:
+            httpGet:
+              path: "/api/v1/health"
+              port: 2020
+            initialDelaySeconds: 5
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: "/api/v1/health"
+              port: 2020
+            initialDelaySeconds: 5
+            timeoutSeconds: 10
+            failureThreshold: 1
       volumes:
         - name: fluentbit-config
           configMap:

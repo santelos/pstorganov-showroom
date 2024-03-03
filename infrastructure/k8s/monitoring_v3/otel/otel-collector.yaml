@@ -161,7 +161,7 @@ spec:
               static_configs:
                 - targets: [loki:3100]
       fluentforward:
-        endpoint: localhost:8006
+        endpoint: 0.0.0.0:8006
 
     processors:
       batch:

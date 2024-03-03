@@ -9,8 +9,10 @@ configMapGenerator:
     options:
       disableNameSuffixHash: true
     files:
-      - fluent-bit.conf=fluentbit-config.conf
-      - parsers.conf=fluentbit-parsers.conf
-      - fluentbit-loki-filter.conf=fluentbit-loki-filter.conf
-      - fluentbit-grafana-filter.conf=fluentbit-grafana-filter.conf
-      - fluentbit-deluge-filter.conf=fluentbit-deluge-filter.conf
+      - fluent-bit.conf=./config/fluentbit-config.conf
+      - parsers.conf=./config/fluentbit-parsers.conf
+      - fluentbit-inputs.conf=./config/fluentbit-inputs.conf
+      - fluentbit-loki-filter.conf=./config/fluentbit-loki-filter.conf
+      - fluentbit-grafana-filter.conf=./config/fluentbit-grafana-filter.conf
+      - fluentbit-deluge-filter.conf=./config/fluentbit-deluge-filter.conf
+      - fluentbit-fluentbit-filter.conf=./config/fluentbit-fluentbit-filter.conf
