@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - vault.yaml
+configMapGenerator:
+  - name: vault-config
+    namespace: vault
+    options:
+      disableNameSuffixHash: true
+    files:
+      - config.hcl=vault_config.hcl

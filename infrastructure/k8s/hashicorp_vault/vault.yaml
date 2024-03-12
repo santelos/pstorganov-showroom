@@ -1,0 +1,145 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/name: vault
+  name: vault-tls
+  namespace: vault
+spec:
+  dnsNames:
+    - vault
+    - vault.vault.svc
+    - vault.vault.svc.cluster.local
+    - vault.santelos.com
+  ipAddresses:
+    - 127.0.0.1
+  issuerRef:
+    kind: Issuer
+    name: vault-selfsigned-issuer
+  secretName: vault-tls
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  labels:
+    app.kubernetes.io/name: vault
+  name: vault-selfsigned-issuer
+  namespace: vault
+spec:
+  selfSigned: {}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: vault
+  namespace: vault
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: local-storage
+  local:
+    path: /mnt/md0/vault
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - pstroganov
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: vault
+  namespace: vault
+spec:
+  replicas: 1
+  serviceName: vault
+  selector:
+    matchLabels:
+      app: vault
+  template:
+    metadata:
+      labels:
+        app: vault
+    spec:
+      containers:
+        - name: vault
+          image: hashicorp/vault
+          imagePullPolicy: "IfNotPresent"
+          command: ["vault", "server", "-config", "/vault/config.d/config.hcl"]
+          ports:
+            - containerPort: 8200
+          volumeMounts:
+            - name: vault-config
+              mountPath: /vault/config.d
+            - name: vault-tls
+              mountPath: /etc/certs
+            - mountPath: /vault/file
+              name: vault-volume-claim
+              subPath: file
+      volumes:
+        - name: vault-config
+          configMap:
+            name: vault-config
+        - name: vault-tls
+          secret:
+            secretName: vault-tls
+  volumeClaimTemplates:
+    - metadata:
+        name: vault-volume-claim
+        labels:
+          app: vault
+      spec:
+        storageClassName: local-storage
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault
+  namespace: vault
+  labels:
+    app: vault
+spec:
+  selector:
+    app: vault
+  ports:
+  - protocol: TCP
+    port: 443
+    targetPort: 8200
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: vault
+  name: vault
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - "vault.santelos.com"
+    secretName: vault-santelos-cert
+  rules:
+  - host: vault.santelos.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vault
+            port:
+              number: 443
