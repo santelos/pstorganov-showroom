@@ -1,3 +1,5 @@
+auth_enabled: false
+
 compactor:
   retention_enabled: true
 limits_config:

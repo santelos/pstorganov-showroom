@@ -16,3 +16,4 @@ configMapGenerator:
       - fluentbit-grafana-filter.conf=./config/fluentbit-grafana-filter.conf
       - fluentbit-deluge-filter.conf=./config/fluentbit-deluge-filter.conf
       - fluentbit-fluentbit-filter.conf=./config/fluentbit-fluentbit-filter.conf
+      - fluentbit-shardeum-filter.conf=./config/fluentbit-shardeum-filter.conf

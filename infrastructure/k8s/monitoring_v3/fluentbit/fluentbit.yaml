@@ -51,6 +51,9 @@ spec:
         - hostPath:
             path: /var/log
           name: var-log
+        - hostPath:
+            path: /var/log/shardeum
+          name: var-log
 ---
 apiVersion: v1
 kind: Service
